@@ -1,0 +1,6 @@
+{"arcs": [
+  { "from": "", "to": "started", "event": "start" },
+  { "from": "started", "to": "in_progress", "event": "to_in_progress" },
+  { "from": "in_progress", "to": "uat", "event": "to_uat" },
+  { "from": "uat", "to": "done", "event": "to_done"}
+]}
