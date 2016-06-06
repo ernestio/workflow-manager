@@ -1,0 +1,11 @@
+{
+   "service": "test-generated-id",
+   "status": "completed",
+   "networks": [
+      {
+         "id": "network_id",
+         "status": "success"
+      }
+   ]
+}
+

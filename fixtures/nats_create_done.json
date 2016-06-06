@@ -1,0 +1,23 @@
+{
+   "service": "test-generated-id",
+   "status": "completed",
+   "nats": [
+      {
+         "id": "nat_id",
+         "router": "test",
+         "name": "test_nat",
+         "rules": [
+            {
+               "type": "SNAT",
+               "origin_ip": "10.64.0.0/16",
+               "origin_port": "ANY",
+               "translation_ip": "31.210.241.10",
+               "translation_port": "ANY",
+               "protocol": "any",
+               "network": "foo"
+            }
+         ],
+         "status": "success"
+      }
+   ]
+}

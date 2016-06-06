@@ -1,0 +1,19 @@
+{
+   "service": "test-generated-id",
+   "status": "completed",
+   "instances": [
+      {
+         "id": "instance_id",
+         "name": "test_instance_1",
+         "network": "43a6a12c-e402-4be7-9931-d7761b53a509",
+         "created": true,
+         "cpus": 1,
+         "ram": 1024,
+         "ip": "10.64.4.101",
+         "reference_catalog": "images",
+         "reference_image": "salt-2014.7.0-v4",
+         "disks": [],
+         "status": "completed"
+      }
+  ]
+}

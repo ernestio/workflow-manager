@@ -1,0 +1,11 @@
+{
+   "service": "test-generated-id",
+   "status": "completed",
+   "firewalls": [
+      {
+         "id": "firewall_id",
+         "name": "test_firewall",
+          "status": "completed"
+      }
+  ]
+}

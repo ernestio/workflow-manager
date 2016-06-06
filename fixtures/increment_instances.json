@@ -1,0 +1,132 @@
+{
+   "service": "a24",
+   "name": "a24",
+   "type": "vcloud",
+   "client": "client",
+   "client_name": "client_name",
+   "workflow": {
+     "arcs": [{
+
+     }]
+   },
+   "datacenter": {
+         "id": "datacenter",
+         "name": "pedrin",
+         "username": "***@***",
+         "password": "***",
+         "region": "LON-001",
+         "type": "vcloud"
+      },
+   "router": {
+         "name": "router-a24",
+         "type": "vcloud"
+      },
+   "networks": [
+         {
+                  "name": "web-a24",
+                  "router": "router-a24",
+                  "subnet": "10.1.0.0/8"
+               }
+      ],
+   "instances": [
+         {
+                  "name": "web-a24",
+                  "network": "web-a24",
+                  "catalog": "images",
+                  "image": "salt-2014.7.0-v4",
+                  "ip": "10.1.0.1",
+                  "cpus": 1,
+                  "memory": 1024,
+                  "disks": [
+                              1024
+                           ],
+                  "provisioner": {
+                              "exec": [
+                                             "date",
+                                             "uptime"
+                                          ]
+                           }
+               }
+      ],
+   "firewalls": [
+         {
+                  "name": "firewall-a24",
+                  "router": "router-a24",
+                  "rules": [
+                              {
+                                             "source_ip": "31.210.240.166",
+                                             "source_port": "ANY",
+                                             "destination_ip": "",
+                                             "destination_port": "ANY",
+                                             "protocol": "any"
+                                          },
+                              {
+                                             "source_ip": "31.210.240.242",
+                                             "source_port": "ANY",
+                                             "destination_ip": "",
+                                             "destination_port": "ANY",
+                                             "protocol": "any"
+                                          }
+                           ]
+               }
+      ],
+   "nats": [
+         {
+                  "name": "nats-a24",
+                  "rules": [
+                              {
+                                             "network": "foo",
+                                             "protocol": "TCP",
+                                             "type": "DNAT",
+                                             "origin_ip": "",
+                                             "origin_port": "ANY",
+                                             "translation_ip": "10.1.0.101",
+                                             "translation_port": "ANY"
+                                          }
+                           ],
+                  "router": "router-a24"
+               }
+      ],
+   "executions": [
+         {
+                  "router": "router-a24",
+                  "type": "salt",
+                  "name": "b_web-a24",
+                  "payload": "data && time",
+                  "target": "list:web-a24"
+               }
+      ],
+   "loadbalancers": [
+         {
+                  "service": "a24",
+                  "router": "router-a24",
+                  "name": "lb-a24",
+                  "protocol": "tcp",
+                  "port": "80",
+                  "vip": "10.64.0.201",
+                  "network": "web-a24",
+                  "servers": [
+                              {
+                                             "ip_address": "10.64.0.100",
+                                             "weight": "5"
+                                          }
+                           ]
+               }
+      ],
+   "bootstraps": [
+         {
+                  "router": "router-a24",
+                  "type": "salt",
+                  "name": "b_web-a24",
+                  "payload": "data && time",
+                  "target": "list:salt-master.localdomain"
+               }
+      ],
+  "workflow": {
+    "arcs": [{
+      "from": "a", 
+      "to": "b", 
+      "event": "to_b"
+    }]
+  }
+}

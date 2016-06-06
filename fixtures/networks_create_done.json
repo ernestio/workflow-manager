@@ -1,0 +1,18 @@
+{
+   "service": "test-generated-id",
+   "status": "completed",
+   "networks": [
+      {
+         "id": "network_id",
+         "name": "network_test",
+         "range": "10.64.4.0/24",
+         "netmask": "netmask",
+         "start_address": "start",
+         "end_address": "end",
+         "gateway": "gateway",
+         "router": "test",
+         "status": "success"
+      }
+   ]
+}
+
