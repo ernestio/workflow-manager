@@ -16,8 +16,9 @@ func TestMappedMessage(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I try to get body for the mapped message", func() {
@@ -38,8 +39,9 @@ func TestUnMappedMessage(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I try to get body for the unmapped message", func() {
@@ -60,8 +62,9 @@ func TestCreateRouters(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a routers.create event", func() {
@@ -94,8 +97,9 @@ func TestPublisherCreateError(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a services.create.error event", func() {
@@ -119,8 +123,9 @@ func TestCreateNetworks(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a networks.create event", func() {
@@ -159,8 +164,9 @@ func TestDeleteNetworks(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a networks.delete event", func() {
@@ -199,8 +205,9 @@ func TestCreateInstances(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a instances.create event", func() {
@@ -227,8 +234,9 @@ func TestCreateNats(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a nats.create event", func() {
@@ -275,8 +283,9 @@ func TestUpdateNats(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a nats.update event", func() {
@@ -322,8 +331,9 @@ func TestCreateFirewalls(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a firewalls.create event", func() {
@@ -360,8 +370,9 @@ func TestUpdateFirewalls(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a firewalls.update event", func() {
@@ -398,8 +409,9 @@ func TestCreateBootstraps(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 		s.Status = "nats_created"
 		s.save()
@@ -483,8 +495,9 @@ func TestCreateExecutions(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 		s.Status = "bootstrap_ran"
 		s.Bootstraps.Finished = "yes"
@@ -531,8 +544,9 @@ func TestServiceDone(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 		s.Status = "executions_ran"
 		s.save()

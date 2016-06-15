@@ -15,8 +15,9 @@ func TestSubscriberMappedMessage(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		body := []byte("{\"service\":\"1\"}")
 
 		Convey("When I try to get body for the mapped message", func() {
@@ -38,8 +39,9 @@ func TestSubscriberUnMappedMessage(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		body := []byte("")
 
 		Convey("When I try to get body for the unmapped message", func() {
@@ -61,8 +63,9 @@ func TestRoutersCreateDone(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		body := h.getFixture("./fixtures/routers_create_done.json")
 		s := h.getService("./fixtures/service.json")
 		s.save()
@@ -87,8 +90,9 @@ func TestCreateErrors(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		body := h.getFixture("./fixtures/routers_create_done.json")
 		s := h.getService("./fixtures/service.json")
 		s.save()
@@ -112,8 +116,9 @@ func TestNetworksCreateDone(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		body := h.getFixture("./fixtures/networks_create_done.json")
 		s := h.getService("./fixtures/service.json")
 		s.save()
@@ -143,8 +148,9 @@ func TestNetworksDeleteDone(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		body := h.getFixture("./fixtures/networks_delete_done.json")
 		s := h.getService("./fixtures/service.json")
 		s.save()
@@ -169,8 +175,9 @@ func TestInstancesCreateDone(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		body := h.getFixture("./fixtures/instances_create_done.json")
 		s := h.getService("./fixtures/service.json")
 		s.save()
@@ -194,8 +201,9 @@ func TestInstancesUpdateDone(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		body := h.getFixture("./fixtures/instances_create_done.json")
 		s := h.getService("./fixtures/service.json")
 		s.save()
@@ -219,8 +227,9 @@ func TestFirewallsCreateDone(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		body := h.getFixture("./fixtures/firewalls_create_done.json")
 		s := h.getService("./fixtures/service.json")
 		s.save()
@@ -245,8 +254,9 @@ func TestFirewallsUpdateDone(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		body := h.getFixture("./fixtures/firewalls_create_done.json")
 		s := h.getService("./fixtures/service.json")
 		s.save()
@@ -270,8 +280,9 @@ func TestNatsCreateDone(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		body := h.getFixture("./fixtures/nats_create_done.json")
 		s := h.getService("./fixtures/service.json")
 		s.save()
@@ -295,8 +306,9 @@ func TestNatUpdateDone(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		body := h.getFixture("./fixtures/nats_create_done.json")
 		s := h.getService("./fixtures/service.json")
 		s.save()
@@ -320,8 +332,9 @@ func TestBootstrapsCreateDone(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		body := h.getFixture("./fixtures/executions_create_done.json")
 		s := h.getService("./fixtures/service.json")
 		s.Status = "bootstrapping"
@@ -349,8 +362,9 @@ func TestExecutionsCreateDone(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		body := h.getFixture("./fixtures/executions_create_done.json")
 		s := h.getService("./fixtures/service.json")
 		s.Status = "running_executions"
@@ -378,8 +392,9 @@ func TestExecutionsCreateError(t *testing.T) {
 		c := Config{}
 		c.Load()
 		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		body := h.getFixture("./fixtures/executions_create_done.json")
 		s := h.getService("./fixtures/service.json")
 		s.Status = "running_executions"

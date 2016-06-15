@@ -45,13 +45,7 @@ func manageInputMessage(m *nats.Msg) {
 func main() {
 	c.Load()
 	natsClient = c.NatsClient()
-
-	redisCfg, err := natsClient.Request("config.get.redis", []byte(""), 1*time.Second)
-	if err != nil {
-		panic("Can't get redis config")
-	}
-
-	p.load(redisCfg.Data)
+	p.load(natsClient)
 
 	saltCfg, err := natsClient.Request("config.get.salt", []byte(""), 1*time.Second)
 	if err == nil {
