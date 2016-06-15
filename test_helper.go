@@ -83,6 +83,9 @@ func runListenerMocks() {
 
 func setup() {
 	if listeners == false {
+		c := Config{}
+		c.Load()
+		natsClient = c.NatsClient()
 		runListenerMocks()
 		listeners = true
 	}

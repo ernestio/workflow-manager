@@ -13,9 +13,6 @@ import (
 
 func TestMappedMessage(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -36,9 +33,6 @@ func TestMappedMessage(t *testing.T) {
 
 func TestUnMappedMessage(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -59,9 +53,6 @@ func TestUnMappedMessage(t *testing.T) {
 
 func TestCreateRouters(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -94,9 +85,6 @@ func TestCreateRouters(t *testing.T) {
 
 func TestPublisherCreateError(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -120,9 +108,6 @@ func TestPublisherCreateError(t *testing.T) {
 
 func TestCreateNetworks(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -161,9 +146,6 @@ func TestCreateNetworks(t *testing.T) {
 
 func TestDeleteNetworks(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -202,9 +184,6 @@ func TestDeleteNetworks(t *testing.T) {
 
 func TestCreateInstances(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -231,9 +210,6 @@ func TestCreateInstances(t *testing.T) {
 
 func TestCreateNats(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -280,9 +256,6 @@ func TestCreateNats(t *testing.T) {
 
 func TestUpdateNats(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -328,9 +301,6 @@ func TestUpdateNats(t *testing.T) {
 
 func TestCreateFirewalls(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -367,9 +337,6 @@ func TestCreateFirewalls(t *testing.T) {
 
 func TestUpdateFirewalls(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -406,9 +373,6 @@ func TestUpdateFirewalls(t *testing.T) {
 
 func TestCreateBootstraps(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -492,9 +456,6 @@ func TestCreateBootstraps(t *testing.T) {
 
 func TestCreateExecutions(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -541,9 +502,6 @@ func TestCreateExecutions(t *testing.T) {
 
 func TestServiceDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)

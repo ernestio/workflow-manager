@@ -12,9 +12,6 @@ import (
 
 func TestSubscriberMappedMessage(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -36,9 +33,6 @@ func TestSubscriberMappedMessage(t *testing.T) {
 
 func TestSubscriberUnMappedMessage(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -60,9 +54,6 @@ func TestSubscriberUnMappedMessage(t *testing.T) {
 
 func TestRoutersCreateDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -87,9 +78,6 @@ func TestRoutersCreateDone(t *testing.T) {
 
 func TestCreateErrors(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -113,9 +101,6 @@ func TestCreateErrors(t *testing.T) {
 
 func TestNetworksCreateDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -145,9 +130,6 @@ func TestNetworksCreateDone(t *testing.T) {
 
 func TestNetworksDeleteDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -172,9 +154,6 @@ func TestNetworksDeleteDone(t *testing.T) {
 
 func TestInstancesCreateDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -198,9 +177,6 @@ func TestInstancesCreateDone(t *testing.T) {
 
 func TestInstancesUpdateDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -224,9 +200,6 @@ func TestInstancesUpdateDone(t *testing.T) {
 
 func TestFirewallsCreateDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -251,9 +224,6 @@ func TestFirewallsCreateDone(t *testing.T) {
 
 func TestFirewallsUpdateDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -277,9 +247,6 @@ func TestFirewallsUpdateDone(t *testing.T) {
 
 func TestNatsCreateDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -303,9 +270,6 @@ func TestNatsCreateDone(t *testing.T) {
 
 func TestNatUpdateDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -329,9 +293,6 @@ func TestNatUpdateDone(t *testing.T) {
 
 func TestBootstrapsCreateDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -359,9 +320,6 @@ func TestBootstrapsCreateDone(t *testing.T) {
 
 func TestExecutionsCreateDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
@@ -389,9 +347,6 @@ func TestExecutionsCreateDone(t *testing.T) {
 
 func TestExecutionsCreateError(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
 		setup()
 
 		p.load(natsClient)
