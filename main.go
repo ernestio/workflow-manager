@@ -68,17 +68,6 @@ func main() {
 		manageInputMessage(m)
 	})
 
-	// Service status
-	natsClient.Subscribe("service.get", func(m *nats.Msg) {
-		mm := messageManager{}
-		s, err := mm.getService(m.Data)
-		if err != nil {
-			natsClient.Publish(m.Reply, []byte(`{"error":"service not found"}`))
-		} else {
-			natsClient.Publish(m.Reply, []byte(s.toJSON()))
-		}
-	})
-
 	// Service delete
 	natsClient.Subscribe("service.delete.done", func(m *nats.Msg) {
 		mm := messageManager{}
