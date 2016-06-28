@@ -31,9 +31,16 @@ func (s *storage) load(n *nats.Conn) {
 
 // Get the value for a given key
 func (s *storage) get(key string) string {
+	if key == "" {
+		return ""
+	}
 	msg, err := natsClient.Request("service.get.mapping", []byte(`{"id":"`+key+`"}`), 1*time.Second)
 	if err != nil {
 		log.Println(err)
+		return ""
+	}
+	if string(msg.Data) == `{"error":"not found"}` {
+		return ""
 	}
 
 	return string(msg.Data)

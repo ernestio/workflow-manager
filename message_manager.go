@@ -72,6 +72,10 @@ func (mm *messageManager) getService(body []byte) (*service, error) {
 		return nil, err
 	}
 
+	if m.Service == "" {
+		return nil, errors.New("Unsupported message")
+	}
+
 	serviceID := m.Service
 	s := p.getService(serviceID)
 
