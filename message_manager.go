@@ -67,7 +67,7 @@ func (mm *messageManager) getServiceFromMessage(subject string, body []byte) (*s
 // message body
 func (mm *messageManager) getService(body []byte) (*service, error) {
 	type InputMessage struct {
-		Service string
+		Service string "json:`id`"
 	}
 
 	m := InputMessage{}
