@@ -1,7 +1,6 @@
 machine:
   services:
     - docker
-    - redis
   environment:
     NATS_URI:  nats://127.0.0.1:4222
 

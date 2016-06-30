@@ -13,11 +13,9 @@ import (
 
 func TestMappedMessage(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I try to get body for the mapped message", func() {
@@ -35,11 +33,9 @@ func TestMappedMessage(t *testing.T) {
 
 func TestUnMappedMessage(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I try to get body for the unmapped message", func() {
@@ -57,11 +53,9 @@ func TestUnMappedMessage(t *testing.T) {
 
 func TestCreateRouters(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a routers.create event", func() {
@@ -91,11 +85,9 @@ func TestCreateRouters(t *testing.T) {
 
 func TestPublisherCreateError(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a services.create.error event", func() {
@@ -116,11 +108,9 @@ func TestPublisherCreateError(t *testing.T) {
 
 func TestCreateNetworks(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a networks.create event", func() {
@@ -156,11 +146,9 @@ func TestCreateNetworks(t *testing.T) {
 
 func TestDeleteNetworks(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a networks.delete event", func() {
@@ -196,11 +184,9 @@ func TestDeleteNetworks(t *testing.T) {
 
 func TestCreateInstances(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a instances.create event", func() {
@@ -224,11 +210,9 @@ func TestCreateInstances(t *testing.T) {
 
 func TestCreateNats(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a nats.create event", func() {
@@ -272,11 +256,9 @@ func TestCreateNats(t *testing.T) {
 
 func TestUpdateNats(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a nats.update event", func() {
@@ -319,11 +301,9 @@ func TestUpdateNats(t *testing.T) {
 
 func TestCreateFirewalls(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a firewalls.create event", func() {
@@ -357,11 +337,9 @@ func TestCreateFirewalls(t *testing.T) {
 
 func TestUpdateFirewalls(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When I get the message for a firewalls.update event", func() {
@@ -395,11 +373,9 @@ func TestUpdateFirewalls(t *testing.T) {
 
 func TestCreateBootstraps(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 		s.Status = "nats_created"
 		s.save()
@@ -480,11 +456,9 @@ func TestCreateBootstraps(t *testing.T) {
 
 func TestCreateExecutions(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 		s.Status = "bootstrap_ran"
 		s.Bootstraps.Finished = "yes"
@@ -528,11 +502,9 @@ func TestCreateExecutions(t *testing.T) {
 
 func TestServiceDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		c := Config{}
-		c.Load()
-		natsClient = c.NatsClient()
+		setup()
 
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 		s.Status = "executions_ran"
 		s.save()

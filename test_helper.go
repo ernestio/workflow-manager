@@ -10,11 +10,11 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/nats-io/nats"
 )
 
 type testHelper struct{}
-
-var redisCfg = []byte(`{"addr":"localhost:6379","password":"","DB":0}`)
 
 func (t *testHelper) getService(source string) service {
 	s := service{}
@@ -52,4 +52,41 @@ func (t *testHelper) getFixture(source string) []byte {
 	content, _ := ioutil.ReadFile(absPath)
 
 	return []byte(content)
+}
+
+var store = make(map[string]string)
+var listeners = false
+
+func runListenerMocks() {
+	natsClient.Subscribe("service.get.mapping", func(m *nats.Msg) {
+		sm := serviceMessage{}
+		json.Unmarshal(m.Data, &sm)
+		natsClient.Publish(m.Reply, []byte(store[sm.ID]))
+	})
+
+	natsClient.Subscribe("service.set.mapping", func(m *nats.Msg) {
+		sm := serviceMessage{}
+		err := json.Unmarshal(m.Data, &sm)
+		if err != nil {
+			println(err.Error())
+		}
+		store[sm.ID] = sm.Mapping
+		manageInputMessage(m)
+		natsClient.Publish(m.Reply, []byte(store[sm.ID]))
+	})
+
+	natsClient.Subscribe("service.del.mapping", func(m *nats.Msg) {
+		sm := serviceMessage{}
+		json.Unmarshal(m.Data, &sm)
+	})
+}
+
+func setup() {
+	if listeners == false {
+		c := Config{}
+		c.Load()
+		natsClient = c.NatsClient()
+		runListenerMocks()
+		listeners = true
+	}
 }

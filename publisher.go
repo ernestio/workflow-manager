@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"time"
 )
 
 // When an event has happened and a a new message is about to be sent,
@@ -28,7 +29,7 @@ func (p *publisher) MethodName(subject string) (string, error) {
 	m["test.message"] = "DummyTest"
 	m["routers.create"] = "CreateRouters"
 	m["routers.delete"] = "DeleteRouters"
-	m["service.create.error"] = "ServicesCreateError"
+	m["service.create.error"] = "ServiceCreateError"
 	m["service.create.done"] = "ServiceCreateDone"
 	m["service.delete.error"] = "ServicesDeleteError"
 	m["service.delete.done"] = "ServiceDeleteDone"
@@ -81,13 +82,15 @@ func (p *publisher) DeleteRouters(s *service) string {
 	return string(marshalled)
 }
 
-func (p *publisher) ServicesCreateError(s *service) string {
+func (p *publisher) ServiceCreateError(s *service) string {
 	s.Status = "errored"
 	marshalled, err := json.Marshal(s)
 	if err != nil {
 		log.Println(err)
 		return ""
 	}
+
+	natsClient.Request("service.set", []byte(`{"id":"`+s.ID+`","status":"errored"}`), time.Second)
 
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "\nOops! Something went wrong. Please manually fix any errors shown above and re-apply your definition.", Level: "INFO"})
@@ -98,7 +101,7 @@ func (p *publisher) ServicesCreateError(s *service) string {
 }
 
 func (p *publisher) ServicesDeleteError(s *service) string {
-	return p.ServicesCreateError(s)
+	return p.ServiceCreateError(s)
 }
 
 func (p *publisher) NetworksCreate(s *service) string {
@@ -249,6 +252,8 @@ func (p *publisher) ServiceCreateDone(s *service) string {
 		log.Println(err)
 	}
 
+	natsClient.Request("service.set", []byte(`{"id":"`+s.ID+`","status":"done"}`), time.Second)
+
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "SUCCESS: rules successfully applied", Level: "SUCCESS"})
 	messages = append(messages, MonitorMessage{Body: "Your environment endpoint is: " + s.Endpoint, Level: "SUCCESS"})
@@ -264,6 +269,8 @@ func (p *publisher) ServiceDeleteDone(s *service) string {
 	if err != nil {
 		log.Println(err)
 	}
+
+	natsClient.Request("service.set", []byte(`{"id":"`+s.ID+`","status":"done"}`), time.Second)
 
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "SUCCESS: your environment has been successfully deleted", Level: "SUCCESS"})
