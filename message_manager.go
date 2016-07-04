@@ -67,7 +67,8 @@ func (mm *messageManager) getServiceFromMessage(subject string, body []byte) (*s
 // message body
 func (mm *messageManager) getService(body []byte) (*service, error) {
 	type InputMessage struct {
-		Service string
+		ID      string `json:"id"`
+		Service string `json:"service"`
 	}
 
 	m := InputMessage{}
@@ -75,11 +76,14 @@ func (mm *messageManager) getService(body []byte) (*service, error) {
 		return nil, err
 	}
 
-	if m.Service == "" {
+	serviceID := m.Service
+	if serviceID == "" {
+		serviceID = m.ID
+	}
+	if serviceID == "" {
 		return nil, errors.New("Unsupported message")
 	}
 
-	serviceID := m.Service
 	s := p.getService(serviceID)
 
 	return s, nil
