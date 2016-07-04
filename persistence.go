@@ -7,41 +7,43 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
-	"gopkg.in/redis.v3"
 	"log"
+	"time"
+
+	"github.com/nats-io/nats"
 )
 
 // Wrapper for redis in order to easily store / recover persisted
 // services
 type storage struct {
-	Addr     string `json:"addr"`
-	Password string `json:"password"`
-	DB       int64  `json:"db"`
-	Client   *redis.Client
+	Nats *nats.Conn
+}
+
+type serviceMessage struct {
+	ID      string `json:"id"`
+	Mapping string `json:"mapping"`
 }
 
 // Prepares the connection based on a given config file
-func (s *storage) load(cfg []byte) {
-	if err := json.Unmarshal(cfg, &s); err != nil {
-		panic(err)
-	}
-	s.Client = redis.NewClient(&redis.Options{
-		Addr:     s.Addr,
-		Password: s.Password,
-		DB:       s.DB,
-	})
+func (s *storage) load(n *nats.Conn) {
+	s.Nats = n
 }
 
 // Get the value for a given key
 func (s *storage) get(key string) string {
-	key = s.cacheKey(key)
-	value, err := s.Client.Get(key).Result()
+	if key == "" {
+		return ""
+	}
+	msg, err := natsClient.Request("service.get.mapping", []byte(`{"id":"`+key+`"}`), 1*time.Second)
 	if err != nil {
 		log.Println(err)
+		return ""
+	}
+	if string(msg.Data) == `{"error":"not found"}` {
+		return ""
 	}
 
-	return value
+	return string(msg.Data)
 }
 
 // Gets a service object for a given key
@@ -61,18 +63,23 @@ func (s *storage) getService(key string) *service {
 
 // Set a value for a given key
 func (s *storage) set(key string, value string) error {
-	key = s.cacheKey(key)
-	if err := s.Client.Set(key, value, 0).Err(); err != nil {
+	sm := serviceMessage{}
+	sm.ID = key
+	sm.Mapping = value
+	body, err := json.Marshal(sm)
+	_, err = natsClient.Request("service.set.mapping", body, 1*time.Second)
+	if err != nil {
 		log.Println(err)
 		log.Panic("Data can't be stored")
-		return errors.New("Data can't be stored")
 	}
-	return nil
+	return err
 }
 
 func (s *storage) del(key string) error {
-	s.Client.Del(s.cacheKey(key))
-	log.Panic("Service deleted")
+	_, err := natsClient.Request("service.del", []byte(`{"id":"`+key+`"}`), 1*time.Second)
+	if err != nil {
+		log.Println(err)
+	}
 
 	return nil
 }

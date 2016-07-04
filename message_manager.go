@@ -37,17 +37,20 @@ func (mm *messageManager) preparePublishMessage(subject string, s *service) (str
 func (mm *messageManager) getServiceFromMessage(subject string, body []byte) (*service, string, error) {
 
 	var sub subscriber
-	s, err := mm.getService(body)
 	methodName, err := sub.MethodName(subject)
 	if err != nil {
 		e := errorManager{}
 		if e.isAnErrorMessage(subject) {
-			s = e.markAsFailed(s, subject, body)
+			s, err := mm.getService(body)
+			if err == nil {
+				s = e.markAsFailed(s, subject, body)
+			}
 			return s, "to_error", nil
 		}
 		log.Printf("Message not supported: %s", subject)
 		return nil, "", errors.New("Message not supported")
 	}
+	s, err := mm.getService(body)
 
 	inputs := make([]reflect.Value, 3)
 	inputs[0] = reflect.ValueOf(s)
@@ -64,7 +67,8 @@ func (mm *messageManager) getServiceFromMessage(subject string, body []byte) (*s
 // message body
 func (mm *messageManager) getService(body []byte) (*service, error) {
 	type InputMessage struct {
-		Service string
+		ID      string `json:"id"`
+		Service string `json:"service"`
 	}
 
 	m := InputMessage{}
@@ -73,6 +77,13 @@ func (mm *messageManager) getService(body []byte) (*service, error) {
 	}
 
 	serviceID := m.Service
+	if serviceID == "" {
+		serviceID = m.ID
+	}
+	if serviceID == "" {
+		return nil, errors.New("Unsupported message")
+	}
+
 	s := p.getService(serviceID)
 
 	return s, nil

@@ -45,13 +45,7 @@ func manageInputMessage(m *nats.Msg) {
 func main() {
 	c.Load()
 	natsClient = c.NatsClient()
-
-	redisCfg, err := natsClient.Request("config.get.redis", []byte(""), 1*time.Second)
-	if err != nil {
-		panic("Can't get redis config")
-	}
-
-	p.load(redisCfg.Data)
+	p.load(natsClient)
 
 	saltCfg, err := natsClient.Request("config.get.salt", []byte(""), 1*time.Second)
 	if err == nil {
@@ -66,17 +60,6 @@ func main() {
 	// Messages with *.*.* are results
 	natsClient.Subscribe("*.*.*", func(m *nats.Msg) {
 		manageInputMessage(m)
-	})
-
-	// Service status
-	natsClient.Subscribe("service.get", func(m *nats.Msg) {
-		mm := messageManager{}
-		s, err := mm.getService(m.Data)
-		if err != nil {
-			natsClient.Publish(m.Reply, []byte(`{"error":"service not found"}`))
-		} else {
-			natsClient.Publish(m.Reply, []byte(s.toJSON()))
-		}
 	})
 
 	// Service delete

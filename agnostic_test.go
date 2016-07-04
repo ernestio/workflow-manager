@@ -15,7 +15,7 @@ var h = testHelper{}
 func TestWithInvalidTransition(t *testing.T) {
 	t.Parallel()
 	Convey("Given a valid service input", t, func() {
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When a message with an unexisting transition is received", func() {
@@ -33,7 +33,7 @@ func TestWithInvalidTransition(t *testing.T) {
 func TestWithValidTransitionButNotRelativeToCurrentStatus(t *testing.T) {
 	t.Parallel()
 	Convey("Given a valid service input", t, func() {
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When a message with an existing transition is received", func() {
@@ -51,7 +51,7 @@ func TestWithValidTransitionButNotRelativeToCurrentStatus(t *testing.T) {
 func TestWithValidTransitionAndStatus(t *testing.T) {
 	t.Parallel()
 	Convey("Given a valid service input", t, func() {
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 		s.Status = "created"
 
@@ -70,7 +70,7 @@ func TestWithValidTransitionAndStatus(t *testing.T) {
 func TestOnStartingStatus(t *testing.T) {
 	t.Parallel()
 	Convey("Given a valid service input", t, func() {
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When a message with an existing transition is received and not set status", func() {
@@ -87,7 +87,7 @@ func TestOnStartingStatus(t *testing.T) {
 func TestOnFinalStatus(t *testing.T) {
 	t.Parallel()
 	Convey("Given a valid service input", t, func() {
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 		s.Status = "uat"
 
@@ -106,7 +106,7 @@ func TestOnFinalStatus(t *testing.T) {
 func TestOnEntryPoint(t *testing.T) {
 	t.Parallel()
 	Convey("Given a valid service input", t, func() {
-		p.load(redisCfg)
+		p.load(natsClient)
 		s := h.getService("./fixtures/service.json")
 
 		Convey("When a message with an existing transition is received", func() {
