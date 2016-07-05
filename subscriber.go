@@ -63,7 +63,6 @@ func (sub *subscriber) DummyTest(s *service, subject string, body []byte) *servi
 // Entry point to the flow environment creation, it will create the service and attach
 // a default workflow to it
 func (sub *subscriber) ServiceCreate(s *service, subject string, body []byte) *service {
-	natsClient.Request("service.set", []byte(`{"id":"`+s.ID+`","status":"in_progress"}`), time.Second)
 
 	if err := json.Unmarshal(body, &s); err != nil {
 		log.Println(err)
@@ -76,6 +75,7 @@ func (sub *subscriber) ServiceCreate(s *service, subject string, body []byte) *s
 		w.loadDefault()
 		s.Workflow = *w
 	}
+	natsClient.Request("service.set", []byte(`{"id":"`+s.ID+`","status":"in_progress"}`), time.Second)
 
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "Starting environment creation", Level: "INFO"})
@@ -87,12 +87,12 @@ func (sub *subscriber) ServiceCreate(s *service, subject string, body []byte) *s
 // Entry point to the flow environment deletion, it will trigger a cleanup of the
 // entire service
 func (sub *subscriber) ServiceDelete(s *service, subject string, body []byte) *service {
-	natsClient.Request("service.set", []byte(`{"id":"`+s.ID+`","status":"in_progress"}`), time.Second)
 	if err := json.Unmarshal(body, &s); err != nil {
 		log.Println(err)
 		return nil
 	}
 	s.Status = "created"
+	natsClient.Request("service.set", []byte(`{"id":"`+s.ID+`","status":"in_progress"}`), time.Second)
 
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "Starting environment deletion", Level: "INFO"})
