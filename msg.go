@@ -17,7 +17,7 @@ type RoutersCreate struct {
 // NetworksCreate : Message to create networks
 type NetworksCreate struct {
 	Service              string    `json:"service"`
-	Networks             []network `json:"networks"`
+	Networks             []network `json:"components"`
 	Status               string    `json:"status"`
 	ErrorCode            string    `json:"error_code"`
 	ErrorMessage         string    `json:"error_message"`
