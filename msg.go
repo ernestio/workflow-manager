@@ -27,7 +27,7 @@ type NetworksCreate struct {
 // InstancesCreate : Message to create instances
 type InstancesCreate struct {
 	Service              string     `json:"service"`
-	Instances            []instance `json:"instances"`
+	Instances            []instance `json:"components"`
 	Status               string     `json:"status"`
 	ErrorCode            string     `json:"error_code"`
 	ErrorMessage         string     `json:"error_message"`
