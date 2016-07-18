@@ -26,7 +26,6 @@ var cfg *ecc.Config
 func manageInputMessage(m *nats.Msg) {
 	mm := messageManager{}
 
-	log.Println("[RECEIVED]", m.Subject)
 	s, subject, err := mm.getServiceFromMessage(m.Subject, m.Data)
 	if err == nil {
 		subject, s, err := em.manage(subject, s)
@@ -37,7 +36,9 @@ func manageInputMessage(m *nats.Msg) {
 			log.Println(err)
 		} else {
 			em.move(s, subject)
+			log.Println("[PROCESSED]", m.Subject)
 			s.save()
+			time.Sleep(time.Second)
 			natsClient.Publish(subject, []byte(message))
 			log.Println("[EMITTED]", subject)
 		}
