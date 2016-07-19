@@ -37,7 +37,7 @@ type InstancesCreate struct {
 // FirewallsCreate : Message to create firewalls
 type FirewallsCreate struct {
 	Service              string     `json:"service"`
-	Firewalls            []firewall `json:"firewalls"`
+	Firewalls            []firewall `json:"components"`
 	Networks             []network  `json:"networks"`
 	Status               string     `json:"status"`
 	ErrorCode            string     `json:"error_code"`
