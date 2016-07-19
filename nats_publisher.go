@@ -47,6 +47,7 @@ func buildNatsList(s *service, inputList []nat) NatsCreate {
 		}
 
 		m.Nats[i] = nat{
+			Service:            s.ID,
 			Name:               n.Name,
 			RouterName:         r.Name,
 			RouterType:         r.Type,

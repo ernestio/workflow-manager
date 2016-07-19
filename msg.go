@@ -48,7 +48,7 @@ type FirewallsCreate struct {
 // NatsCreate : Message to create nats
 type NatsCreate struct {
 	Service              string `json:"service"`
-	Nats                 []nat  `json:"nats"`
+	Nats                 []nat  `json:"components"`
 	Status               string `json:"status"`
 	ErrorCode            string `json:"error_code"`
 	ErrorMessage         string `json:"error_message"`
