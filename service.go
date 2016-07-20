@@ -50,6 +50,9 @@ type execution struct {
 	Reports            []executionReport `json:"reports"`
 	ExecutionStatus    string            `json:"execution_status"`
 	Created            bool              `json:"created"`
+	User               string            `json:"user"`
+	Password           string            `json:"password"`
+	EndPoint           string            `json:"service_endpoint"`
 	status
 }
 

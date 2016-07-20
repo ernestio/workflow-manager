@@ -57,12 +57,10 @@ type NatsCreate struct {
 
 // ExecutionsCreate : Message to create Executions
 type ExecutionsCreate struct {
-	Service     string         `json:"service"`
-	ServiceName string         `json:"service_name"`
-	ServiceType string         `json:"service_type"`
-	Executions  []execution    `json:"executions"`
-	Options     ServiceOptions `json:"options"`
-	EndPoint    string         `json:"service_endpoint"`
+	Service     string      `json:"service"`
+	ServiceName string      `json:"service_name"`
+	ServiceType string      `json:"service_type"`
+	Executions  []execution `json:"components"`
 }
 
 // ServiceOptions : Service options aka salt user password

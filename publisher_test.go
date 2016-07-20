@@ -391,9 +391,6 @@ func TestCreateBootstraps(t *testing.T) {
 					So(m.Service, ShouldEqual, s.ID)
 					So(m.ServiceName, ShouldEqual, s.Name)
 					So(m.ServiceType, ShouldEqual, s.Type)
-					So(m.Options.User, ShouldEqual, "")
-					So(m.Options.Password, ShouldEqual, "")
-					So(m.EndPoint, ShouldEqual, s.Routers.Items[0].IP)
 					So(len(m.Executions), ShouldEqual, 1)
 
 					e := m.Executions[0]
@@ -402,6 +399,9 @@ func TestCreateBootstraps(t *testing.T) {
 					So(e.Payload, ShouldEqual, s.Bootstraps.Items[0].Payload)
 					So(e.Target, ShouldEqual, s.Bootstraps.Items[0].Target)
 					So(e.Status, ShouldEqual, s.Bootstraps.Items[0].Status)
+					So(e.User, ShouldEqual, "")
+					So(e.Password, ShouldEqual, "")
+					So(e.EndPoint, ShouldEqual, s.Routers.Items[0].IP)
 					So(e.ClientName, ShouldEqual, s.ClientName)
 
 					d := s.Datacenters.Items[0]
@@ -426,9 +426,6 @@ func TestCreateBootstraps(t *testing.T) {
 					So(m.Service, ShouldEqual, s.ID)
 					So(m.ServiceName, ShouldEqual, s.Name)
 					So(m.ServiceType, ShouldEqual, s.Type)
-					So(m.Options.User, ShouldEqual, "")
-					So(m.Options.Password, ShouldEqual, "")
-					So(m.EndPoint, ShouldEqual, "1.1.1.1")
 					So(len(m.Executions), ShouldEqual, 1)
 
 					e := m.Executions[0]
@@ -437,6 +434,9 @@ func TestCreateBootstraps(t *testing.T) {
 					So(e.Payload, ShouldEqual, s.Bootstraps.Items[0].Payload)
 					So(e.Target, ShouldEqual, s.Bootstraps.Items[0].Target)
 					So(e.Status, ShouldEqual, s.Bootstraps.Items[0].Status)
+					So(e.User, ShouldEqual, "")
+					So(e.Password, ShouldEqual, "")
+					So(e.EndPoint, ShouldEqual, "1.1.1.1")
 					So(e.ClientName, ShouldEqual, s.ClientName)
 
 					d := s.Datacenters.Items[0]
@@ -476,17 +476,17 @@ func TestCreateExecutions(t *testing.T) {
 				So(m.Service, ShouldEqual, s.ID)
 				So(m.ServiceName, ShouldEqual, s.Name)
 				So(m.ServiceType, ShouldEqual, s.Type)
-				So(m.Options.User, ShouldEqual, "")
-				So(m.Options.Password, ShouldEqual, "")
-				So(m.EndPoint, ShouldEqual, s.Routers.Items[0].IP)
 				So(len(m.Executions), ShouldEqual, 1)
 
 				e := m.Executions[0]
 				So(e.Payload, ShouldEqual, s.ExecutionsToCreate.Items[0].Payload)
 				So(e.Name, ShouldEqual, s.ExecutionsToCreate.Items[0].Name)
 				So(e.Type, ShouldEqual, "salt")
+				So(e.User, ShouldEqual, "")
+				So(e.Password, ShouldEqual, "")
 				So(e.Target, ShouldEqual, s.ExecutionsToCreate.Items[0].Target)
 				So(e.ClientName, ShouldEqual, s.ClientName)
+				So(e.EndPoint, ShouldEqual, s.Routers.Items[0].IP)
 
 				d := s.Datacenters.Items[0]
 				So(e.DatacenterName, ShouldEqual, d.Name)

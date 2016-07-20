@@ -47,8 +47,6 @@ func buildBasicExecutionsCreate(s *service, inputItems []execution) ExecutionsCr
 		ServiceName: s.Name,
 		ServiceType: s.Type,
 		Executions:  items,
-		Options:     c.SaltAuthentication,
-		EndPoint:    endpoint,
 	}
 
 	for i, e := range items {
@@ -65,7 +63,10 @@ func buildBasicExecutionsCreate(s *service, inputItems []execution) ExecutionsCr
 		m.Executions[i].DatacenterRegion = d.Region
 		m.Executions[i].DatacenterType = d.Type
 		m.Executions[i].DatacenterUsername = d.Username
+		m.Executions[i].User = c.SaltAuthentication.User
+		m.Executions[i].Password = c.SaltAuthentication.Password
 		m.Executions[i].Status = e.Status
+		m.Executions[i].EndPoint = endpoint
 	}
 
 	return m

@@ -1,7 +1,7 @@
 {
   "service": "test-generated-id",
   "status": "completed",
-  "executions": [
+  "components": [
     {
       "id": "execution_id",
       "created": true,
