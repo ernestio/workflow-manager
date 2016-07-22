@@ -157,6 +157,8 @@ func (sub *subscriber) NetworksCreateDone(s *service, subject string, body []byt
 				s.Networks.Items[i].StartAddress = mr.StartAddress
 				s.Networks.Items[i].EndAddress = mr.EndAddress
 				s.Networks.Items[i].Gateway = mr.Gateway
+				s.Networks.Items[i].NetworkSubnet = mr.NetworkSubnet
+				s.Networks.Items[i].NetworkAWSID = mr.NetworkAWSID
 				s.Networks.Items[i].Status = mr.Status
 			}
 		}
@@ -207,6 +209,7 @@ func (sub *subscriber) NetworksDeleteDone(s *service, subject string, body []byt
 func (sub *subscriber) InstancesCreateDone(s *service, subject string, body []byte) *service {
 	m := InstancesCreate{}
 	if err := json.Unmarshal(body, &m); err != nil {
+		log.Println(err.Error())
 		return nil
 	}
 	for i := range s.Instances.Items {
@@ -276,6 +279,7 @@ func (sub *subscriber) FirewallsCreateDone(s *service, subject string, body []by
 	for i, sr := range s.Firewalls.Items {
 		for _, mr := range m.Firewalls {
 			if sr.Name == mr.Name {
+				s.Firewalls.Items[i].SecurityGroupAWSIDs = mr.SecurityGroupAWSIDs
 				s.Firewalls.Items[i].Status = mr.Status
 			}
 		}

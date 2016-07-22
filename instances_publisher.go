@@ -57,24 +57,31 @@ func buildInstancesList(s *service, list []instance, messages []MonitorMessage, 
 
 	for i, ii := range list {
 		messages = append(messages, MonitorMessage{Body: "\t - " + ii.Name, Level: ""})
+		n := s.networkByName(ii.NetworkName)
 
 		m.Instances[i] = instance{
-			Name:               ii.Name,
-			Type:               ii.Type,
-			CPU:                ii.CPU,
-			RAM:                ii.RAM,
-			IP:                 ii.IP,
-			Catalog:            ii.Catalog,
-			Image:              ii.Image,
-			Disks:              ii.Disks,
-			NetworkName:        ii.NetworkName,
-			ClientName:         s.ClientName,
-			DatacenterName:     d.Name,
-			DatacenterPassword: d.Password,
-			DatacenterRegion:   d.Region,
-			DatacenterType:     d.Type,
-			DatacenterUsername: d.Username,
-			VCloudURL:          d.VCloudURL,
+			Name:                ii.Name,
+			Type:                ii.Type,
+			CPU:                 ii.CPU,
+			RAM:                 ii.RAM,
+			IP:                  ii.IP,
+			Catalog:             ii.Catalog,
+			Image:               ii.Image,
+			Disks:               ii.Disks,
+			NetworkName:         ii.NetworkName,
+			SecurityGroupAWSIDs: ii.SecurityGroupAWSIDs,
+			ClientName:          s.ClientName,
+			DatacenterName:      d.Name,
+			DatacenterPassword:  d.Password,
+			DatacenterRegion:    d.Region,
+			DatacenterType:      d.Type,
+			DatacenterUsername:  d.Username,
+			DatacenterToken:     d.Token,
+			DatacenterSecret:    d.Secret,
+			VCloudURL:           d.VCloudURL,
+		}
+		if n != nil {
+			m.Instances[i].NetworkAWSID = n.NetworkAWSID
 		}
 		m.Instances[i].Status = ii.Status
 	}

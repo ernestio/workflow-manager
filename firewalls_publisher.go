@@ -61,6 +61,7 @@ func buildFirewallsList(s *service, inputList []firewall) FirewallsCreate {
 			}
 
 			rules[j] = firewallRules{
+				Type:            rule.Type,
 				Destination:     destination,
 				DestinationPort: rule.DestinationPort,
 				Protocol:        rule.Protocol,
@@ -81,6 +82,8 @@ func buildFirewallsList(s *service, inputList []firewall) FirewallsCreate {
 			DatacenterRegion:   d.Region,
 			DatacenterType:     d.Type,
 			DatacenterUsername: d.Username,
+			DatacenterToken:    d.Token,
+			DatacenterSecret:   d.Secret,
 			ExternalNetwork:    d.ExternalNetwork,
 			VCloudURL:          d.VCloudURL,
 		}

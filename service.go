@@ -22,6 +22,8 @@ type datacenter struct {
 	Type            string `json:"type"`
 	Username        string `json:"username"`
 	ExternalNetwork string `json:"external_network"`
+	Token           string `json:"token"`
+	Secret          string `json:"secret"`
 	VCloudURL       string `json:"vcloud_url"`
 	VseURL          string `json:"vse_url"`
 	status
@@ -57,6 +59,7 @@ type execution struct {
 }
 
 type firewallRules struct {
+	Type            string `json:"type"`
 	Destination     string `json:"destination_ip"`
 	DestinationPort string `json:"destination_port"`
 	Protocol        string `json:"protocol"`
@@ -65,21 +68,24 @@ type firewallRules struct {
 }
 
 type firewall struct {
-	Type               string          `json:"type"`
-	Name               string          `json:"name"`
-	Rules              []firewallRules `json:"rules"`
-	Service            string          `json:"service"`
-	ClientName         string          `json:"client_name"`
-	RouterName         string          `json:"router_name"`
-	RouterType         string          `json:"router_type"`
-	RouterIP           string          `json:"router_ip"`
-	DatacenterName     string          `json:"datacenter_name"`
-	DatacenterPassword string          `json:"datacenter_password"`
-	DatacenterRegion   string          `json:"datacenter_region"`
-	DatacenterType     string          `json:"datacenter_type"`
-	DatacenterUsername string          `json:"datacenter_username"`
-	ExternalNetwork    string          `json:"external_network"`
-	VCloudURL          string          `json:"vcloud_url"`
+	Type                string          `json:"type"`
+	Name                string          `json:"name"`
+	Rules               []firewallRules `json:"rules"`
+	Service             string          `json:"service"`
+	ClientName          string          `json:"client_name"`
+	RouterName          string          `json:"router_name"`
+	RouterType          string          `json:"router_type"`
+	RouterIP            string          `json:"router_ip"`
+	DatacenterName      string          `json:"datacenter_name"`
+	DatacenterPassword  string          `json:"datacenter_password"`
+	DatacenterRegion    string          `json:"datacenter_region"`
+	DatacenterType      string          `json:"datacenter_type"`
+	DatacenterUsername  string          `json:"datacenter_username"`
+	DatacenterToken     string          `json:"datacenter_token"`
+	DatacenterSecret    string          `json:"datacenter_secret"`
+	ExternalNetwork     string          `json:"external_network"`
+	SecurityGroupAWSIDs string          `json:"security_group_aws_ids"`
+	VCloudURL           string          `json:"vcloud_url"`
 	status
 }
 
@@ -89,26 +95,30 @@ type instanceDisk struct {
 }
 
 type instance struct {
-	Service            string         `json:"service"`
-	Name               string         `json:"name"`
-	Type               string         `json:"type"`
-	IP                 string         `json:"ip"`
-	CPU                int            `json:"cpus"`
-	RAM                int            `json:"ram"`
-	Catalog            string         `json:"reference_catalog"`
-	Image              string         `json:"reference_image"`
-	Disks              []instanceDisk `json:"disks"`
-	RouterName         string         `json:"router_name"`
-	RouterType         string         `json:"router_type"`
-	RouterIP           string         `json:"router_ip"`
-	ClientName         string         `json:"client_name"`
-	DatacenterName     string         `json:"datacenter_name"`
-	DatacenterPassword string         `json:"datacenter_password"`
-	DatacenterRegion   string         `json:"datacenter_region"`
-	DatacenterType     string         `json:"datacenter_type"`
-	DatacenterUsername string         `json:"datacenter_username"`
-	NetworkName        string         `json:"network_name"`
-	VCloudURL          string         `json:"vcloud_url"`
+	Service             string         `json:"service"`
+	Name                string         `json:"name"`
+	Type                string         `json:"type"`
+	IP                  string         `json:"ip"`
+	CPU                 int            `json:"cpus"`
+	RAM                 int            `json:"ram"`
+	Catalog             string         `json:"reference_catalog"`
+	Image               string         `json:"reference_image"`
+	Disks               []instanceDisk `json:"disks"`
+	RouterName          string         `json:"router_name"`
+	RouterType          string         `json:"router_type"`
+	RouterIP            string         `json:"router_ip"`
+	ClientName          string         `json:"client_name"`
+	DatacenterName      string         `json:"datacenter_name"`
+	DatacenterPassword  string         `json:"datacenter_password"`
+	DatacenterRegion    string         `json:"datacenter_region"`
+	DatacenterType      string         `json:"datacenter_type"`
+	DatacenterUsername  string         `json:"datacenter_username"`
+	DatacenterToken     string         `json:"datacenter_token"`
+	DatacenterSecret    string         `json:"datacenter_secret"`
+	NetworkName         string         `json:"network_name"`
+	NetworkAWSID        string         `json:"network_aws_id"`
+	SecurityGroupAWSIDs []string       `json:"security_group_aws_ids"`
+	VCloudURL           string         `json:"vcloud_url"`
 	status
 }
 
@@ -138,6 +148,8 @@ type nat struct {
 	Service            string    `json:"service"`
 	Name               string    `json:"name"`
 	Rules              []natRule `json:"rules"`
+	NetworkName        string    `json:"network_name"`
+	NetworkAWSID       string    `json:"network_aws_id"`
 	RouterName         string    `json:"router_name"`
 	RouterType         string    `json:"router_type"`
 	RouterIP           string    `json:"router_ip"`
@@ -148,6 +160,8 @@ type nat struct {
 	DatacenterUsername string    `json:"datacenter_username"`
 	DatacenterPassword string    `json:"datacenter_password"`
 	DatacenterRegion   string    `json:"datacenter_region,omitempty"`
+	DatacenterToken    string    `json:"datacenter_token"`
+	DatacenterSecret   string    `json:"datacenter_secret"`
 	ExternalNetwork    string    `json:"external_network"`
 	VCloudURL          string    `json:"vcloud_url"`
 	status
@@ -172,6 +186,10 @@ type network struct {
 	DatacenterUsername string   `json:"datacenter_username"`
 	DatacenterPassword string   `json:"datacenter_password"`
 	DatacenterRegion   string   `json:"datacenter_region"`
+	DatacenterToken    string   `json:"datacenter_token"`
+	DatacenterSecret   string   `json:"datacenter_secret"`
+	NetworkSubnet      string   `json:"network_subnet"`
+	NetworkAWSID       string   `json:"network_aws_id"`
 	DNS                []string `json:"DNS"`
 	VCloudURL          string   `json:"vcloud_url"`
 	status
