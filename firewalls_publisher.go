@@ -10,11 +10,15 @@ func buildCreateFirewalls(s *service) FirewallsCreate {
 	messages = append(messages, MonitorMessage{Body: "Setting up firewalls:", Level: "INFO"})
 	UserOutput(s.Channel(), messages)
 
-	return buildFirewallsList(s, s.Firewalls.Items)
+	return buildFirewallsList(s, s.FirewallsToCreate.Items)
 }
 
 func buildUpdateFirewalls(s *service) FirewallsCreate {
-	return buildCreateFirewalls(s)
+	messages := []MonitorMessage{}
+	messages = append(messages, MonitorMessage{Body: "Updating firewalls:", Level: "INFO"})
+	UserOutput(s.Channel(), messages)
+
+	return buildFirewallsList(s, s.FirewallsToUpdate.Items)
 }
 
 func buildDeleteFirewalls(s *service) FirewallsCreate {

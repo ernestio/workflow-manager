@@ -9,13 +9,7 @@ func buildCreateNetworks(s *service) NetworksCreate {
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "Creating networks:", Level: "INFO"})
 
-	res := NetworksCreate{}
-
-	if len(s.NetworksToCreate.Items) > 0 {
-		res, messages = buildNetworksList(s, s.NetworksToCreate.Items, messages)
-	} else {
-		res, messages = buildNetworksList(s, s.Networks.Items, messages)
-	}
+	res, messages := buildNetworksList(s, s.NetworksToCreate.Items, messages)
 
 	UserOutput(s.Channel(), messages)
 

@@ -9,13 +9,7 @@ func buildCreateInstances(s *service) InstancesCreate {
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "Creating instances:", Level: "INFO"})
 
-	res := InstancesCreate{}
-
-	if len(s.InstancesToCreate.Items) > 0 {
-		res, messages = buildInstancesList(s, s.InstancesToCreate.Items, messages, false)
-	} else {
-		res, messages = buildInstancesList(s, s.Instances.Items, messages, false)
-	}
+	res, messages := buildInstancesList(s, s.InstancesToCreate.Items, messages, false)
 
 	UserOutput(s.Channel(), messages)
 

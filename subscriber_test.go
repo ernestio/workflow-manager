@@ -66,8 +66,8 @@ func TestRoutersCreateDone(t *testing.T) {
 			s, subject, err := mm.getServiceFromMessage("routers.create.done", body)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(s.Routers.Items), ShouldEqual, 1)
-				So(s.Routers.Items[0].IP, ShouldEqual, "31.210.241.2")
+				So(len(s.Routers.Items), ShouldEqual, 2)
+				So(s.Routers.Items[1].IP, ShouldEqual, "31.210.241.2")
 				So(subject, ShouldEqual, "routers.create.done")
 				So(err, ShouldEqual, nil)
 
@@ -114,12 +114,12 @@ func TestNetworksCreateDone(t *testing.T) {
 
 			Convey("Then I'll receive the valid body", func() {
 				So(len(s.Routers.Items), ShouldEqual, 1)
-				So(s.Networks.Items[0].Name, ShouldEqual, "network_test")
-				So(s.Networks.Items[0].Range, ShouldEqual, "10.64.4.0/24")
-				So(s.Networks.Items[0].Netmask, ShouldEqual, "netmask")
-				So(s.Networks.Items[0].StartAddress, ShouldEqual, "start")
-				So(s.Networks.Items[0].EndAddress, ShouldEqual, "end")
-				So(s.Networks.Items[0].Gateway, ShouldEqual, "gateway")
+				So(s.Networks.Items[1].Name, ShouldEqual, "network_test")
+				So(s.Networks.Items[1].Range, ShouldEqual, "10.64.4.0/24")
+				So(s.Networks.Items[1].Netmask, ShouldEqual, "netmask")
+				So(s.Networks.Items[1].StartAddress, ShouldEqual, "start")
+				So(s.Networks.Items[1].EndAddress, ShouldEqual, "end")
+				So(s.Networks.Items[1].Gateway, ShouldEqual, "gateway")
 				So(subject, ShouldEqual, "networks.create.done")
 				So(err, ShouldEqual, nil)
 
@@ -166,10 +166,10 @@ func TestInstancesCreateDone(t *testing.T) {
 			s, subject, err := mm.getServiceFromMessage("instances.create.done", body)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(s.Instances.Items), ShouldEqual, 2)
+				So(len(s.Instances.Items), ShouldEqual, 3)
 				So(subject, ShouldEqual, "instances.create.done")
 				So(err, ShouldEqual, nil)
-				So(s.Instances.Items[0].Status, ShouldEqual, "completed")
+				So(s.Instances.Items[2].Status, ShouldEqual, "completed")
 			})
 		})
 	})
@@ -204,7 +204,7 @@ func TestFirewallsCreateDone(t *testing.T) {
 
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/firewalls_create_done.json")
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_create_firewalls.json")
 		s.save()
 
 		Convey("When I try to get body for the mapped message firewalls.create.done", func() {
@@ -251,7 +251,7 @@ func TestNatsCreateDone(t *testing.T) {
 
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/nats_create_done.json")
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_create_nats.json")
 		s.save()
 
 		Convey("When I try to get body for the mapped message nats.create.done", func() {

@@ -9,11 +9,15 @@ func buildCreateNats(s *service) NatsCreate {
 	messages = append(messages, MonitorMessage{Body: "Configuring nats", Level: "INFO"})
 	UserOutput(s.Channel(), messages)
 
-	return buildNatsList(s, s.Nats.Items)
+	return buildNatsList(s, s.NatsToCreate.Items)
 }
 
 func buildUpdateNats(s *service) NatsCreate {
-	return buildCreateNats(s)
+	messages := []MonitorMessage{}
+	messages = append(messages, MonitorMessage{Body: "Configuring nats", Level: "INFO"})
+	UserOutput(s.Channel(), messages)
+
+	return buildNatsList(s, s.NatsToUpdate.Items)
 }
 
 func buildDeleteNats(s *service) NatsCreate {

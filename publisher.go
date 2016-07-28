@@ -182,7 +182,7 @@ func (p *publisher) NatsDelete(s *service) string {
 }
 
 func (p *publisher) NatsUpdate(s *service) string {
-	m := buildCreateNats(s)
+	m := buildUpdateNats(s)
 	marshalled, err := json.Marshal(m)
 	if err != nil {
 		log.Println(err)

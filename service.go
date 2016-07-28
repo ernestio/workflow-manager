@@ -265,6 +265,18 @@ type service struct {
 		Started  string     `json:"started"`
 		status
 	} `json:"firewalls"`
+	FirewallsToCreate struct {
+		Finished string     `json:"finished"`
+		Items    []firewall `json:"items"`
+		Started  string     `json:"started"`
+		status
+	} `json:"firewalls_to_create"`
+	FirewallsToUpdate struct {
+		Finished string     `json:"finished"`
+		Items    []firewall `json:"items"`
+		Started  string     `json:"started"`
+		status
+	} `json:"firewalls_to_update"`
 	FirewallsToDelete struct {
 		Finished string     `json:"finished"`
 		Items    []firewall `json:"items"`
@@ -307,6 +319,18 @@ type service struct {
 		Started  string `json:"started"`
 		status
 	} `json:"nats"`
+	NatsToCreate struct {
+		Finished string `json:"finished"`
+		Items    []nat  `json:"items"`
+		Started  string `json:"started"`
+		status
+	} `json:"nats_to_create"`
+	NatsToUpdate struct {
+		Finished string `json:"finished"`
+		Items    []nat  `json:"items"`
+		Started  string `json:"started"`
+		status
+	} `json:"nats_to_update"`
 	NatsToDelete struct {
 		Finished string `json:"finished"`
 		Items    []nat  `json:"items"`
@@ -337,6 +361,12 @@ type service struct {
 		Started  string   `json:"started"`
 		status
 	} `json:"routers"`
+	RoutersToCreate struct {
+		Finished string   `json:"finished"`
+		Items    []router `json:"items"`
+		Started  string   `json:"started"`
+		status
+	} `json:"routers_to_create"`
 	RoutersToDelete struct {
 		Finished string   `json:"finished"`
 		Items    []router `json:"items"`
