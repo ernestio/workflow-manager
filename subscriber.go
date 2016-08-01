@@ -125,8 +125,23 @@ func (sub *subscriber) RoutersCreateDone(s *service, subject string, body []byte
 
 	messages := []MonitorMessage{}
 	for _, mr := range m.Routers {
-		s.Routers.Items = append(s.Routers.Items, mr)
+		sw := false
+		for i, er := range s.Routers.Items {
+			if er.Name == mr.Name {
+				s.Routers.Items[i] = mr
+				sw = true
+			}
+		}
+		if sw == false {
+			s.Routers.Items = append(s.Routers.Items, mr)
+		}
 		messages = append(messages, MonitorMessage{Body: "\t" + mr.IP, Level: ""})
+		if s.Endpoint == "" {
+			s.Endpoint = mr.IP
+		}
+		if s.ServiceIP == "" {
+			s.ServiceIP = mr.IP
+		}
 	}
 	s.RoutersToCreate.Status = m.Status
 	s.RoutersToCreate.ErrorCode = m.ErrorCode
@@ -149,7 +164,16 @@ func (sub *subscriber) NetworksCreateDone(s *service, subject string, body []byt
 	}
 
 	for _, mr := range m.Networks {
-		s.Networks.Items = append(s.Networks.Items, mr)
+		sw := false
+		for i, er := range s.Networks.Items {
+			if er.Name == mr.Name {
+				s.Networks.Items[i] = mr
+				sw = true
+			}
+		}
+		if sw == false {
+			s.Networks.Items = append(s.Networks.Items, mr)
+		}
 	}
 
 	s.NetworksToCreate.Status = m.Status
@@ -201,8 +225,18 @@ func (sub *subscriber) InstancesCreateDone(s *service, subject string, body []by
 		log.Println(err.Error())
 		return nil
 	}
-	for _, instance := range m.Instances {
-		s.Instances.Items = append(s.Instances.Items, instance)
+
+	for _, mr := range m.Instances {
+		sw := false
+		for i, er := range s.Instances.Items {
+			if er.Name == mr.Name {
+				s.Instances.Items[i] = mr
+				sw = true
+			}
+		}
+		if sw == false {
+			s.Instances.Items = append(s.Instances.Items, mr)
+		}
 	}
 
 	s.InstancesToCreate.Status = m.Status
@@ -263,7 +297,16 @@ func (sub *subscriber) FirewallsCreateDone(s *service, subject string, body []by
 	}
 
 	for _, mr := range m.Firewalls {
-		s.Firewalls.Items = append(s.Firewalls.Items, mr)
+		sw := false
+		for i, er := range s.Firewalls.Items {
+			if er.Name == mr.Name {
+				s.Firewalls.Items[i] = mr
+				sw = true
+			}
+		}
+		if sw == false {
+			s.Firewalls.Items = append(s.Firewalls.Items, mr)
+		}
 	}
 
 	s.FirewallsToCreate.Status = m.Status
@@ -330,7 +373,16 @@ func (sub *subscriber) NatsCreateDone(s *service, subject string, body []byte) *
 	}
 
 	for _, mr := range m.Nats {
-		s.Nats.Items = append(s.Nats.Items, mr)
+		sw := false
+		for i, er := range s.Nats.Items {
+			if er.Name == mr.Name {
+				s.Nats.Items[i] = mr
+				sw = true
+			}
+		}
+		if sw == false {
+			s.Nats.Items = append(s.Nats.Items, mr)
+		}
 	}
 
 	s.NatsToCreate.Status = m.Status
