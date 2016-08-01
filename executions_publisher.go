@@ -35,9 +35,12 @@ func buildBasicExecutionsCreate(s *service, inputItems []execution) ExecutionsCr
 	d := s.datacenter()
 
 	// TODO: This should be modified once we support multiple routers
-	r := s.Routers.Items[0]
+	endpoint := ""
+	if len(s.Routers.Items) > 0 {
+		r := s.Routers.Items[0]
+		endpoint = r.IP
+	}
 
-	endpoint := r.IP
 	if s.ServiceIP != "" {
 		endpoint = s.ServiceIP
 	}
