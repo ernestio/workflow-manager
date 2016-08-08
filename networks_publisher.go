@@ -47,6 +47,8 @@ func buildNetworksList(s *service, list []network, messages []MonitorMessage) (N
 			m.Networks[i].RouterName = r.Name
 			m.Networks[i].RouterType = r.Type
 			m.Networks[i].RouterIP = r.IP
+		} else {
+			m.Networks[i].NetworkType = d.Type
 		}
 
 		m.Networks[i].ClientName = s.ClientName

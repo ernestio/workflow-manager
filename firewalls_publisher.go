@@ -96,6 +96,8 @@ func buildFirewallsList(s *service, inputList []firewall) FirewallsCreate {
 			m.Firewalls[i].RouterName = r.Name
 			m.Firewalls[i].RouterType = r.Type
 			m.Firewalls[i].RouterIP = r.IP
+		} else {
+			m.Firewalls[i].FirewallType = d.Type
 		}
 
 		m.Firewalls[i].Status = f.Status

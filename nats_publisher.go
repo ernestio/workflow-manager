@@ -68,10 +68,13 @@ func buildNatsList(s *service, inputList []nat) NatsCreate {
 			ExternalNetwork:    d.ExternalNetwork,
 			VCloudURL:          d.VCloudURL,
 		}
-
-		m.Nats[i].RouterName = r.Name
-		m.Nats[i].RouterType = r.Type
-		m.Nats[i].RouterIP = r.IP
+		if r != nil {
+			m.Nats[i].RouterName = r.Name
+			m.Nats[i].RouterType = r.Type
+			m.Nats[i].RouterIP = r.IP
+		} else {
+			m.Nats[i].NatType = d.Type
+		}
 
 		if net != nil {
 			m.Nats[i].NetworkAWSID = net.NetworkAWSID

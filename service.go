@@ -71,6 +71,7 @@ type firewall struct {
 	Type                string          `json:"type"`
 	Name                string          `json:"name"`
 	Rules               []firewallRules `json:"rules"`
+	FirewallType        string          `json:"firewall_type"`
 	Service             string          `json:"service"`
 	ClientName          string          `json:"client_name"`
 	RouterName          string          `json:"router_name"`
@@ -148,6 +149,7 @@ type nat struct {
 	Service            string    `json:"service"`
 	Name               string    `json:"name"`
 	Rules              []natRule `json:"rules"`
+	NatType            string    `json:"nat_type"`
 	NetworkName        string    `json:"network_name"`
 	NetworkAWSID       string    `json:"network_aws_id"`
 	RouterName         string    `json:"router_name"`
@@ -188,6 +190,7 @@ type network struct {
 	DatacenterRegion   string   `json:"datacenter_region"`
 	DatacenterToken    string   `json:"datacenter_token"`
 	DatacenterSecret   string   `json:"datacenter_secret"`
+	NetworkType        string   `json:"network_type"`
 	NetworkSubnet      string   `json:"network_subnet"`
 	NetworkAWSID       string   `json:"network_aws_id"`
 	DNS                []string `json:"DNS"`
