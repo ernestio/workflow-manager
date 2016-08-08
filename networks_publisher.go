@@ -43,9 +43,12 @@ func buildNetworksList(s *service, list []network, messages []MonitorMessage) (N
 
 		r = s.routerByName(n.RouterName)
 
-		m.Networks[i].RouterName = r.Name
-		m.Networks[i].RouterType = r.Type
-		m.Networks[i].RouterIP = r.IP
+		if r != nil {
+			m.Networks[i].RouterName = r.Name
+			m.Networks[i].RouterType = r.Type
+			m.Networks[i].RouterIP = r.IP
+		}
+
 		m.Networks[i].ClientName = s.ClientName
 		m.Networks[i].DatacenterName = d.Name
 		m.Networks[i].DatacenterPassword = d.Password

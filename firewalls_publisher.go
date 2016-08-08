@@ -43,12 +43,15 @@ func buildFirewallsList(s *service, inputList []firewall) FirewallsCreate {
 
 	r := &router{}
 	for i, f := range list {
+		var endpoint string
+
 		r = s.routerByName(f.RouterName)
 		rules := make([]firewallRules, len(f.Rules))
 
-		endpoint := r.IP
 		if s.ServiceIP != "" {
 			endpoint = s.ServiceIP
+		} else if r != nil {
+			endpoint = r.IP
 		}
 
 		for j, rule := range f.Rules {
@@ -77,9 +80,6 @@ func buildFirewallsList(s *service, inputList []firewall) FirewallsCreate {
 		m.Firewalls[i] = firewall{
 			Name:               f.Name,
 			Rules:              rules,
-			RouterName:         r.Name,
-			RouterType:         r.Type,
-			RouterIP:           r.IP,
 			ClientName:         s.ClientName,
 			DatacenterName:     d.Name,
 			DatacenterPassword: d.Password,
@@ -91,6 +91,13 @@ func buildFirewallsList(s *service, inputList []firewall) FirewallsCreate {
 			ExternalNetwork:    d.ExternalNetwork,
 			VCloudURL:          d.VCloudURL,
 		}
+
+		if r != nil {
+			m.Firewalls[i].RouterName = r.Name
+			m.Firewalls[i].RouterType = r.Type
+			m.Firewalls[i].RouterIP = r.IP
+		}
+
 		m.Firewalls[i].Status = f.Status
 	}
 

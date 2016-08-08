@@ -43,20 +43,20 @@ func buildNatsList(s *service, inputList []nat) NatsCreate {
 	r := &router{}
 
 	for i, n := range list {
+		var endpoint string
+
 		r = s.routerByName(n.RouterName)
 		net := s.networkByName(n.NetworkName)
 
-		endpoint := r.IP
 		if s.ServiceIP != "" {
 			endpoint = s.ServiceIP
+		} else if r != nil {
+			endpoint = r.IP
 		}
 
 		m.Nats[i] = nat{
 			Service:            s.ID,
 			Name:               n.Name,
-			RouterName:         r.Name,
-			RouterType:         r.Type,
-			RouterIP:           r.IP,
 			ClientName:         s.ClientName,
 			DatacenterName:     d.Name,
 			DatacenterPassword: d.Password,
@@ -68,6 +68,10 @@ func buildNatsList(s *service, inputList []nat) NatsCreate {
 			ExternalNetwork:    d.ExternalNetwork,
 			VCloudURL:          d.VCloudURL,
 		}
+
+		m.Nats[i].RouterName = r.Name
+		m.Nats[i].RouterType = r.Type
+		m.Nats[i].RouterIP = r.IP
 
 		if net != nil {
 			m.Nats[i].NetworkAWSID = net.NetworkAWSID
