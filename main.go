@@ -7,16 +7,19 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"os"
 	"runtime"
 	"time"
 
+	ecc "github.com/ernestio/ernest-config-client"
 	"github.com/nats-io/nats"
 )
 
 var natsClient *nats.Conn
 var em = eventManager{}
 var p = storage{}
-var c = Config{}
+var c Config
+var cfg *ecc.Config
 
 // Receives a message, updates the related service on the FSM
 // and emits the relative message
@@ -43,8 +46,8 @@ func manageInputMessage(m *nats.Msg) {
 
 // Setup the listeners for all messages on the platform
 func main() {
-	c.Load()
-	natsClient = c.NatsClient()
+	cfg = ecc.NewConfig(os.Getenv("NATS_URI"))
+	natsClient = cfg.Nats()
 	p.load(natsClient)
 
 	saltCfg, err := natsClient.Request("config.get.salt", []byte(""), 1*time.Second)

@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 
+	ecc "github.com/ernestio/ernest-config-client"
 	"github.com/nats-io/nats"
 )
 
@@ -85,7 +86,7 @@ func setup() {
 	if listeners == false {
 		c := Config{}
 		c.Load()
-		natsClient = c.NatsClient()
+		natsClient = ecc.NewConfig(os.Getenv("NATS_URI")).Nats()
 		runListenerMocks()
 		listeners = true
 	}
