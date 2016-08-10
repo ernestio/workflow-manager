@@ -74,9 +74,20 @@ func buildInstancesList(s *service, list []instance, messages []MonitorMessage, 
 			DatacenterSecret:    d.Secret,
 			VCloudURL:           d.VCloudURL,
 		}
+
 		if n != nil {
 			m.Instances[i].NetworkAWSID = n.NetworkAWSID
 		}
+
+		if len(m.Instances[i].SecurityGroups) > 0 {
+			var ids []string
+			for _, sg := range m.Instances[i].SecurityGroups {
+				f := s.firewallByName(sg)
+				ids = append(ids, f.SecurityGroupAWSID)
+			}
+			m.Instances[i].SecurityGroupAWSIDs = ids
+		}
+
 		m.Instances[i].Status = ii.Status
 	}
 
