@@ -83,7 +83,9 @@ func buildInstancesList(s *service, list []instance, messages []MonitorMessage, 
 			var ids []string
 			for _, sg := range m.Instances[i].SecurityGroups {
 				f := s.firewallByName(sg)
-				ids = append(ids, f.SecurityGroupAWSID)
+				if f != nil {
+					ids = append(ids, f.SecurityGroupAWSID)
+				}
 			}
 			m.Instances[i].SecurityGroupAWSIDs = ids
 		}
