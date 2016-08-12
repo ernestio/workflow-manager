@@ -207,7 +207,6 @@ func (sub *subscriber) RoutersDeleteDone(s *service, subject string, body []byte
 // message and deleting the networks data
 func (sub *subscriber) NetworksDeleteDone(s *service, subject string, body []byte) *service {
 	s.NetworksToDelete.Items = make([]network, 0)
-	s.Networks.Items = make([]network, 0)
 
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "Networks deleted", Level: "INFO"})
