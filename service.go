@@ -118,6 +118,7 @@ type instance struct {
 	DatacenterSecret    string         `json:"datacenter_secret"`
 	NetworkName         string         `json:"network_name"`
 	NetworkAWSID        string         `json:"network_aws_id"`
+	KeyPair             string         `json:"key_pair"`
 	SecurityGroups      []string       `json:"security_groups"`
 	SecurityGroupAWSIDs []string       `json:"security_group_aws_ids"`
 	VCloudURL           string         `json:"vcloud_url"`
