@@ -66,6 +66,7 @@ func buildNatsList(s *service, inputList []nat) NatsCreate {
 			DatacenterToken:    d.Token,
 			DatacenterSecret:   d.Secret,
 			ExternalNetwork:    d.ExternalNetwork,
+			NatGatewayAWSID:    n.NatGatewayAWSID,
 			VCloudURL:          d.VCloudURL,
 		}
 		if r != nil {

@@ -90,6 +90,7 @@ func buildFirewallsList(s *service, inputList []firewall) FirewallsCreate {
 			DatacenterSecret:   d.Secret,
 			ExternalNetwork:    d.ExternalNetwork,
 			VCloudURL:          d.VCloudURL,
+			SecurityGroupAWSID: f.SecurityGroupAWSID,
 		}
 
 		if r != nil {

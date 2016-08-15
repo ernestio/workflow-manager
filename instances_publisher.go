@@ -74,6 +74,7 @@ func buildInstancesList(s *service, list []instance, messages []MonitorMessage, 
 			DatacenterToken:    d.Token,
 			DatacenterSecret:   d.Secret,
 			VCloudURL:          d.VCloudURL,
+			InstanceAWSID:      ii.InstanceAWSID,
 		}
 
 		if n != nil {

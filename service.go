@@ -105,6 +105,7 @@ type instance struct {
 	Catalog             string         `json:"reference_catalog"`
 	Image               string         `json:"reference_image"`
 	Disks               []instanceDisk `json:"disks"`
+	InstanceAWSID       string         `json:"instance_aws_id"`
 	RouterName          string         `json:"router_name"`
 	RouterType          string         `json:"router_type"`
 	RouterIP            string         `json:"router_ip"`
