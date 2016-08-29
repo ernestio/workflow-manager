@@ -142,7 +142,6 @@ func TestNetworksDeleteDone(t *testing.T) {
 			s, subject, err := mm.getServiceFromMessage("networks.delete.done", body)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(s.Networks.Items), ShouldEqual, 0)
 				So(len(s.NetworksToDelete.Items), ShouldEqual, 0)
 				So(subject, ShouldEqual, "networks.delete.done")
 				So(err, ShouldEqual, nil)
