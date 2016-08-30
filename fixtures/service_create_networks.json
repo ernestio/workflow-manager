@@ -1,0 +1,232 @@
+{
+    "id": "test-generated-id",
+    "body": "",
+    "name": "test",
+    "type": "",
+    "endpoint": "",
+    "options": {
+      "user": "",
+      "password": ""
+    },
+    "status": "",
+    "started": "",
+    "finished": "",
+    "workflow": {
+      "arcs": [
+      { "from": "created", "to": "started", "event": "start" },
+      { "from": "started", "to": "in_progress", "event": "to_in_progress" },
+      { "from": "in_progress", "to": "uat", "event": "to_uat" },
+      { "from": "uat", "to": "done", "event": "to_done" }
+    ]},
+    "datacenters": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "name": "dtc_name",
+        "type": "dtc_type",
+        "region": "dtc_region",
+        "username": "dtc_user",
+        "password": "dtc_pwd"
+      }]
+    },
+    "routers": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "service": "test-generated-id",
+        "datacenter": "1",
+        "name": "test",
+        "type": "",
+        "ip": ""
+      }]
+    },
+    "networks": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": []
+    },
+    "networks_to_create": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "service": "test",
+        "router_name": "test",
+        "type": "vcloud",
+        "name": "network_test",
+        "range": "11.11.11.11/11",
+        "netmask": "",
+        "start_address": "",
+        "end_address": "",
+        "gateway": ""
+      }]
+    },
+    "networks_to_delete": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "service": "test",
+        "router_name": "test",
+        "type": "vcloud",
+        "name": "network_test",
+        "range": "11.11.11.11/11",
+        "netmask": "",
+        "start_address": "",
+        "end_address": "",
+        "gateway": ""
+      }]
+    },
+    "nats": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "id": "nat_id",
+        "service": "test",
+        "router_name": "test",
+        "status": "completed",
+        "rules": [{
+          "type": "type",
+          "network": "network",
+          "origin_ip": "11.11.11.11/11",
+          "origin_port": "1",
+          "translation_ip": "10.10.10.10/10",
+          "translation_port": "1",
+          "protocol": "protocol"
+        }]
+      }]
+    },
+    "firewalls": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "router_name": "test",
+        "service": "test-generated-id",
+        "type": "vcloud",
+        "name": "test_firewall",
+        "status": "completed",
+        "rules": [{
+          "source_ip": "network_test",
+          "source_port": "source_port",
+          "destination_ip": "any",
+          "destination_port": "destination_port",
+          "protocol": "protocol"
+        }]
+      }]
+    },
+    "loadbalancer": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "service": "",
+        "router": "",
+        "name": "",
+        "instance": "",
+        "ports": [{
+          "from": 80,
+          "to": 8080
+        }]
+      }]
+    },
+    "instances": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "network_name": "network_test",
+        "service": "test-generated-id",
+        "datacenter_name": "dtc_name",
+        "type": "test_instance",
+        "name": "test_instance_1",
+        "ip": "1.1.1.1",
+        "instance_resource": {
+          "cpus": 2,
+          "ram": 4096,
+          "ip": "10.10.10.11",
+          "reference_catalog": "",
+          "reference_image": "",
+          "disks": [{
+            "id": 1,
+            "size": 10240
+          }]
+        }
+      }, {
+        "network_name": "network_test",
+        "service": "test-generated-id",
+        "datacenter_name": "dtc_name",
+        "type": "salt",
+        "name": "salt",
+        "instance_resource": {
+          "cpus": 2,
+          "ram": 4096,
+          "ip": "10.10.10.12",
+          "reference_catalog": "",
+          "reference_image": "",
+          "disks": [{
+            "id": 1,
+            "size": 10240
+          }]
+        }
+      }]
+    },
+    "executions": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "service": "test-generated-id",
+        "router_name": "test",
+        "type": "salt",
+        "name": "test_execution",
+        "payload": "test",
+        "target": "list:test",
+        "status": "completed",
+        "reports": [{
+          "instance": "",
+          "return_code": 0,
+          "stdout": "",
+          "stderr": ""
+        }],
+        "matched_instances": [ "" ],
+        "execution_status": ""
+      }]
+    },
+    "executions_to_create": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "type": "salt",
+        "name": "test_execution",
+        "payload": "test to create",
+        "target": "list:test"
+      }]
+    },
+    "bootstraps": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "service": "test-generated-id",
+        "router_name": "test",
+        "type": "salt",
+        "name": "test_execution",
+        "payload": "test",
+        "target": "list:test",
+        "status": "completed",
+        "reports": [{
+          "instance": "",
+          "return_code": 0,
+          "stdout": "",
+          "stderr": ""
+        }],
+        "matched_instances": [ "" ]
+      }]
+    }
+}

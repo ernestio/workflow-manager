@@ -9,13 +9,7 @@ func buildCreateNetworks(s *service) NetworksCreate {
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "Creating networks:", Level: "INFO"})
 
-	res := NetworksCreate{}
-
-	if len(s.NetworksToCreate.Items) > 0 {
-		res, messages = buildNetworksList(s, s.NetworksToCreate.Items, messages)
-	} else {
-		res, messages = buildNetworksList(s, s.Networks.Items, messages)
-	}
+	res, messages := buildNetworksList(s, s.NetworksToCreate.Items, messages)
 
 	UserOutput(s.Channel(), messages)
 
@@ -49,15 +43,24 @@ func buildNetworksList(s *service, list []network, messages []MonitorMessage) (N
 
 		r = s.routerByName(n.RouterName)
 
-		m.Networks[i].RouterName = r.Name
-		m.Networks[i].RouterType = r.Type
-		m.Networks[i].RouterIP = r.IP
+		if r != nil {
+			m.Networks[i].RouterName = r.Name
+			m.Networks[i].RouterType = r.Type
+			m.Networks[i].RouterIP = r.IP
+		} else {
+			m.Networks[i].NetworkType = d.Type
+		}
+
 		m.Networks[i].ClientName = s.ClientName
 		m.Networks[i].DatacenterName = d.Name
 		m.Networks[i].DatacenterPassword = d.Password
 		m.Networks[i].DatacenterRegion = d.Region
 		m.Networks[i].DatacenterType = d.Type
 		m.Networks[i].DatacenterUsername = d.Username
+		m.Networks[i].DatacenterToken = d.Token
+		m.Networks[i].DatacenterSecret = d.Secret
+		m.Networks[i].NetworkSubnet = n.NetworkSubnet
+		m.Networks[i].NetworkAWSID = n.NetworkAWSID
 		m.Networks[i].VCloudURL = d.VCloudURL
 	}
 

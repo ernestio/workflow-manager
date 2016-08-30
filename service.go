@@ -22,6 +22,8 @@ type datacenter struct {
 	Type            string `json:"type"`
 	Username        string `json:"username"`
 	ExternalNetwork string `json:"external_network"`
+	Token           string `json:"token"`
+	Secret          string `json:"secret"`
 	VCloudURL       string `json:"vcloud_url"`
 	VseURL          string `json:"vse_url"`
 	status
@@ -50,10 +52,14 @@ type execution struct {
 	Reports            []executionReport `json:"reports"`
 	ExecutionStatus    string            `json:"execution_status"`
 	Created            bool              `json:"created"`
+	User               string            `json:"user"`
+	Password           string            `json:"password"`
+	EndPoint           string            `json:"service_endpoint"`
 	status
 }
 
 type firewallRules struct {
+	Type            string `json:"type"`
 	Destination     string `json:"destination_ip"`
 	DestinationPort string `json:"destination_port"`
 	Protocol        string `json:"protocol"`
@@ -65,6 +71,7 @@ type firewall struct {
 	Type               string          `json:"type"`
 	Name               string          `json:"name"`
 	Rules              []firewallRules `json:"rules"`
+	FirewallType       string          `json:"firewall_type"`
 	Service            string          `json:"service"`
 	ClientName         string          `json:"client_name"`
 	RouterName         string          `json:"router_name"`
@@ -75,7 +82,10 @@ type firewall struct {
 	DatacenterRegion   string          `json:"datacenter_region"`
 	DatacenterType     string          `json:"datacenter_type"`
 	DatacenterUsername string          `json:"datacenter_username"`
+	DatacenterToken    string          `json:"datacenter_token"`
+	DatacenterSecret   string          `json:"datacenter_secret"`
 	ExternalNetwork    string          `json:"external_network"`
+	SecurityGroupAWSID string          `json:"security_group_aws_id"`
 	VCloudURL          string          `json:"vcloud_url"`
 	status
 }
@@ -86,26 +96,33 @@ type instanceDisk struct {
 }
 
 type instance struct {
-	Service            string         `json:"service"`
-	Name               string         `json:"name"`
-	Type               string         `json:"type"`
-	IP                 string         `json:"ip"`
-	CPU                int            `json:"cpus"`
-	RAM                int            `json:"ram"`
-	Catalog            string         `json:"reference_catalog"`
-	Image              string         `json:"reference_image"`
-	Disks              []instanceDisk `json:"disks"`
-	RouterName         string         `json:"router_name"`
-	RouterType         string         `json:"router_type"`
-	RouterIP           string         `json:"router_ip"`
-	ClientName         string         `json:"client_name"`
-	DatacenterName     string         `json:"datacenter_name"`
-	DatacenterPassword string         `json:"datacenter_password"`
-	DatacenterRegion   string         `json:"datacenter_region"`
-	DatacenterType     string         `json:"datacenter_type"`
-	DatacenterUsername string         `json:"datacenter_username"`
-	NetworkName        string         `json:"network_name"`
-	VCloudURL          string         `json:"vcloud_url"`
+	Service             string         `json:"service"`
+	Name                string         `json:"name"`
+	Type                string         `json:"type"`
+	IP                  string         `json:"ip"`
+	CPU                 int            `json:"cpus"`
+	RAM                 int            `json:"ram"`
+	Catalog             string         `json:"reference_catalog"`
+	Image               string         `json:"reference_image"`
+	Disks               []instanceDisk `json:"disks"`
+	InstanceAWSID       string         `json:"instance_aws_id"`
+	RouterName          string         `json:"router_name"`
+	RouterType          string         `json:"router_type"`
+	RouterIP            string         `json:"router_ip"`
+	ClientName          string         `json:"client_name"`
+	DatacenterName      string         `json:"datacenter_name"`
+	DatacenterPassword  string         `json:"datacenter_password"`
+	DatacenterRegion    string         `json:"datacenter_region"`
+	DatacenterType      string         `json:"datacenter_type"`
+	DatacenterUsername  string         `json:"datacenter_username"`
+	DatacenterToken     string         `json:"datacenter_token"`
+	DatacenterSecret    string         `json:"datacenter_secret"`
+	NetworkName         string         `json:"network_name"`
+	NetworkAWSID        string         `json:"network_aws_id"`
+	KeyPair             string         `json:"key_pair"`
+	SecurityGroups      []string       `json:"security_groups"`
+	SecurityGroupAWSIDs []string       `json:"security_group_aws_ids"`
+	VCloudURL           string         `json:"vcloud_url"`
 	status
 }
 
@@ -132,21 +149,29 @@ type natRule struct {
 }
 
 type nat struct {
-	Service            string    `json:"service"`
-	Name               string    `json:"name"`
-	Rules              []natRule `json:"rules"`
-	RouterName         string    `json:"router_name"`
-	RouterType         string    `json:"router_type"`
-	RouterIP           string    `json:"router_ip"`
-	ClientID           string    `json:"client_id"`
-	ClientName         string    `json:"client_name"`
-	DatacenterType     string    `json:"datacenter_type"`
-	DatacenterName     string    `json:"datacenter_name"`
-	DatacenterUsername string    `json:"datacenter_username"`
-	DatacenterPassword string    `json:"datacenter_password"`
-	DatacenterRegion   string    `json:"datacenter_region,omitempty"`
-	ExternalNetwork    string    `json:"external_network"`
-	VCloudURL          string    `json:"vcloud_url"`
+	Service                string    `json:"service"`
+	Name                   string    `json:"name"`
+	Rules                  []natRule `json:"rules"`
+	NatType                string    `json:"nat_type"`
+	NetworkName            string    `json:"network_name"`
+	NetworkAWSID           string    `json:"network_aws_id"`
+	NatGatewayAWSID        string    `json:"nat_gateway_aws_id"`
+	NatGatewayAllocationID string    `json:"nat_gateway_allocation_id"`
+	NatGatewayAllocationIP string    `json:"nat_gateway_allocation_ip"`
+	RouterName             string    `json:"router_name"`
+	RouterType             string    `json:"router_type"`
+	RouterIP               string    `json:"router_ip"`
+	ClientID               string    `json:"client_id"`
+	ClientName             string    `json:"client_name"`
+	DatacenterType         string    `json:"datacenter_type"`
+	DatacenterName         string    `json:"datacenter_name"`
+	DatacenterUsername     string    `json:"datacenter_username"`
+	DatacenterPassword     string    `json:"datacenter_password"`
+	DatacenterRegion       string    `json:"datacenter_region,omitempty"`
+	DatacenterToken        string    `json:"datacenter_token"`
+	DatacenterSecret       string    `json:"datacenter_secret"`
+	ExternalNetwork        string    `json:"external_network"`
+	VCloudURL              string    `json:"vcloud_url"`
 	status
 }
 
@@ -169,6 +194,11 @@ type network struct {
 	DatacenterUsername string   `json:"datacenter_username"`
 	DatacenterPassword string   `json:"datacenter_password"`
 	DatacenterRegion   string   `json:"datacenter_region"`
+	DatacenterToken    string   `json:"datacenter_token"`
+	DatacenterSecret   string   `json:"datacenter_secret"`
+	NetworkType        string   `json:"network_type"`
+	NetworkSubnet      string   `json:"network_subnet"`
+	NetworkAWSID       string   `json:"network_aws_id"`
 	DNS                []string `json:"DNS"`
 	VCloudURL          string   `json:"vcloud_url"`
 	status
@@ -244,6 +274,18 @@ type service struct {
 		Started  string     `json:"started"`
 		status
 	} `json:"firewalls"`
+	FirewallsToCreate struct {
+		Finished string     `json:"finished"`
+		Items    []firewall `json:"items"`
+		Started  string     `json:"started"`
+		status
+	} `json:"firewalls_to_create"`
+	FirewallsToUpdate struct {
+		Finished string     `json:"finished"`
+		Items    []firewall `json:"items"`
+		Started  string     `json:"started"`
+		status
+	} `json:"firewalls_to_update"`
 	FirewallsToDelete struct {
 		Finished string     `json:"finished"`
 		Items    []firewall `json:"items"`
@@ -286,6 +328,18 @@ type service struct {
 		Started  string `json:"started"`
 		status
 	} `json:"nats"`
+	NatsToCreate struct {
+		Finished string `json:"finished"`
+		Items    []nat  `json:"items"`
+		Started  string `json:"started"`
+		status
+	} `json:"nats_to_create"`
+	NatsToUpdate struct {
+		Finished string `json:"finished"`
+		Items    []nat  `json:"items"`
+		Started  string `json:"started"`
+		status
+	} `json:"nats_to_update"`
 	NatsToDelete struct {
 		Finished string `json:"finished"`
 		Items    []nat  `json:"items"`
@@ -316,6 +370,12 @@ type service struct {
 		Started  string   `json:"started"`
 		status
 	} `json:"routers"`
+	RoutersToCreate struct {
+		Finished string   `json:"finished"`
+		Items    []router `json:"items"`
+		Started  string   `json:"started"`
+		status
+	} `json:"routers_to_create"`
 	RoutersToDelete struct {
 		Finished string   `json:"finished"`
 		Items    []router `json:"items"`
@@ -383,6 +443,16 @@ func (s *service) networkByName(name string) *network {
 	for _, n := range s.Networks.Items {
 		if n.Name == name {
 			return &n
+		}
+	}
+
+	return nil
+}
+
+func (s *service) firewallByName(name string) *firewall {
+	for _, f := range s.Firewalls.Items {
+		if f.Name == name {
+			return &f
 		}
 	}
 

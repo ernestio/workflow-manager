@@ -9,13 +9,7 @@ func buildCreateInstances(s *service) InstancesCreate {
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "Creating instances:", Level: "INFO"})
 
-	res := InstancesCreate{}
-
-	if len(s.InstancesToCreate.Items) > 0 {
-		res, messages = buildInstancesList(s, s.InstancesToCreate.Items, messages, false)
-	} else {
-		res, messages = buildInstancesList(s, s.Instances.Items, messages, false)
-	}
+	res, messages := buildInstancesList(s, s.InstancesToCreate.Items, messages, false)
 
 	UserOutput(s.Channel(), messages)
 
@@ -57,6 +51,7 @@ func buildInstancesList(s *service, list []instance, messages []MonitorMessage, 
 
 	for i, ii := range list {
 		messages = append(messages, MonitorMessage{Body: "\t - " + ii.Name, Level: ""})
+		n := s.networkByName(ii.NetworkName)
 
 		m.Instances[i] = instance{
 			Name:               ii.Name,
@@ -68,14 +63,35 @@ func buildInstancesList(s *service, list []instance, messages []MonitorMessage, 
 			Image:              ii.Image,
 			Disks:              ii.Disks,
 			NetworkName:        ii.NetworkName,
+			SecurityGroups:     ii.SecurityGroups,
+			KeyPair:            ii.KeyPair,
 			ClientName:         s.ClientName,
 			DatacenterName:     d.Name,
 			DatacenterPassword: d.Password,
 			DatacenterRegion:   d.Region,
 			DatacenterType:     d.Type,
 			DatacenterUsername: d.Username,
+			DatacenterToken:    d.Token,
+			DatacenterSecret:   d.Secret,
 			VCloudURL:          d.VCloudURL,
+			InstanceAWSID:      ii.InstanceAWSID,
 		}
+
+		if n != nil {
+			m.Instances[i].NetworkAWSID = n.NetworkAWSID
+		}
+
+		if len(m.Instances[i].SecurityGroups) > 0 {
+			var ids []string
+			for _, sg := range m.Instances[i].SecurityGroups {
+				f := s.firewallByName(sg)
+				if f != nil {
+					ids = append(ids, f.SecurityGroupAWSID)
+				}
+			}
+			m.Instances[i].SecurityGroupAWSIDs = ids
+		}
+
 		m.Instances[i].Status = ii.Status
 	}
 

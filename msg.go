@@ -7,7 +7,7 @@ package main
 // RoutersCreate : Message to create routers
 type RoutersCreate struct {
 	Service              string   `json:"service"`
-	Routers              []router `json:"routers"`
+	Routers              []router `json:"components"`
 	Status               string   `json:"status"`
 	ErrorCode            string   `json:"error_code"`
 	ErrorMessage         string   `json:"error_message"`
@@ -17,7 +17,7 @@ type RoutersCreate struct {
 // NetworksCreate : Message to create networks
 type NetworksCreate struct {
 	Service              string    `json:"service"`
-	Networks             []network `json:"networks"`
+	Networks             []network `json:"components"`
 	Status               string    `json:"status"`
 	ErrorCode            string    `json:"error_code"`
 	ErrorMessage         string    `json:"error_message"`
@@ -27,7 +27,7 @@ type NetworksCreate struct {
 // InstancesCreate : Message to create instances
 type InstancesCreate struct {
 	Service              string     `json:"service"`
-	Instances            []instance `json:"instances"`
+	Instances            []instance `json:"components"`
 	Status               string     `json:"status"`
 	ErrorCode            string     `json:"error_code"`
 	ErrorMessage         string     `json:"error_message"`
@@ -37,7 +37,7 @@ type InstancesCreate struct {
 // FirewallsCreate : Message to create firewalls
 type FirewallsCreate struct {
 	Service              string     `json:"service"`
-	Firewalls            []firewall `json:"firewalls"`
+	Firewalls            []firewall `json:"components"`
 	Networks             []network  `json:"networks"`
 	Status               string     `json:"status"`
 	ErrorCode            string     `json:"error_code"`
@@ -48,7 +48,7 @@ type FirewallsCreate struct {
 // NatsCreate : Message to create nats
 type NatsCreate struct {
 	Service              string `json:"service"`
-	Nats                 []nat  `json:"nats"`
+	Nats                 []nat  `json:"components"`
 	Status               string `json:"status"`
 	ErrorCode            string `json:"error_code"`
 	ErrorMessage         string `json:"error_message"`
@@ -57,12 +57,10 @@ type NatsCreate struct {
 
 // ExecutionsCreate : Message to create Executions
 type ExecutionsCreate struct {
-	Service     string         `json:"service"`
-	ServiceName string         `json:"service_name"`
-	ServiceType string         `json:"service_type"`
-	Executions  []execution    `json:"executions"`
-	Options     ServiceOptions `json:"options"`
-	EndPoint    string         `json:"service_endpoint"`
+	Service     string      `json:"service"`
+	ServiceName string      `json:"service_name"`
+	ServiceType string      `json:"service_type"`
+	Executions  []execution `json:"components"`
 }
 
 // ServiceOptions : Service options aka salt user password

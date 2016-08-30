@@ -9,7 +9,7 @@ func buildCreateRouters(s *service) RoutersCreate {
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "Creating routers:", Level: "INFO"})
 
-	m := buildRoutersList(s, s.Routers.Items)
+	m := buildRoutersList(s, s.RoutersToCreate.Items, s.RoutersToCreate.Status)
 
 	UserOutput(s.Channel(), messages)
 
@@ -21,14 +21,14 @@ func buildDeleteRouters(s *service) RoutersCreate {
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "Deleting router:", Level: "INFO"})
 
-	m := buildRoutersList(s, s.RoutersToDelete.Items)
+	m := buildRoutersList(s, s.RoutersToDelete.Items, s.RoutersToDelete.Status)
 
 	UserOutput(s.Channel(), messages)
 
 	return m
 }
 
-func buildRoutersList(s *service, list []router) RoutersCreate {
+func buildRoutersList(s *service, list []router, status string) RoutersCreate {
 	d := s.datacenter()
 
 	m := RoutersCreate{
@@ -38,7 +38,6 @@ func buildRoutersList(s *service, list []router) RoutersCreate {
 	}
 
 	for i := range m.Routers {
-
 		m.Routers[i].ClientName = s.ClientName
 		m.Routers[i].DatacenterName = d.Name
 		m.Routers[i].DatacenterPassword = d.Password

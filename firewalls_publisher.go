@@ -10,11 +10,15 @@ func buildCreateFirewalls(s *service) FirewallsCreate {
 	messages = append(messages, MonitorMessage{Body: "Setting up firewalls:", Level: "INFO"})
 	UserOutput(s.Channel(), messages)
 
-	return buildFirewallsList(s, s.Firewalls.Items)
+	return buildFirewallsList(s, s.FirewallsToCreate.Items)
 }
 
 func buildUpdateFirewalls(s *service) FirewallsCreate {
-	return buildCreateFirewalls(s)
+	messages := []MonitorMessage{}
+	messages = append(messages, MonitorMessage{Body: "Updating firewalls:", Level: "INFO"})
+	UserOutput(s.Channel(), messages)
+
+	return buildFirewallsList(s, s.FirewallsToUpdate.Items)
 }
 
 func buildDeleteFirewalls(s *service) FirewallsCreate {
@@ -39,12 +43,15 @@ func buildFirewallsList(s *service, inputList []firewall) FirewallsCreate {
 
 	r := &router{}
 	for i, f := range list {
+		var endpoint string
+
 		r = s.routerByName(f.RouterName)
 		rules := make([]firewallRules, len(f.Rules))
 
-		endpoint := r.IP
 		if s.ServiceIP != "" {
 			endpoint = s.ServiceIP
+		} else if r != nil {
+			endpoint = r.IP
 		}
 
 		for j, rule := range f.Rules {
@@ -61,6 +68,7 @@ func buildFirewallsList(s *service, inputList []firewall) FirewallsCreate {
 			}
 
 			rules[j] = firewallRules{
+				Type:            rule.Type,
 				Destination:     destination,
 				DestinationPort: rule.DestinationPort,
 				Protocol:        rule.Protocol,
@@ -72,18 +80,27 @@ func buildFirewallsList(s *service, inputList []firewall) FirewallsCreate {
 		m.Firewalls[i] = firewall{
 			Name:               f.Name,
 			Rules:              rules,
-			RouterName:         r.Name,
-			RouterType:         r.Type,
-			RouterIP:           r.IP,
 			ClientName:         s.ClientName,
 			DatacenterName:     d.Name,
 			DatacenterPassword: d.Password,
 			DatacenterRegion:   d.Region,
 			DatacenterType:     d.Type,
 			DatacenterUsername: d.Username,
+			DatacenterToken:    d.Token,
+			DatacenterSecret:   d.Secret,
 			ExternalNetwork:    d.ExternalNetwork,
 			VCloudURL:          d.VCloudURL,
+			SecurityGroupAWSID: f.SecurityGroupAWSID,
 		}
+
+		if r != nil {
+			m.Firewalls[i].RouterName = r.Name
+			m.Firewalls[i].RouterType = r.Type
+			m.Firewalls[i].RouterIP = r.IP
+		} else {
+			m.Firewalls[i].FirewallType = d.Type
+		}
+
 		m.Firewalls[i].Status = f.Status
 	}
 

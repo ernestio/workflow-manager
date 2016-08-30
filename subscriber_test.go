@@ -142,7 +142,6 @@ func TestNetworksDeleteDone(t *testing.T) {
 			s, subject, err := mm.getServiceFromMessage("networks.delete.done", body)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(s.Networks.Items), ShouldEqual, 0)
 				So(len(s.NetworksToDelete.Items), ShouldEqual, 0)
 				So(subject, ShouldEqual, "networks.delete.done")
 				So(err, ShouldEqual, nil)
@@ -204,7 +203,7 @@ func TestFirewallsCreateDone(t *testing.T) {
 
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/firewalls_create_done.json")
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_create_firewalls.json")
 		s.save()
 
 		Convey("When I try to get body for the mapped message firewalls.create.done", func() {
@@ -251,7 +250,7 @@ func TestNatsCreateDone(t *testing.T) {
 
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/nats_create_done.json")
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_create_nats.json")
 		s.save()
 
 		Convey("When I try to get body for the mapped message nats.create.done", func() {

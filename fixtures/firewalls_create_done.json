@@ -1,7 +1,7 @@
 {
    "service": "test-generated-id",
    "status": "completed",
-   "firewalls": [
+   "components": [
       {
          "id": "firewall_id",
          "name": "test_firewall",

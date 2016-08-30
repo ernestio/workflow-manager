@@ -124,15 +124,30 @@ func (sub *subscriber) RoutersCreateDone(s *service, subject string, body []byte
 	}
 
 	messages := []MonitorMessage{}
-	for i, sr := range s.Routers.Items {
-		for _, mr := range m.Routers {
-			if sr.Name == mr.Name {
+	for _, mr := range m.Routers {
+		sw := false
+		for i, er := range s.Routers.Items {
+			if er.Name == mr.Name {
 				s.Routers.Items[i] = mr
-				s.Endpoint = mr.IP
-				messages = append(messages, MonitorMessage{Body: "\t" + mr.IP, Level: ""})
+				sw = true
 			}
 		}
+		if sw == false {
+			s.Routers.Items = append(s.Routers.Items, mr)
+		}
+		messages = append(messages, MonitorMessage{Body: "\t" + mr.IP, Level: ""})
+		if s.Endpoint == "" {
+			s.Endpoint = mr.IP
+		}
+		if s.ServiceIP == "" {
+			s.ServiceIP = mr.IP
+		}
 	}
+	s.RoutersToCreate.Status = m.Status
+	s.RoutersToCreate.ErrorCode = m.ErrorCode
+	s.RoutersToCreate.ErrorMessage = m.ErrorMessage
+	s.RoutersToCreate.Items = []router{}
+
 	messages = append(messages, MonitorMessage{Body: "Routers successfully created", Level: "INFO"})
 	UserOutput(s.Channel(), messages)
 
@@ -148,23 +163,23 @@ func (sub *subscriber) NetworksCreateDone(s *service, subject string, body []byt
 		return nil
 	}
 
-	for i, sr := range s.Networks.Items {
-		for _, mr := range m.Networks {
-			if sr.Name == mr.Name {
-				s.Networks.Items[i].Name = mr.Name
-				s.Networks.Items[i].Range = mr.Range
-				s.Networks.Items[i].Netmask = mr.Netmask
-				s.Networks.Items[i].StartAddress = mr.StartAddress
-				s.Networks.Items[i].EndAddress = mr.EndAddress
-				s.Networks.Items[i].Gateway = mr.Gateway
-				s.Networks.Items[i].Status = mr.Status
+	for _, mr := range m.Networks {
+		sw := false
+		for i, er := range s.Networks.Items {
+			if er.Name == mr.Name {
+				s.Networks.Items[i] = mr
+				sw = true
 			}
+		}
+		if sw == false {
+			s.Networks.Items = append(s.Networks.Items, mr)
 		}
 	}
 
-	s.Networks.Status = m.Status
-	s.Networks.ErrorCode = m.ErrorCode
-	s.Networks.ErrorMessage = m.ErrorMessage
+	s.NetworksToCreate.Status = m.Status
+	s.NetworksToCreate.ErrorCode = m.ErrorCode
+	s.NetworksToCreate.ErrorMessage = m.ErrorMessage
+	s.NetworksToCreate.Items = []network{}
 
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "Networks successfully created", Level: "INFO"})
@@ -192,7 +207,6 @@ func (sub *subscriber) RoutersDeleteDone(s *service, subject string, body []byte
 // message and deleting the networks data
 func (sub *subscriber) NetworksDeleteDone(s *service, subject string, body []byte) *service {
 	s.NetworksToDelete.Items = make([]network, 0)
-	s.Networks.Items = make([]network, 0)
 
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "Networks deleted", Level: "INFO"})
@@ -207,19 +221,27 @@ func (sub *subscriber) NetworksDeleteDone(s *service, subject string, body []byt
 func (sub *subscriber) InstancesCreateDone(s *service, subject string, body []byte) *service {
 	m := InstancesCreate{}
 	if err := json.Unmarshal(body, &m); err != nil {
+		log.Println(err.Error())
 		return nil
 	}
-	for i := range s.Instances.Items {
-		for j := range m.Instances {
-			if s.Instances.Items[i].Name == m.Instances[j].Name {
-				s.Instances.Items[i].Status = m.Instances[j].Status
+
+	for _, mr := range m.Instances {
+		sw := false
+		for i, er := range s.Instances.Items {
+			if er.Name == mr.Name {
+				s.Instances.Items[i] = mr
+				sw = true
 			}
+		}
+		if sw == false {
+			s.Instances.Items = append(s.Instances.Items, mr)
 		}
 	}
 
-	s.Instances.Status = m.Status
-	s.Instances.ErrorCode = m.ErrorCode
-	s.Instances.ErrorMessage = m.ErrorMessage
+	s.InstancesToCreate.Status = m.Status
+	s.InstancesToCreate.ErrorCode = m.ErrorCode
+	s.InstancesToCreate.ErrorMessage = m.ErrorMessage
+	s.InstancesToCreate.Items = []instance{}
 
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "Instances successfully created", Level: "INFO"})
@@ -273,17 +295,23 @@ func (sub *subscriber) FirewallsCreateDone(s *service, subject string, body []by
 		return nil
 	}
 
-	for i, sr := range s.Firewalls.Items {
-		for _, mr := range m.Firewalls {
-			if sr.Name == mr.Name {
-				s.Firewalls.Items[i].Status = mr.Status
+	for _, mr := range m.Firewalls {
+		sw := false
+		for i, er := range s.Firewalls.Items {
+			if er.Name == mr.Name {
+				s.Firewalls.Items[i] = mr
+				sw = true
 			}
+		}
+		if sw == false {
+			s.Firewalls.Items = append(s.Firewalls.Items, mr)
 		}
 	}
 
-	s.Firewalls.Status = m.Status
-	s.Firewalls.ErrorCode = m.ErrorCode
-	s.Firewalls.ErrorMessage = m.ErrorMessage
+	s.FirewallsToCreate.Status = m.Status
+	s.FirewallsToCreate.ErrorCode = m.ErrorCode
+	s.FirewallsToCreate.ErrorMessage = m.ErrorMessage
+	s.FirewallsToCreate.Items = []firewall{}
 
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "Firewalls Created", Level: "INFO"})
@@ -343,17 +371,23 @@ func (sub *subscriber) NatsCreateDone(s *service, subject string, body []byte) *
 		return nil
 	}
 
-	for i, sr := range s.Nats.Items {
-		for _, mr := range m.Nats {
-			if sr.Name == mr.Name {
-				s.Nats.Items[i].Status = mr.Status
+	for _, mr := range m.Nats {
+		sw := false
+		for i, er := range s.Nats.Items {
+			if er.Name == mr.Name {
+				s.Nats.Items[i] = mr
+				sw = true
 			}
+		}
+		if sw == false {
+			s.Nats.Items = append(s.Nats.Items, mr)
 		}
 	}
 
-	s.Nats.Status = m.Status
-	s.Nats.ErrorCode = m.ErrorCode
-	s.Nats.ErrorMessage = m.ErrorMessage
+	s.NatsToCreate.Status = m.Status
+	s.NatsToCreate.ErrorCode = m.ErrorCode
+	s.NatsToCreate.ErrorMessage = m.ErrorMessage
+	s.NatsToCreate.Items = []nat{}
 
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "Nats Created", Level: "INFO"})

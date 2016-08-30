@@ -56,7 +56,7 @@ func TestCreateRouters(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_create_routers.json")
 
 		Convey("When I get the message for a routers.create event", func() {
 			mm := messageManager{}
@@ -67,8 +67,8 @@ func TestCreateRouters(t *testing.T) {
 			Convey("Then I'll receive a valid json string", func() {
 				r := m.Routers[0]
 				So(len(m.Routers), ShouldEqual, 1)
-				So(r.Name, ShouldEqual, s.Routers.Items[0].Name)
-				So(r.Type, ShouldEqual, s.Routers.Items[0].Type)
+				So(r.Name, ShouldEqual, s.RoutersToCreate.Items[0].Name)
+				So(r.Type, ShouldEqual, s.RoutersToCreate.Items[0].Type)
 
 				d := s.Datacenters.Items[0]
 				So(r.DatacenterName, ShouldEqual, d.Name)
@@ -111,7 +111,7 @@ func TestCreateNetworks(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_create_networks.json")
 
 		Convey("When I get the message for a networks.create event", func() {
 			mm := messageManager{}
@@ -125,8 +125,8 @@ func TestCreateNetworks(t *testing.T) {
 				So(m.Service, ShouldEqual, s.ID)
 				So(len(m.Networks), ShouldEqual, 1)
 				n := m.Networks[0]
-				So(n.Name, ShouldEqual, s.Networks.Items[0].Name)
-				So(n.Range, ShouldEqual, s.Networks.Items[0].Range)
+				So(n.Name, ShouldEqual, s.NetworksToCreate.Items[0].Name)
+				So(n.Range, ShouldEqual, s.NetworksToCreate.Items[0].Range)
 				So(n.RouterName, ShouldEqual, r.Name)
 				So(n.RouterType, ShouldEqual, r.Type)
 				So(n.RouterIP, ShouldEqual, r.IP)
@@ -187,7 +187,7 @@ func TestCreateInstances(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_create_instances.json")
 
 		Convey("When I get the message for a instances.create event", func() {
 			mm := messageManager{}
@@ -199,7 +199,7 @@ func TestCreateInstances(t *testing.T) {
 				So(m.Service, ShouldEqual, s.ID)
 				So(len(m.Instances), ShouldEqual, 2)
 				i := m.Instances[0]
-				So(i.Name, ShouldEqual, s.Instances.Items[0].Name)
+				So(i.Name, ShouldEqual, s.InstancesToCreate.Items[0].Name)
 
 				So(err, ShouldEqual, nil)
 
@@ -213,7 +213,7 @@ func TestCreateNats(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_create_nats.json")
 
 		Convey("When I get the message for a nats.create event", func() {
 			mm := messageManager{}
@@ -228,8 +228,8 @@ func TestCreateNats(t *testing.T) {
 				So(m.Service, ShouldEqual, s.ID)
 				So(len(m.Nats), ShouldEqual, 1)
 				n := m.Nats[0]
-				So(n.Name, ShouldEqual, s.Nats.Items[0].Name)
-				So(n.Status, ShouldEqual, s.Nats.Items[0].Status)
+				So(n.Name, ShouldEqual, s.NatsToCreate.Items[0].Name)
+				So(n.Status, ShouldEqual, s.NatsToCreate.Items[0].Status)
 				So(n.RouterName, ShouldEqual, ro.Name)
 				So(n.RouterType, ShouldEqual, ro.Type)
 				So(n.RouterIP, ShouldEqual, ro.IP)
@@ -259,7 +259,7 @@ func TestUpdateNats(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_update_nats.json")
 
 		Convey("When I get the message for a nats.update event", func() {
 			mm := messageManager{}
@@ -274,7 +274,7 @@ func TestUpdateNats(t *testing.T) {
 				So(m.Service, ShouldEqual, s.ID)
 				So(len(m.Nats), ShouldEqual, 1)
 				n := m.Nats[0]
-				So(n.Name, ShouldEqual, s.Nats.Items[0].Name)
+				So(n.Name, ShouldEqual, s.NatsToUpdate.Items[0].Name)
 				So(n.RouterName, ShouldEqual, ro.Name)
 				So(n.RouterType, ShouldEqual, ro.Type)
 				So(n.RouterIP, ShouldEqual, ro.IP)
@@ -304,7 +304,7 @@ func TestCreateFirewalls(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_create_firewalls.json")
 
 		Convey("When I get the message for a firewalls.create event", func() {
 			mm := messageManager{}
@@ -318,8 +318,8 @@ func TestCreateFirewalls(t *testing.T) {
 				So(len(m.Networks), ShouldEqual, 1)
 				f := m.Firewalls[0]
 				n := m.Networks[0]
-				So(f.Name, ShouldEqual, s.Firewalls.Items[0].Name)
-				So(f.Status, ShouldEqual, s.Firewalls.Items[0].Status)
+				So(f.Name, ShouldEqual, s.FirewallsToCreate.Items[0].Name)
+				So(f.Status, ShouldEqual, s.FirewallsToCreate.Items[0].Status)
 				So(n.Name, ShouldEqual, s.Networks.Items[0].Name)
 				So(n.Range, ShouldEqual, s.Networks.Items[0].Range)
 				r := f.Rules[0]
@@ -340,7 +340,7 @@ func TestUpdateFirewalls(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_update_firewalls.json")
 
 		Convey("When I get the message for a firewalls.update event", func() {
 			mm := messageManager{}
@@ -391,9 +391,6 @@ func TestCreateBootstraps(t *testing.T) {
 					So(m.Service, ShouldEqual, s.ID)
 					So(m.ServiceName, ShouldEqual, s.Name)
 					So(m.ServiceType, ShouldEqual, s.Type)
-					So(m.Options.User, ShouldEqual, "")
-					So(m.Options.Password, ShouldEqual, "")
-					So(m.EndPoint, ShouldEqual, s.Routers.Items[0].IP)
 					So(len(m.Executions), ShouldEqual, 1)
 
 					e := m.Executions[0]
@@ -402,6 +399,9 @@ func TestCreateBootstraps(t *testing.T) {
 					So(e.Payload, ShouldEqual, s.Bootstraps.Items[0].Payload)
 					So(e.Target, ShouldEqual, s.Bootstraps.Items[0].Target)
 					So(e.Status, ShouldEqual, s.Bootstraps.Items[0].Status)
+					So(e.User, ShouldEqual, "")
+					So(e.Password, ShouldEqual, "")
+					So(e.EndPoint, ShouldEqual, s.Routers.Items[0].IP)
 					So(e.ClientName, ShouldEqual, s.ClientName)
 
 					d := s.Datacenters.Items[0]
@@ -426,9 +426,6 @@ func TestCreateBootstraps(t *testing.T) {
 					So(m.Service, ShouldEqual, s.ID)
 					So(m.ServiceName, ShouldEqual, s.Name)
 					So(m.ServiceType, ShouldEqual, s.Type)
-					So(m.Options.User, ShouldEqual, "")
-					So(m.Options.Password, ShouldEqual, "")
-					So(m.EndPoint, ShouldEqual, "1.1.1.1")
 					So(len(m.Executions), ShouldEqual, 1)
 
 					e := m.Executions[0]
@@ -437,6 +434,9 @@ func TestCreateBootstraps(t *testing.T) {
 					So(e.Payload, ShouldEqual, s.Bootstraps.Items[0].Payload)
 					So(e.Target, ShouldEqual, s.Bootstraps.Items[0].Target)
 					So(e.Status, ShouldEqual, s.Bootstraps.Items[0].Status)
+					So(e.User, ShouldEqual, "")
+					So(e.Password, ShouldEqual, "")
+					So(e.EndPoint, ShouldEqual, "1.1.1.1")
 					So(e.ClientName, ShouldEqual, s.ClientName)
 
 					d := s.Datacenters.Items[0]
@@ -476,17 +476,17 @@ func TestCreateExecutions(t *testing.T) {
 				So(m.Service, ShouldEqual, s.ID)
 				So(m.ServiceName, ShouldEqual, s.Name)
 				So(m.ServiceType, ShouldEqual, s.Type)
-				So(m.Options.User, ShouldEqual, "")
-				So(m.Options.Password, ShouldEqual, "")
-				So(m.EndPoint, ShouldEqual, s.Routers.Items[0].IP)
 				So(len(m.Executions), ShouldEqual, 1)
 
 				e := m.Executions[0]
 				So(e.Payload, ShouldEqual, s.ExecutionsToCreate.Items[0].Payload)
 				So(e.Name, ShouldEqual, s.ExecutionsToCreate.Items[0].Name)
 				So(e.Type, ShouldEqual, "salt")
+				So(e.User, ShouldEqual, "")
+				So(e.Password, ShouldEqual, "")
 				So(e.Target, ShouldEqual, s.ExecutionsToCreate.Items[0].Target)
 				So(e.ClientName, ShouldEqual, s.ClientName)
+				So(e.EndPoint, ShouldEqual, s.Routers.Items[0].IP)
 
 				d := s.Datacenters.Items[0]
 				So(e.DatacenterName, ShouldEqual, d.Name)

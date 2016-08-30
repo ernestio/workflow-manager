@@ -35,7 +35,6 @@ func (mm *messageManager) preparePublishMessage(subject string, s *service) (str
 // It gets a message subject and the body received and calls the necessary
 // subscriber methods to read them into a service object
 func (mm *messageManager) getServiceFromMessage(subject string, body []byte) (*service, string, error) {
-
 	var sub subscriber
 	methodName, err := sub.MethodName(subject)
 	if err != nil {
@@ -47,7 +46,6 @@ func (mm *messageManager) getServiceFromMessage(subject string, body []byte) (*s
 			}
 			return s, "to_error", nil
 		}
-		log.Printf("Message not supported: %s", subject)
 		return nil, "", errors.New("Message not supported")
 	}
 	s, err := mm.getService(body)

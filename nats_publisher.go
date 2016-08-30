@@ -9,11 +9,15 @@ func buildCreateNats(s *service) NatsCreate {
 	messages = append(messages, MonitorMessage{Body: "Configuring nats", Level: "INFO"})
 	UserOutput(s.Channel(), messages)
 
-	return buildNatsList(s, s.Nats.Items)
+	return buildNatsList(s, s.NatsToCreate.Items)
 }
 
 func buildUpdateNats(s *service) NatsCreate {
-	return buildCreateNats(s)
+	messages := []MonitorMessage{}
+	messages = append(messages, MonitorMessage{Body: "Configuring nats", Level: "INFO"})
+	UserOutput(s.Channel(), messages)
+
+	return buildNatsList(s, s.NatsToUpdate.Items)
 }
 
 func buildDeleteNats(s *service) NatsCreate {
@@ -39,27 +43,44 @@ func buildNatsList(s *service, inputList []nat) NatsCreate {
 	r := &router{}
 
 	for i, n := range list {
-		r = s.routerByName(n.RouterName)
+		var endpoint string
 
-		endpoint := r.IP
+		r = s.routerByName(n.RouterName)
+		net := s.networkByName(n.NetworkName)
+
 		if s.ServiceIP != "" {
 			endpoint = s.ServiceIP
+		} else if r != nil {
+			endpoint = r.IP
 		}
 
 		m.Nats[i] = nat{
+			Service:            s.ID,
 			Name:               n.Name,
-			RouterName:         r.Name,
-			RouterType:         r.Type,
-			RouterIP:           r.IP,
 			ClientName:         s.ClientName,
 			DatacenterName:     d.Name,
 			DatacenterPassword: d.Password,
 			DatacenterRegion:   d.Region,
 			DatacenterType:     d.Type,
 			DatacenterUsername: d.Username,
+			DatacenterToken:    d.Token,
+			DatacenterSecret:   d.Secret,
 			ExternalNetwork:    d.ExternalNetwork,
+			NatGatewayAWSID:    n.NatGatewayAWSID,
 			VCloudURL:          d.VCloudURL,
 		}
+		if r != nil {
+			m.Nats[i].RouterName = r.Name
+			m.Nats[i].RouterType = r.Type
+			m.Nats[i].RouterIP = r.IP
+		} else {
+			m.Nats[i].NatType = d.Type
+		}
+
+		if net != nil {
+			m.Nats[i].NetworkAWSID = net.NetworkAWSID
+		}
+
 		m.Nats[i].Status = n.Status
 		m.Nats[i].Rules = n.Rules
 		for x := 0; x < len(n.Rules); x++ {

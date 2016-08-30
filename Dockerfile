@@ -7,4 +7,4 @@ WORKDIR /go/src/github.com/ernestio/workflow-manager
 
 RUN make deps && go install
 
-ENTRYPOINT /go/bin/workflow-manager
+ENTRYPOINT ./entrypoint.sh
