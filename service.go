@@ -488,3 +488,142 @@ func (s *service) saltMaster() *instance {
 func (s *service) Channel() string {
 	return s.ID
 }
+
+func (s *service) asMap() (mapped map[string]interface{}) {
+	body, err := json.Marshal(s)
+	if err != nil {
+		log.Panic(err.Error())
+	}
+	err = json.Unmarshal(body, &mapped)
+	if err != nil {
+		log.Panic(err.Error())
+	}
+	return mapped
+}
+
+func (s *service) loadFromMap(mapped map[string]interface{}) {
+	body, err := json.Marshal(mapped)
+	if err != nil {
+		log.Panic(err.Error())
+	}
+	err = json.Unmarshal(body, s)
+}
+
+func (s *service) getComponentList(cType string) []interface{} {
+	tmp := s.asMap()
+	cList := tmp[cType].(map[string]interface{})
+	list := cList["items"].([]interface{})
+
+	return list
+}
+
+func (s *service) transferCreated(cType string, input GenericComponentMsg) {
+	tmp := s.asMap()
+	inputComponents := input.Components
+
+	currentComponents := tmp[cType].(map[string]interface{})
+	components := currentComponents["items"].([]interface{})
+
+	// Append new components
+	for _, c := range inputComponents {
+		exists := false
+		for i, v := range components {
+			inHash := c.(map[string]interface{})
+			exHash := v.(map[string]interface{})
+			iName := inHash["name"].(string)
+			name := exHash["name"].(string)
+			if iName == name {
+				components[i] = c
+				exists = true
+			}
+		}
+		if exists == false {
+			components = append(components, c)
+		}
+	}
+	currentComponents["status"] = "completed"
+	currentComponents["items"] = components
+
+	// Remove to be created components
+	componentsToBeProcessed := tmp[cType+"_to_create"].(map[string]interface{})
+	componentsToBeProcessed["items"] = nil
+	componentsToBeProcessed["status"] = "completed"
+	componentsToBeProcessed["error_code"] = ""
+	componentsToBeProcessed["error_message"] = ""
+
+	// Save result
+	s.loadFromMap(tmp)
+}
+
+func (s *service) transferUpdated(cType string, input GenericComponentMsg) {
+	var components []interface{}
+	tmp := s.asMap()
+	inputComponents := input.Components
+
+	currentComponents := tmp[cType].(map[string]interface{})
+	if currentComponents["items"] != nil {
+		components = currentComponents["items"].([]interface{})
+	}
+
+	// Append new components
+	for _, c := range inputComponents {
+		for i, v := range components {
+			inHash := c.(map[string]interface{})
+			exHash := v.(map[string]interface{})
+			iName := inHash["name"].(string)
+			name := exHash["name"].(string)
+			if iName == name {
+				components[i] = c
+			}
+		}
+	}
+	currentComponents["status"] = "completed"
+	currentComponents["items"] = components
+
+	// Remove to be created components
+	componentsToBeProcessed := tmp[cType+"_to_update"].(map[string]interface{})
+	componentsToBeProcessed["items"] = nil
+	componentsToBeProcessed["status"] = "completed"
+	componentsToBeProcessed["error_code"] = ""
+	componentsToBeProcessed["error_message"] = ""
+
+	// Save result
+	s.loadFromMap(tmp)
+}
+
+func (s *service) transferDeleted(cType string, input GenericComponentMsg) {
+	tmp := s.asMap()
+	inputComponents := input.Components
+
+	currentComponents := tmp[cType].(map[string]interface{})
+	components := currentComponents["items"].([]interface{})
+	var remanentComponents []interface{}
+
+	for _, v := range components {
+		sw := false
+		exHash := v.(map[string]interface{})
+		name := exHash["name"].(string)
+		for _, c := range inputComponents {
+			inHash := c.(map[string]interface{})
+			iName := inHash["name"].(string)
+			if iName == name {
+				sw = true
+			}
+		}
+		if sw == false {
+			remanentComponents = append(remanentComponents, v)
+		}
+	}
+	currentComponents["status"] = "completed"
+	currentComponents["items"] = remanentComponents
+
+	// Remove to be created components
+	componentsToBeProcessed := tmp[cType+"_to_delete"].(map[string]interface{})
+	componentsToBeProcessed["items"] = nil
+	componentsToBeProcessed["status"] = "completed"
+	componentsToBeProcessed["error_code"] = ""
+	componentsToBeProcessed["error_message"] = ""
+
+	// Save result
+	s.loadFromMap(tmp)
+}

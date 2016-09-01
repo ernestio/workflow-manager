@@ -10,55 +10,13 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestSubscriberMappedMessage(t *testing.T) {
-	Convey("Given I have a valid service", t, func() {
-		setup()
-
-		p.load(natsClient)
-		body := []byte("{\"service\":\"1\"}")
-
-		Convey("When I try to get body for the mapped message", func() {
-			mm := messageManager{}
-			s, subject, err := mm.getServiceFromMessage("test.message", body)
-
-			Convey("Then I'll receive the valid body", func() {
-				So(s.Name, ShouldEqual, "hello world from subscriber!")
-				So(subject, ShouldEqual, "test.message")
-				So(err, ShouldEqual, nil)
-
-			})
-		})
-	})
-}
-
-func TestSubscriberUnMappedMessage(t *testing.T) {
-	Convey("Given I have a valid service", t, func() {
-		setup()
-
-		p.load(natsClient)
-		body := []byte("")
-
-		Convey("When I try to get body for the unmapped message", func() {
-			mm := messageManager{}
-			s, subject, err := mm.getServiceFromMessage("test.message.invalid", body)
-
-			Convey("Then I'll receive an empty body and an error", func() {
-				So(s, ShouldEqual, nil)
-				So(subject, ShouldEqual, "")
-				So(err, ShouldNotEqual, nil)
-
-			})
-		})
-	})
-}
-
 func TestRoutersCreateDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
 		setup()
 
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/routers_create_done.json")
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 		s.save()
 
 		Convey("When I try to get body for the mapped message routers.create.done", func() {
@@ -67,7 +25,8 @@ func TestRoutersCreateDone(t *testing.T) {
 
 			Convey("Then I'll receive the valid body", func() {
 				So(len(s.Routers.Items), ShouldEqual, 1)
-				So(s.Routers.Items[0].IP, ShouldEqual, "31.210.241.2")
+				router := s.Routers.Items[len(s.Routers.Items)-1]
+				So(router.IP, ShouldEqual, "31.210.241.2")
 				So(subject, ShouldEqual, "routers.create.done")
 				So(err, ShouldEqual, nil)
 
@@ -105,7 +64,7 @@ func TestNetworksCreateDone(t *testing.T) {
 
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/networks_create_done.json")
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 		s.save()
 
 		Convey("When I try to get body for the mapped message networks.create.done", func() {
@@ -113,13 +72,14 @@ func TestNetworksCreateDone(t *testing.T) {
 			s, subject, err := mm.getServiceFromMessage("networks.create.done", body)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(s.Routers.Items), ShouldEqual, 1)
-				So(s.Networks.Items[0].Name, ShouldEqual, "network_test")
-				So(s.Networks.Items[0].Range, ShouldEqual, "10.64.4.0/24")
-				So(s.Networks.Items[0].Netmask, ShouldEqual, "netmask")
-				So(s.Networks.Items[0].StartAddress, ShouldEqual, "start")
-				So(s.Networks.Items[0].EndAddress, ShouldEqual, "end")
-				So(s.Networks.Items[0].Gateway, ShouldEqual, "gateway")
+				So(len(s.Networks.Items), ShouldEqual, 1)
+				network := s.Networks.Items[len(s.Networks.Items)-1]
+				So(network.Name, ShouldEqual, "network_test")
+				So(network.Range, ShouldEqual, "10.64.4.0/24")
+				So(network.Netmask, ShouldEqual, "netmask")
+				So(network.StartAddress, ShouldEqual, "start")
+				So(network.EndAddress, ShouldEqual, "end")
+				So(network.Gateway, ShouldEqual, "gateway")
 				So(subject, ShouldEqual, "networks.create.done")
 				So(err, ShouldEqual, nil)
 
@@ -134,7 +94,7 @@ func TestNetworksDeleteDone(t *testing.T) {
 
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/networks_delete_done.json")
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 		s.save()
 
 		Convey("When I try to get body for the mapped message networks.delete.done", func() {
@@ -157,7 +117,7 @@ func TestInstancesCreateDone(t *testing.T) {
 
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/instances_create_done.json")
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 		s.save()
 
 		Convey("When I try to get body for the mapped message instances.create.done", func() {
@@ -168,7 +128,11 @@ func TestInstancesCreateDone(t *testing.T) {
 				So(len(s.Instances.Items), ShouldEqual, 2)
 				So(subject, ShouldEqual, "instances.create.done")
 				So(err, ShouldEqual, nil)
-				So(s.Instances.Items[0].Status, ShouldEqual, "completed")
+				lastInstance := s.Instances.Items[0]
+				So(lastInstance.Status, ShouldEqual, "completed")
+				So(lastInstance.Name, ShouldEqual, "test_instance_1")
+				So(lastInstance.RAM, ShouldEqual, 1024)
+				So(lastInstance.IP, ShouldEqual, "10.64.4.101")
 			})
 		})
 	})
@@ -180,7 +144,7 @@ func TestInstancesUpdateDone(t *testing.T) {
 
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/instances_create_done.json")
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 		s.save()
 
 		Convey("When I try to get body for the mapped message instances.create.done", func() {
@@ -227,7 +191,7 @@ func TestFirewallsUpdateDone(t *testing.T) {
 
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/firewalls_create_done.json")
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 		s.save()
 
 		Convey("When I try to get body for the mapped message firewalls.update.done", func() {
@@ -273,7 +237,7 @@ func TestNatUpdateDone(t *testing.T) {
 
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/nats_create_done.json")
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 		s.save()
 
 		Convey("When I try to get body for the mapped message nats.create.done", func() {
@@ -296,7 +260,7 @@ func TestBootstrapsCreateDone(t *testing.T) {
 
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/executions_create_done.json")
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 		s.Status = "bootstrapping"
 		s.save()
 
@@ -323,7 +287,7 @@ func TestExecutionsCreateDone(t *testing.T) {
 
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/executions_create_done.json")
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 		s.Status = "running_executions"
 		s.save()
 

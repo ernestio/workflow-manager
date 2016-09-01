@@ -105,6 +105,22 @@
 				"to": "creating_firewalls",
 				"event": "firewalls.create"
 			}, {
+				"from": "instances_created",
+				"to": "deleting_instances",
+				"event": "instances.delete"
+			}, {
+				"from": "deleting_instances",
+				"to": "instances_deleted",
+				"event": "instances.delete.done"
+			}, {
+				"from": "networks_created",
+				"to": "deleting_networks",
+				"event": "networks.delete"
+			}, {
+				"from": "deleting_networks",
+				"to": "networks_deleted",
+				"event": "networks.delete.done"
+			}, {
 				"from": "networks_created",
 				"to": "creating_instances",
 				"event": "instances.create"
@@ -187,12 +203,6 @@
       }]
     },
     "firewalls": {
-      "status": "",
-      "started": "",
-      "finished": "",
-      "items": []
-    },
-    "firewalls_to_create": {
       "status": "",
       "started": "",
       "finished": "",

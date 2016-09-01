@@ -6,8 +6,8 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -24,38 +24,94 @@ import (
 type subscriber struct {
 }
 
-// This method is mapping received messages to internal methods
-func (sub *subscriber) MethodName(subject string) (string, error) {
-	m := make(map[string]string)
-
-	m["test.message"] = "DummyTest"
-	m["service.create"] = "ServiceCreate"
-	m["service.delete"] = "ServiceDelete"
-	m["service.patch"] = "ServicePatch"
-	m["routers.create.done"] = "RoutersCreateDone"
-	m["routers.delete.done"] = "RoutersDeleteDone"
-	m["networks.create.done"] = "NetworksCreateDone"
-	m["networks.delete.done"] = "NetworksDeleteDone"
-	m["instances.create.done"] = "InstancesCreateDone"
-	m["instances.delete.done"] = "InstancesDeleteDone"
-	m["instances.update.done"] = "InstancesUpdateDone"
-	m["firewalls.create.done"] = "FirewallsCreateDone"
-	m["firewalls.delete.done"] = "FirewallsDeleteDone"
-	m["firewalls.update.done"] = "FirewallsUpdateDone"
-	m["nats.create.done"] = "NatsCreateDone"
-	m["nats.delete.done"] = "NatsDeleteDone"
-	m["nats.update.done"] = "NatsUpdateDone"
-	m["executions.create.done"] = "ExecutionsCreateDone"
-
-	if val, ok := m[subject]; ok {
-		return val, nil
+func (sub *subscriber) Process(s *service, subject string, body []byte) (*service, bool, string) {
+	e := errorManager{}
+	if e.isAnErrorMessage(subject) {
+		return s, true, "to_error"
 	}
-	return "", errors.New("Message not supported")
+
+	if sub.isSupportedMessage(s, subject) == false {
+		return nil, false, ""
+	}
+
+	switch subject {
+	case "service.create":
+		sub.ServiceCreate(s, subject, body)
+	case "service.delete":
+		sub.ServiceDelete(s, subject, body)
+	case "service.patch":
+		sub.ServicePatch(s, subject, body)
+	case "executions.create.done":
+		sub.ExecutionsCreateDone(s, subject, body)
+	default:
+		parts := strings.Split(subject, ".")
+		if len(parts) != 3 || parts[0] == "service" {
+			log.Println("Message not supported : " + subject)
+			return s, false, ""
+		}
+		switch parts[1] {
+		case "create":
+			sub.GenericCreation(s, subject, body)
+		case "update":
+			sub.GenericModification(s, subject, body)
+		case "delete":
+			sub.GenericDeletion(s, subject, body)
+		default:
+			log.Println("Message not supported")
+			return s, false, ""
+		}
+	}
+
+	return s, true, ""
 }
 
-// This method is here just for testing / educational purposes
-func (sub *subscriber) DummyTest(s *service, subject string, body []byte) *service {
-	s.Name = "hello world from subscriber!"
+func (sub *subscriber) isSupportedMessage(s *service, subject string) bool {
+	valid := s.Workflow.transitions()
+	for _, v := range valid {
+		if v == subject {
+			return true
+		}
+	}
+	if subject == "service.delete" {
+		return true
+	}
+
+	return false
+}
+
+func (sub *subscriber) getInputList(body []byte) GenericComponentMsg {
+	input := GenericComponentMsg{}
+	err := json.Unmarshal(body, &input)
+	if err != nil {
+		log.Panic(err.Error())
+	}
+
+	return input
+}
+
+// GenericCreation : Will process generic messages
+func (sub *subscriber) GenericCreation(s *service, subject string, body []byte) *service {
+	parts := strings.Split(subject, ".")
+	input := sub.getInputList(body)
+	s.transferCreated(parts[0], input)
+
+	return s
+}
+
+// GenericModification : Will process generic messages
+func (sub *subscriber) GenericModification(s *service, subject string, body []byte) *service {
+	parts := strings.Split(subject, ".")
+	input := sub.getInputList(body)
+	s.transferUpdated(parts[0], input)
+
+	return s
+}
+
+// GenericDeletion : Will process generic messages
+func (sub *subscriber) GenericDeletion(s *service, subject string, body []byte) *service {
+	parts := strings.Split(subject, ".")
+	input := sub.getInputList(body)
+	s.transferDeleted(parts[0], input)
 
 	return s
 }
@@ -109,331 +165,6 @@ func (sub *subscriber) ServicePatch(s *service, subject string, body []byte) *se
 		return nil
 	}
 	s.Status = ""
-
-	return s
-}
-
-// A routers.create.done event is emmited when all routers have
-// been created, so in this method we will be processing this
-// message and storing the routers data
-func (sub *subscriber) RoutersCreateDone(s *service, subject string, body []byte) *service {
-	m := RoutersCreate{}
-	if err := json.Unmarshal(body, &m); err != nil {
-		log.Println(err)
-		return nil
-	}
-
-	messages := []MonitorMessage{}
-	for _, mr := range m.Routers {
-		sw := false
-		for i, er := range s.Routers.Items {
-			if er.Name == mr.Name {
-				s.Routers.Items[i] = mr
-				sw = true
-			}
-		}
-		if sw == false {
-			s.Routers.Items = append(s.Routers.Items, mr)
-		}
-		messages = append(messages, MonitorMessage{Body: "\t" + mr.IP, Level: ""})
-		if s.Endpoint == "" {
-			s.Endpoint = mr.IP
-		}
-		if s.ServiceIP == "" {
-			s.ServiceIP = mr.IP
-		}
-	}
-	s.RoutersToCreate.Status = m.Status
-	s.RoutersToCreate.ErrorCode = m.ErrorCode
-	s.RoutersToCreate.ErrorMessage = m.ErrorMessage
-	s.RoutersToCreate.Items = []router{}
-
-	messages = append(messages, MonitorMessage{Body: "Routers successfully created", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
-
-	return s
-}
-
-// A networks.create.done event is emmited when all networks have
-// been created, so in this method we will be processing this
-// message and storing the networks data
-func (sub *subscriber) NetworksCreateDone(s *service, subject string, body []byte) *service {
-	m := NetworksCreate{}
-	if err := json.Unmarshal(body, &m); err != nil {
-		return nil
-	}
-
-	for _, mr := range m.Networks {
-		sw := false
-		for i, er := range s.Networks.Items {
-			if er.Name == mr.Name {
-				s.Networks.Items[i] = mr
-				sw = true
-			}
-		}
-		if sw == false {
-			s.Networks.Items = append(s.Networks.Items, mr)
-		}
-	}
-
-	s.NetworksToCreate.Status = m.Status
-	s.NetworksToCreate.ErrorCode = m.ErrorCode
-	s.NetworksToCreate.ErrorMessage = m.ErrorMessage
-	s.NetworksToCreate.Items = []network{}
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "Networks successfully created", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
-
-	return s
-}
-
-// A routers.delete.done event is emmited when all networks have
-// been deleted, so in this method we will be processing this
-// message and deleting the networks data
-func (sub *subscriber) RoutersDeleteDone(s *service, subject string, body []byte) *service {
-	s.RoutersToDelete.Items = make([]router, 0)
-	s.Routers.Items = make([]router, 0)
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "Routers deleted", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
-
-	return s
-}
-
-// A networks.delete.done event is emmited when all networks have
-// been deleted, so in this method we will be processing this
-// message and deleting the networks data
-func (sub *subscriber) NetworksDeleteDone(s *service, subject string, body []byte) *service {
-	s.NetworksToDelete.Items = make([]network, 0)
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "Networks deleted", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
-
-	return s
-}
-
-// A instances.create.done event is emmited when all instances have
-// been created, so in this method we will be processing this
-// message and storing the instances data
-func (sub *subscriber) InstancesCreateDone(s *service, subject string, body []byte) *service {
-	m := InstancesCreate{}
-	if err := json.Unmarshal(body, &m); err != nil {
-		log.Println(err.Error())
-		return nil
-	}
-
-	for _, mr := range m.Instances {
-		sw := false
-		for i, er := range s.Instances.Items {
-			if er.Name == mr.Name {
-				s.Instances.Items[i] = mr
-				sw = true
-			}
-		}
-		if sw == false {
-			s.Instances.Items = append(s.Instances.Items, mr)
-		}
-	}
-
-	s.InstancesToCreate.Status = m.Status
-	s.InstancesToCreate.ErrorCode = m.ErrorCode
-	s.InstancesToCreate.ErrorMessage = m.ErrorMessage
-	s.InstancesToCreate.Items = []instance{}
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "Instances successfully created", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
-
-	return s
-}
-
-func (sub *subscriber) InstancesUpdateDone(s *service, subject string, body []byte) *service {
-	s.InstancesToUpdate.Items = make([]instance, 0)
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "Instances successfully updated", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
-
-	return s
-}
-
-func (sub *subscriber) InstancesDeleteDone(s *service, subject string, body []byte) *service {
-	s.InstancesToDelete.Items = make([]instance, 0)
-
-	var instances []instance
-	for i, instance := range s.Instances.Items {
-		deleted := false
-		for _, d := range s.InstancesToDelete.Items {
-			if instance.Name == d.Name {
-				deleted = true
-				s.Instances.Items[i].Status = d.Status
-			}
-		}
-		if deleted == false {
-			instances = append(instances, instance)
-		}
-	}
-	s.Instances.Items = instances
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "Instances deleted", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
-
-	return s
-}
-
-// A firewalls.create.done event is emmited when all firewalls have
-// been created, so in this method we will be processing this
-// message and storing the firewalls data
-func (sub *subscriber) FirewallsCreateDone(s *service, subject string, body []byte) *service {
-	m := FirewallsCreate{}
-	if err := json.Unmarshal(body, &m); err != nil {
-		log.Println(err)
-		return nil
-	}
-
-	for _, mr := range m.Firewalls {
-		sw := false
-		for i, er := range s.Firewalls.Items {
-			if er.Name == mr.Name {
-				s.Firewalls.Items[i] = mr
-				sw = true
-			}
-		}
-		if sw == false {
-			s.Firewalls.Items = append(s.Firewalls.Items, mr)
-		}
-	}
-
-	s.FirewallsToCreate.Status = m.Status
-	s.FirewallsToCreate.ErrorCode = m.ErrorCode
-	s.FirewallsToCreate.ErrorMessage = m.ErrorMessage
-	s.FirewallsToCreate.Items = []firewall{}
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "Firewalls Created", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
-
-	return s
-}
-
-// A firewalls.update.done event is emmited when all firewalls have
-// been created, so in this method we will be processing this
-// message and storing the firewalls data
-func (sub *subscriber) FirewallsUpdateDone(s *service, subject string, body []byte) *service {
-	m := FirewallsCreate{}
-	if err := json.Unmarshal(body, &m); err != nil {
-		log.Println(err)
-		return nil
-	}
-
-	for i, sr := range s.Firewalls.Items {
-		for _, mr := range m.Firewalls {
-			if sr.Name == mr.Name {
-				s.Firewalls.Items[i].Status = mr.Status
-			}
-		}
-	}
-	s.Firewalls.Status = m.Status
-	s.Firewalls.ErrorCode = m.ErrorCode
-	s.Firewalls.ErrorMessage = m.ErrorMessage
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "Firewalls Updated", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
-
-	return s
-}
-
-// A firewalls.delete.done event is emmited when all firewalls have
-// been deleted, so in this method we will be processing this
-// message and storing the firewalls data
-func (sub *subscriber) FirewallsDeleteDone(s *service, subject string, body []byte) *service {
-	s.FirewallsToDelete.Items = make([]firewall, 0)
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "Firewalls Deleted", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
-
-	return s
-}
-
-// A nats.create.done event is emmited when all nats have
-// been created, so in this method we will be processing this
-// message and storing the nats data
-func (sub *subscriber) NatsCreateDone(s *service, subject string, body []byte) *service {
-	m := NatsCreate{}
-	if err := json.Unmarshal(body, &m); err != nil {
-		log.Println(err)
-		return nil
-	}
-
-	for _, mr := range m.Nats {
-		sw := false
-		for i, er := range s.Nats.Items {
-			if er.Name == mr.Name {
-				s.Nats.Items[i] = mr
-				sw = true
-			}
-		}
-		if sw == false {
-			s.Nats.Items = append(s.Nats.Items, mr)
-		}
-	}
-
-	s.NatsToCreate.Status = m.Status
-	s.NatsToCreate.ErrorCode = m.ErrorCode
-	s.NatsToCreate.ErrorMessage = m.ErrorMessage
-	s.NatsToCreate.Items = []nat{}
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "Nats Created", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
-
-	return s
-}
-
-// A nats.update.done event is emmited when all nats have
-// been created, so in this method we will be processing this
-// message and storing the nats data
-func (sub *subscriber) NatsUpdateDone(s *service, subject string, body []byte) *service {
-	m := NatsCreate{}
-	if err := json.Unmarshal(body, &m); err != nil {
-		log.Println(err)
-		return nil
-	}
-
-	for i, sr := range s.Nats.Items {
-		for _, mr := range m.Nats {
-			if sr.Name == mr.Name {
-				s.Nats.Items[i].Status = mr.Status
-			}
-		}
-	}
-
-	s.Nats.Status = m.Status
-	s.Nats.ErrorCode = m.ErrorCode
-	s.Nats.ErrorMessage = m.ErrorMessage
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "Nats Updated", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
-
-	return s
-}
-
-// A nats.delete.done event is emmited when all nats have
-// been deleted, so in this method we will be processing this
-// message and storing the nats data
-func (sub *subscriber) NatsDeleteDone(s *service, subject string, body []byte) *service {
-	s.NatsToDelete.Items = make([]nat, 0)
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "Nats Deleted", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
 
 	return s
 }
