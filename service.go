@@ -105,6 +105,7 @@ type instance struct {
 	Catalog             string         `json:"reference_catalog"`
 	Image               string         `json:"reference_image"`
 	Disks               []instanceDisk `json:"disks"`
+	PublicIP            string         `json:"public_ip"`
 	InstanceAWSID       string         `json:"instance_aws_id"`
 	RouterName          string         `json:"router_name"`
 	RouterType          string         `json:"router_type"`
@@ -120,6 +121,7 @@ type instance struct {
 	NetworkName         string         `json:"network_name"`
 	NetworkAWSID        string         `json:"network_aws_id"`
 	KeyPair             string         `json:"key_pair"`
+	AssignElasticIP     bool           `json:"assign_elastic_ip"`
 	SecurityGroups      []string       `json:"security_groups"`
 	SecurityGroupAWSIDs []string       `json:"security_group_aws_ids"`
 	VCloudURL           string         `json:"vcloud_url"`
