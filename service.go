@@ -119,6 +119,7 @@ type instance struct {
 	DatacenterToken     string         `json:"datacenter_token"`
 	DatacenterSecret    string         `json:"datacenter_secret"`
 	NetworkName         string         `json:"network_name"`
+	NetworkIsPublic     bool           `json:"network_is_public"`
 	NetworkAWSID        string         `json:"network_aws_id"`
 	KeyPair             string         `json:"key_pair"`
 	AssignElasticIP     bool           `json:"assign_elastic_ip"`
@@ -187,6 +188,7 @@ type network struct {
 	StartAddress       string   `json:"start_address"`
 	EndAddress         string   `json:"end_address"`
 	Gateway            string   `json:"gateway"`
+	IsPublic           bool     `json:"is_public"`
 	RouterName         string   `json:"router_name"`
 	RouterType         string   `json:"router_type"`
 	RouterIP           string   `json:"router_ip"`

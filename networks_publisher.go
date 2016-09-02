@@ -60,6 +60,7 @@ func buildNetworksList(s *service, list []network, messages []MonitorMessage) (N
 		m.Networks[i].DatacenterToken = d.Token
 		m.Networks[i].DatacenterSecret = d.Secret
 		m.Networks[i].NetworkSubnet = n.NetworkSubnet
+		m.Networks[i].IsPublic = n.IsPublic
 		m.Networks[i].NetworkAWSID = n.NetworkAWSID
 		m.Networks[i].VCloudURL = d.VCloudURL
 	}
