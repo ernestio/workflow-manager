@@ -6,6 +6,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type errorManager struct{}
@@ -98,22 +99,19 @@ func (em *errorManager) markRoutersDeletionAsFailed(s *service, body []byte) *se
 		return nil
 	}
 
-	var errored []router
-	for i, sr := range s.RoutersToDelete.Items {
-		for _, mr := range m.Routers {
-			if sr.Name == mr.Name {
-				s.RoutersToDelete.Items[i].Status = mr.Status
-				if mr.Status == "errored" {
-					errored = append(errored, s.Routers.Items[i])
-					msg := "Router " + mr.Name + " deletion failed with: \n" + mr.ErrorMessage
-					em.sendErrors(s.Channel(), msg)
-				}
-			}
+	s.RoutersToDelete.Items = m.Routers
+
+	for i := len(s.RoutersToDelete.Items) - 1; i >= 0; i-- {
+		router := s.RoutersToDelete.Items[i]
+		if router.Status == "completed" {
+			s.RoutersToDelete.Items = append(s.RoutersToDelete.Items[:i], s.RoutersToDelete.Items[i+1:]...)
+		}
+
+		if router.Status == "errored" {
+			msg := fmt.Sprintf("Router %s deletion failed with: \n %s", router.Name, router.ErrorMessage)
+			em.sendErrors(s.Channel(), msg)
 		}
 	}
-
-	s.Routers.Items = errored
-	s.RoutersToDelete.Items = errored
 
 	return s
 }
@@ -159,21 +157,19 @@ func (em *errorManager) markNetworksDeletionAsErrored(s *service, body []byte) *
 		return nil
 	}
 
-	var errored []network
-	for i, sr := range s.NetworksToDelete.Items {
-		for _, mr := range m.Networks {
-			if sr.Name == mr.Name {
-				s.NetworksToDelete.Items[i].Status = mr.Status
-				if mr.Status == "errored" {
-					errored = append(errored, s.Networks.Items[i])
-					msg := "Network " + mr.Name + " deletion failed with: \n" + mr.ErrorMessage
-					em.sendErrors(s.Channel(), msg)
-				}
-			}
+	s.NetworksToDelete.Items = m.Networks
+
+	for i := len(s.NetworksToDelete.Items) - 1; i >= 0; i-- {
+		network := s.NetworksToDelete.Items[i]
+		if network.Status == "completed" {
+			s.NetworksToDelete.Items = append(s.NetworksToDelete.Items[:i], s.NetworksToDelete.Items[i+1:]...)
+		}
+
+		if network.Status == "errored" {
+			msg := fmt.Sprintf("Network %s deletion failed with: \n %s", network.Name, network.ErrorMessage)
+			em.sendErrors(s.Channel(), msg)
 		}
 	}
-	s.NetworksToDelete.Items = errored
-	s.Networks.Items = errored
 
 	return s
 }
@@ -240,22 +236,19 @@ func (em *errorManager) markInstancesDeletionAsErrored(s *service, body []byte) 
 		return nil
 	}
 
-	errored := make([]instance, 0)
-	for i, sr := range s.InstancesToDelete.Items {
-		for _, mr := range m.Instances {
-			if sr.Name == mr.Name {
-				s.InstancesToDelete.Items[i].Status = mr.Status
-				if mr.Status == "errored" {
-					errored = append(errored, s.Instances.Items[i])
-					msg := "Instance " + mr.Name + " removal failed with: \n" + mr.ErrorMessage
-					em.sendErrors(s.Channel(), msg)
-				}
-			}
+	s.InstancesToDelete.Items = m.Instances
+
+	for i := len(s.InstancesToDelete.Items) - 1; i >= 0; i-- {
+		instance := s.InstancesToDelete.Items[i]
+		if instance.Status == "completed" {
+			s.InstancesToDelete.Items = append(s.InstancesToDelete.Items[:i], s.InstancesToDelete.Items[i+1:]...)
+		}
+
+		if instance.Status == "errored" {
+			msg := fmt.Sprintf("Instance %s deletion failed with: \n %s", instance.Name, instance.ErrorMessage)
+			em.sendErrors(s.Channel(), msg)
 		}
 	}
-
-	s.InstancesToDelete.Items = errored
-	s.Instances.Items = errored
 
 	return s
 }
@@ -287,15 +280,17 @@ func (em *errorManager) markFirewallsDeletionAsErrored(s *service, body []byte) 
 		return nil
 	}
 
-	for i, sr := range s.FirewallsToDelete.Items {
-		for _, mr := range m.Firewalls {
-			if sr.Name == mr.Name {
-				s.FirewallsToDelete.Items[i].Status = mr.Status
-				if mr.Status == "errored" {
-					msg := "Firewall " + mr.Name + " creation failed with: \n" + mr.ErrorMessage
-					em.sendErrors(s.Channel(), msg)
-				}
-			}
+	s.FirewallsToDelete.Items = m.Firewalls
+
+	for i := len(s.FirewallsToDelete.Items) - 1; i >= 0; i-- {
+		firewall := s.FirewallsToDelete.Items[i]
+		if firewall.Status == "completed" {
+			s.FirewallsToDelete.Items = append(s.FirewallsToDelete.Items[:i], s.FirewallsToDelete.Items[i+1:]...)
+		}
+
+		if firewall.Status == "errored" {
+			msg := fmt.Sprintf("Firewall %s deletion failed with: \n %s", firewall.Name, firewall.ErrorMessage)
+			em.sendErrors(s.Channel(), msg)
 		}
 	}
 
@@ -371,15 +366,17 @@ func (em *errorManager) markNatsDeleteAsErrored(s *service, body []byte) *servic
 		return nil
 	}
 
-	for i, sr := range s.NatsToDelete.Items {
-		for _, mr := range m.Nats {
-			if sr.Name == mr.Name {
-				s.NatsToDelete.Items[i].Status = mr.Status
-				if mr.Status == "errored" {
-					msg := "Nats " + mr.Name + " modification failed with: \n" + mr.ErrorMessage
-					em.sendErrors(s.Channel(), msg)
-				}
-			}
+	s.NatsToDelete.Items = m.Nats
+
+	for i := len(s.NatsToDelete.Items) - 1; i >= 0; i-- {
+		nat := s.NatsToDelete.Items[i]
+		if nat.Status == "completed" {
+			s.NatsToDelete.Items = append(s.NatsToDelete.Items[:i], s.NatsToDelete.Items[i+1:]...)
+		}
+
+		if nat.Status == "errored" {
+			msg := fmt.Sprintf("Nat %s deletion failed with: \n %s", nat.Name, nat.ErrorMessage)
+			em.sendErrors(s.Channel(), msg)
 		}
 	}
 
