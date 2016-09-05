@@ -46,7 +46,7 @@ func buildNatsList(s *service, inputList []nat) NatsCreate {
 		var endpoint string
 
 		r = s.routerByName(n.RouterName)
-		net := s.networkByName(n.NetworkName)
+		pnet := s.networkByName(n.PublicNetwork)
 
 		if s.ServiceIP != "" {
 			endpoint = s.ServiceIP
@@ -57,6 +57,8 @@ func buildNatsList(s *service, inputList []nat) NatsCreate {
 		m.Nats[i] = nat{
 			Service:            s.ID,
 			Name:               n.Name,
+			PublicNetwork:      n.PublicNetwork,
+			RoutedNetworks:     n.RoutedNetworks,
 			ClientName:         s.ClientName,
 			DatacenterName:     d.Name,
 			DatacenterPassword: d.Password,
@@ -77,8 +79,15 @@ func buildNatsList(s *service, inputList []nat) NatsCreate {
 			m.Nats[i].NatType = d.Type
 		}
 
-		if net != nil {
-			m.Nats[i].NetworkAWSID = net.NetworkAWSID
+		if pnet != nil {
+			m.Nats[i].PublicNetworkAWSID = pnet.NetworkAWSID
+		}
+
+		for _, nw := range n.RoutedNetworks {
+			net := s.networkByName(nw)
+			if net != nil {
+				m.Nats[i].RoutedNetworkAWSIDs = append(m.Nats[i].RoutedNetworkAWSIDs, net.NetworkAWSID)
+			}
 		}
 
 		m.Nats[i].Status = n.Status

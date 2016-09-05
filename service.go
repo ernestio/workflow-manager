@@ -157,7 +157,10 @@ type nat struct {
 	Rules                  []natRule `json:"rules"`
 	NatType                string    `json:"nat_type"`
 	NetworkName            string    `json:"network_name"`
-	NetworkAWSID           string    `json:"network_aws_id"`
+	PublicNetwork          string    `json:"public_network"`
+	RoutedNetworks         []string  `json:"routed_networks"`
+	RoutedNetworkAWSIDs    []string  `json:"routed_networks_aws_ids"`
+	PublicNetworkAWSID     string    `json:"public_network_aws_id"`
 	NatGatewayAWSID        string    `json:"nat_gateway_aws_id"`
 	NatGatewayAllocationID string    `json:"nat_gateway_allocation_id"`
 	NatGatewayAllocationIP string    `json:"nat_gateway_allocation_ip"`
