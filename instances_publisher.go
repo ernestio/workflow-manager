@@ -80,6 +80,7 @@ func buildInstancesList(s *service, list []instance, messages []MonitorMessage, 
 
 		if n != nil {
 			m.Instances[i].NetworkAWSID = n.NetworkAWSID
+			m.Instances[i].NetworkIsPublic = n.IsPublic
 		}
 
 		if len(m.Instances[i].SecurityGroups) > 0 {
