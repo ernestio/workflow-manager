@@ -4,8 +4,8 @@ Workflow Manager is the core of ernest, it is responsible to manage all events o
 
 ## Build status
 
-* master:  [![CircleCI](https://circleci.com/gh/ErnestIO/workflow-manager/tree/master.svg?style=svg)](https://circleci.com/gh/ErnestIO/workflow-manager/tree/master)
-* develop: [![CircleCI](https://circleci.com/gh/ErnestIO/workflow-manager/tree/develop.svg?style=svg)](https://circleci.com/gh/ErnestIO/workflow-manager/tree/develop)
+* master:  [![CircleCI](https://circleci.com/gh/ernestio/workflow-manager/tree/master.svg?style=svg)](https://circleci.com/gh/ernestio/workflow-manager/tree/master)
+* develop: [![CircleCI](https://circleci.com/gh/ernestio/workflow-manager/tree/develop.svg?style=svg)](https://circleci.com/gh/ernestio/workflow-manager/tree/develop)
 
 ## Code Example
 
