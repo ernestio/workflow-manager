@@ -22,35 +22,65 @@ import (
 type publisher struct {
 }
 
-// This method is mapping messages to be sent to internal methods
-func (p *publisher) MethodName(subject string) (string, error) {
-	m := make(map[string]string)
-
-	m["test.message"] = "DummyTest"
-	m["routers.create"] = "CreateRouters"
-	m["routers.delete"] = "DeleteRouters"
-	m["service.create.error"] = "ServiceCreateError"
-	m["service.create.done"] = "ServiceCreateDone"
-	m["service.delete.error"] = "ServicesDeleteError"
-	m["service.delete.done"] = "ServiceDeleteDone"
-	m["networks.create"] = "NetworksCreate"
-	m["networks.delete"] = "NetworksDelete"
-	m["instances.create"] = "InstancesCreate"
-	m["instances.delete"] = "InstancesDelete"
-	m["instances.update"] = "InstancesUpdate"
-	m["nats.create"] = "NatsCreate"
-	m["nats.delete"] = "NatsDelete"
-	m["nats.update"] = "NatsUpdate"
-	m["firewalls.create"] = "FirewallsCreate"
-	m["firewalls.delete"] = "FirewallsDelete"
-	m["firewalls.update"] = "FirewallsUpdate"
-	m["executions.create"] = "ExecutionsCreate"
-
-	if val, ok := m[subject]; ok {
-		return val, nil
+func (p *publisher) Process(s *service, subject string) (result string, err error) {
+	if p.isSupportedMessage(s, subject) == false {
+		return result, errors.New("Message not supported")
+	}
+	switch subject {
+	case "test.message":
+		result = p.DummyTest(s)
+	case "routers.create":
+		result = p.CreateRouters(s)
+	case "routers.delete":
+		result = p.DeleteRouters(s)
+	case "service.create.error":
+		result = p.DeleteRouters(s)
+	case "service.create.done":
+		result = p.ServiceCreateDone(s)
+	case "service.delete.error":
+		result = p.ServicesDeleteError(s)
+	case "service.delete.done":
+		result = p.ServiceDeleteDone(s)
+	case "networks.create":
+		result = p.NetworksCreate(s)
+	case "networks.delete":
+		result = p.NetworksDelete(s)
+	case "instances.create":
+		result = p.InstancesCreate(s)
+	case "instances.delete":
+		result = p.InstancesDelete(s)
+	case "instances.update":
+		result = p.InstancesUpdate(s)
+	case "nats.create":
+		result = p.NatsCreate(s)
+	case "nats.delete":
+		result = p.NatsDelete(s)
+	case "nats.update":
+		result = p.NatsUpdate(s)
+	case "firewalls.create":
+		result = p.FirewallsCreate(s)
+	case "firewalls.delete":
+		result = p.FirewallsDelete(s)
+	case "firewalls.update":
+		result = p.FirewallsUpdate(s)
+	case "executions.create":
+		result = p.ExecutionsCreate(s)
+	default:
+		return result, errors.New("Message not supported")
 	}
 
-	return "", errors.New("Message not supported")
+	return result, nil
+}
+
+func (p *publisher) isSupportedMessage(s *service, subject string) bool {
+	valid := s.Workflow.transitions()
+	for _, v := range valid {
+		if v == subject {
+			return true
+		}
+	}
+
+	return false
 }
 
 // This method is here just for testing / educational purposes

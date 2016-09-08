@@ -7,8 +7,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"log"
-	"reflect"
 	"strings"
 )
 
@@ -21,16 +19,8 @@ type messageManager struct {
 // message to be published
 func (mm *messageManager) preparePublishMessage(subject string, s *service) (string, error) {
 	var p publisher
-	methodName, err := p.MethodName(subject)
-	if err != nil {
-		log.Printf("Message not supported: %s", subject)
-		return "", errors.New("Message not supported")
-	}
 
-	inputs := make([]reflect.Value, 1)
-	inputs[0] = reflect.ValueOf(s)
-	outputs := reflect.ValueOf(&p).MethodByName(methodName).Call(inputs)
-	return outputs[0].String(), nil
+	return p.Process(s, subject)
 }
 
 // It gets a message subject and the body received and calls the necessary
