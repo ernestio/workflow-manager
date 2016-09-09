@@ -60,7 +60,7 @@ func (mm *messageManager) validateSubject(subject string) error {
 	if len(parts) < 2 {
 		return errors.New("Message not supported")
 	}
-	if parts[1] != "create" && parts[1] != "update" && parts[1] != "delete" {
+	if parts[1] != "create" && parts[1] != "update" && parts[1] != "delete" && parts[1] != "patch" {
 		return errors.New("Message not supported")
 	}
 	if subject == "service.create.done" || subject == "service.create.error" {

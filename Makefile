@@ -15,6 +15,7 @@ deps: dev-deps
 	go get gopkg.in/redis.v3
 	go get github.com/nats-io/nats
 	go get github.com/ernestio/ernest-config-client
+	go get github.com/tidwall/gjson
 
 dev-deps:
 	go get github.com/golang/lint/golint

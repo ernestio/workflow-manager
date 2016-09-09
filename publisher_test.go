@@ -11,26 +11,6 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestMappedMessage(t *testing.T) {
-	Convey("Given I have a valid service", t, func() {
-		setup()
-
-		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
-
-		Convey("When I try to get body for the mapped message", func() {
-			mm := messageManager{}
-			message, err := mm.preparePublishMessage("test.message", &s)
-
-			Convey("Then I'll receive the valid body", func() {
-				So(message, ShouldEqual, "hello world from publisher!")
-				So(err, ShouldEqual, nil)
-
-			})
-		})
-	})
-}
-
 func TestUnMappedMessage(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
 		setup()
@@ -88,7 +68,7 @@ func TestPublisherCreateError(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 
 		Convey("When I get the message for a services.create.error event", func() {
 			mm := messageManager{}
@@ -149,7 +129,7 @@ func TestDeleteNetworks(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 
 		Convey("When I get the message for a networks.delete event", func() {
 			mm := messageManager{}
@@ -376,7 +356,7 @@ func TestCreateBootstraps(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 		s.Status = "nats_created"
 		s.save()
 
@@ -459,7 +439,7 @@ func TestCreateExecutions(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 		s.Status = "bootstrap_ran"
 		s.Bootstraps.Finished = "yes"
 		s.save()
@@ -505,7 +485,7 @@ func TestServiceDone(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 		s.Status = "executions_ran"
 		s.save()
 

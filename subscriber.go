@@ -75,6 +75,9 @@ func (sub *subscriber) isSupportedMessage(s *service, subject string) bool {
 	if subject == "service.delete" {
 		return true
 	}
+	if subject == "service.patch" {
+		return true
+	}
 
 	return false
 }

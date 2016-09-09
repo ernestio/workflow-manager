@@ -8,7 +8,10 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"strings"
 	"time"
+
+	"github.com/tidwall/gjson"
 )
 
 // When an event has happened and a a new message is about to be sent,
@@ -27,20 +30,18 @@ func (p *publisher) Process(s *service, subject string) (result string, err erro
 		return result, errors.New("Message not supported")
 	}
 	switch subject {
-	case "test.message":
-		result = p.DummyTest(s)
-	case "routers.create":
-		result = p.CreateRouters(s)
-	case "routers.delete":
-		result = p.DeleteRouters(s)
 	case "service.create.error":
-		result = p.DeleteRouters(s)
+		result = p.ServiceCreateError(s)
 	case "service.create.done":
 		result = p.ServiceCreateDone(s)
 	case "service.delete.error":
 		result = p.ServicesDeleteError(s)
 	case "service.delete.done":
 		result = p.ServiceDeleteDone(s)
+	case "routers.create":
+		result = p.CreateRouters(s)
+	case "routers.delete":
+		result = p.DeleteRouters(s)
 	case "networks.create":
 		result = p.NetworksCreate(s)
 	case "networks.delete":
@@ -66,10 +67,58 @@ func (p *publisher) Process(s *service, subject string) (result string, err erro
 	case "executions.create":
 		result = p.ExecutionsCreate(s)
 	default:
-		return result, errors.New("Message not supported")
+		return p.GenericHandler(s, subject)
 	}
 
 	return result, nil
+}
+
+func (p *publisher) GenericHandler(s *service, subject string) (string, error) {
+	output := GenericComponentMsg{
+		Service: s.ID,
+		Status:  "processing",
+	}
+
+	key := strings.Replace(subject, ".", "_to_", 1)
+
+	mapped := s.asMap()
+	m, ok := mapped[key]
+	if ok == false {
+		return "", errors.New("Component " + key + " not present")
+	}
+	list := m.(map[string]interface{})
+	items := list["items"].([]interface{})
+	items = p.Vitamine(items, s)
+	output.Components = items
+
+	marshalled, err := json.Marshal(output)
+	if err != nil {
+		log.Println(err)
+		return "", errors.New(err.Error())
+	}
+
+	return string(marshalled), nil
+}
+
+func (p *publisher) Vitamine(items []interface{}, s *service) []interface{} {
+	body, err := json.Marshal(s)
+	if err != nil {
+		log.Println("Can't marshal current service")
+		return items
+	}
+	json := string(body)
+
+	for _, v := range items {
+		item := v.(map[string]interface{})
+		for field, selector := range item {
+			value := selector.(string)
+			if value[0:2] == "$(" && value[len(value)-1:len(value)] == ")" {
+				item[field] = gjson.Get(json, value[2:len(value)-1]).String()
+			}
+		}
+	}
+
+	return items
 }
 
 func (p *publisher) isSupportedMessage(s *service, subject string) bool {
@@ -81,11 +130,6 @@ func (p *publisher) isSupportedMessage(s *service, subject string) bool {
 	}
 
 	return false
-}
-
-// This method is here just for testing / educational purposes
-func (p *publisher) DummyTest(s *service) string {
-	return "hello world from publisher!"
 }
 
 // Prepares a message to create routers
