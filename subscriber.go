@@ -41,8 +41,6 @@ func (sub *subscriber) Process(s *service, subject string, body []byte) (*servic
 		sub.ServiceDelete(s, subject, body)
 	case "service.patch":
 		sub.ServicePatch(s, subject, body)
-	case "executions.create.done":
-		sub.ExecutionsCreateDone(s, subject, body)
 	default:
 		parts := strings.Split(subject, ".")
 		if len(parts) != 3 || parts[0] == "service" {
@@ -168,70 +166,6 @@ func (sub *subscriber) ServicePatch(s *service, subject string, body []byte) *se
 		return nil
 	}
 	s.Status = ""
-
-	return s
-}
-
-// A executions.create.done event is emmited when all bootstraps/executions have
-// been created, so in this method we will be processing this
-// message and storing the executions data
-// When all executions have been completed, service.create.done will be emitted
-func (sub *subscriber) ExecutionsCreateDone(s *service, subject string, body []byte) *service {
-	m := ExecutionsCreate{}
-	if err := json.Unmarshal(body, &m); err != nil {
-		log.Println(err)
-		return nil
-	}
-
-	if s.Status == "bootstrapping" {
-		for i, sr := range s.Bootstraps.Items {
-			s.Bootstraps.Finished = "yes"
-			for _, mr := range m.Executions {
-				if sr.Name == mr.Name {
-					s.Bootstraps.Items[i].MatchedInstances = mr.MatchedInstances
-					s.Bootstraps.Items[i].ExecutionStatus = mr.ExecutionStatus
-					s.Bootstraps.Items[i].Status = mr.Status
-					// s.Bootstraps.Items[i].Reports = mr.Reports
-				}
-			}
-		}
-		if len(s.Bootstraps.Items) > 0 {
-			messages := []MonitorMessage{}
-			messages = append(messages, MonitorMessage{Body: "Instances bootstrapped", Level: "INFO"})
-			UserOutput(s.Channel(), messages)
-		}
-	} else if s.Status == "running_executions" {
-		for _, mr := range m.Executions {
-			if sr := s.executionByName(mr.Name); sr != nil {
-				sr.Payload = mr.Payload
-				sr.Target = mr.Target
-				sr.MatchedInstances = mr.MatchedInstances
-				sr.ExecutionStatus = mr.ExecutionStatus
-				sr.Status = mr.Status
-				// s.Executions.Items[i].Reports = mr.Reports
-			} else {
-				ex := execution{
-					Type:             mr.Type,
-					Name:             mr.Name,
-					Payload:          mr.Payload,
-					Target:           mr.Target,
-					MatchedInstances: mr.MatchedInstances,
-					ExecutionStatus:  mr.ExecutionStatus,
-					Created:          mr.Created,
-				}
-				ex.Status = mr.Status
-				s.Executions.Items = append(s.Executions.Items, ex)
-			}
-		}
-		if len(s.ExecutionsToCreate.Items) > 0 {
-			messages := []MonitorMessage{}
-			messages = append(messages, MonitorMessage{Body: "Executions ran", Level: "INFO"})
-			UserOutput(s.Channel(), messages)
-		}
-
-		// Clear executions
-		s.ExecutionsToCreate.Items = []execution{}
-	}
 
 	return s
 }

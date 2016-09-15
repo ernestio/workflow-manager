@@ -66,6 +66,8 @@ func (p *publisher) Process(s *service, subject string) (result string, err erro
 		result = p.FirewallsUpdate(s)
 	case "executions.create":
 		result = p.ExecutionsCreate(s)
+	case "bootstraps.create":
+		result = p.BootstrapsCreate(s)
 	default:
 		return p.GenericHandler(s, subject)
 	}
@@ -304,11 +306,20 @@ func (p *publisher) FirewallsDelete(s *service) string {
 
 func (p *publisher) ExecutionsCreate(s *service) string {
 	m := ExecutionsCreate{}
-	if s.Bootstraps.Finished == "yes" || len(s.Bootstraps.Items) == 0 {
-		m = buildCreateExecutions(s)
-	} else {
-		m = buildCreateBootstraps(s)
+	m = buildCreateExecutions(s)
+
+	marshalled, err := json.Marshal(m)
+	if err != nil {
+		log.Println(err)
+		return ""
 	}
+
+	return string(marshalled)
+}
+
+func (p *publisher) BootstrapsCreate(s *service) string {
+	m := ExecutionsCreate{}
+	m = buildCreateBootstraps(s)
 
 	marshalled, err := json.Marshal(m)
 	if err != nil {

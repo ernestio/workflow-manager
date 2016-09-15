@@ -263,6 +263,12 @@ type service struct {
 		Started  string      `json:"started"`
 		Status   string      `json:"status"`
 	} `json:"bootstraps"`
+	BootstrapsToCreate struct {
+		Finished string      `json:"finished"`
+		Items    []execution `json:"items"`
+		Started  string      `json:"started"`
+		Status   string      `json:"status"`
+	} `json:"bootstraps_to_create"`
 	Executions struct {
 		Finished string      `json:"finished"`
 		Items    []execution `json:"items"`
