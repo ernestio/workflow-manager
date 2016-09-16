@@ -266,14 +266,13 @@ func TestBootstrapsCreateDone(t *testing.T) {
 
 		Convey("When I try to get body for the mapped message executions.create.done", func() {
 			mm := messageManager{}
-			s, subject, err := mm.getServiceFromMessage("executions.create.done", body)
-
+			s, subject, err := mm.getServiceFromMessage("bootstraps.create.done", body)
 			Convey("Then I'll receive the valid body", func() {
 				So(len(s.Bootstraps.Items), ShouldEqual, 1)
 				So(s.Bootstraps.Items[0].Reports[0].ReturnCode, ShouldEqual, 0)
-				So(s.Bootstraps.Items[0].Reports[0].Stdout, ShouldEqual, "")
+				So(s.Bootstraps.Items[0].Reports[0].Stdout, ShouldEqual, "test")
 				So(s.Bootstraps.Items[0].MatchedInstances[0], ShouldEqual, "test")
-				So(subject, ShouldEqual, "executions.create.done")
+				So(subject, ShouldEqual, "bootstraps.create.done")
 				So(err, ShouldEqual, nil)
 
 			})
@@ -298,7 +297,7 @@ func TestExecutionsCreateDone(t *testing.T) {
 			Convey("Then I'll receive the valid body", func() {
 				So(len(s.Executions.Items), ShouldEqual, 1)
 				So(s.Executions.Items[0].Reports[0].ReturnCode, ShouldEqual, 0)
-				So(s.Executions.Items[0].Reports[0].Stdout, ShouldEqual, "")
+				So(s.Executions.Items[0].Reports[0].Stdout, ShouldEqual, "test")
 				So(s.Executions.Items[0].MatchedInstances[0], ShouldEqual, "test")
 				So(subject, ShouldEqual, "executions.create.done")
 				So(err, ShouldEqual, nil)

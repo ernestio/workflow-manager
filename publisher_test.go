@@ -363,7 +363,7 @@ func TestCreateBootstraps(t *testing.T) {
 		Convey("When I get the message for a executions.create event and status nats_created", func() {
 			Convey("If a service_ip is not provided", func() {
 				mm := messageManager{}
-				body, err := mm.preparePublishMessage("executions.create", &s)
+				body, err := mm.preparePublishMessage("bootstraps.create", &s)
 				m := &ExecutionsCreate{}
 				json.Unmarshal([]byte(body), &m)
 
@@ -374,11 +374,11 @@ func TestCreateBootstraps(t *testing.T) {
 					So(len(m.Executions), ShouldEqual, 1)
 
 					e := m.Executions[0]
-					So(e.Name, ShouldEqual, s.Bootstraps.Items[0].Name)
+					So(e.Name, ShouldEqual, s.BootstrapsToCreate.Items[0].Name)
 					So(e.Type, ShouldEqual, "salt")
-					So(e.Payload, ShouldEqual, s.Bootstraps.Items[0].Payload)
-					So(e.Target, ShouldEqual, s.Bootstraps.Items[0].Target)
-					So(e.Status, ShouldEqual, s.Bootstraps.Items[0].Status)
+					So(e.Payload, ShouldEqual, s.BootstrapsToCreate.Items[0].Payload)
+					So(e.Target, ShouldEqual, s.BootstrapsToCreate.Items[0].Target)
+					So(e.Status, ShouldEqual, s.BootstrapsToCreate.Items[0].Status)
 					So(e.User, ShouldEqual, "")
 					So(e.Password, ShouldEqual, "")
 					So(e.EndPoint, ShouldEqual, s.Routers.Items[0].IP)
@@ -409,11 +409,11 @@ func TestCreateBootstraps(t *testing.T) {
 					So(len(m.Executions), ShouldEqual, 1)
 
 					e := m.Executions[0]
-					So(e.Name, ShouldEqual, s.Bootstraps.Items[0].Name)
+					So(e.Name, ShouldEqual, s.ExecutionsToCreate.Items[0].Name)
 					So(e.Type, ShouldEqual, "salt")
-					So(e.Payload, ShouldEqual, s.Bootstraps.Items[0].Payload)
-					So(e.Target, ShouldEqual, s.Bootstraps.Items[0].Target)
-					So(e.Status, ShouldEqual, s.Bootstraps.Items[0].Status)
+					So(e.Payload, ShouldEqual, s.ExecutionsToCreate.Items[0].Payload)
+					So(e.Target, ShouldEqual, s.ExecutionsToCreate.Items[0].Target)
+					So(e.Status, ShouldEqual, s.ExecutionsToCreate.Items[0].Status)
 					So(e.User, ShouldEqual, "")
 					So(e.Password, ShouldEqual, "")
 					So(e.EndPoint, ShouldEqual, "1.1.1.1")

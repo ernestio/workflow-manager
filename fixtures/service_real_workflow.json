@@ -63,20 +63,20 @@
 			}, {
 				"from": "updating_nats",
 				"to": "nats_updated",
-				"event": "nats.update"
+				"event": "nats.update.done"
 			}, {
 				"from": "nats_updated",
 				"to": "bootstrapping",
-				"event": "nats.update.done"
-			}, {
-				"from": "bootstrapping",
-				"to": "bootstrap_ran",
-				"event": "executions.create.done"
-			}, {
-				"from": "bootstrap_ran",
-				"to": "running_executions",
-				"event": "executions.create"
-			}, {
+				"event": "bootstraps.create"
+      }, {
+        "from": "bootstrapping",
+        "to": "bootstrap_ran",
+        "event": "bootstraps.create.done"
+      }, {
+        "from": "bootstrap_ran",
+        "to": "running_executions",
+        "event": "executions.create"
+      }, {
 				"from": "running_executions",
 				"to": "executions_ran",
 				"event": "executions.create.done"
@@ -329,6 +329,18 @@
           "stderr": ""
         }],
         "matched_instances": [ "" ]
+      }]
+    },
+    "bootstraps_to_create": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "type": "salt",
+        "name": "test_execution",
+        "payload": "bootstrap to create",
+        "target": "list:test",
+        "status": "completed"
       }]
     }
 }
