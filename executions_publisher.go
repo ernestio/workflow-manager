@@ -18,12 +18,12 @@ func buildCreateExecutions(s *service) ExecutionsCreate {
 
 // Creates a CreateExecutions with Bootstraps struct based on a given service
 func buildCreateBootstraps(s *service) ExecutionsCreate {
-	if len(s.Bootstraps.Items) > 0 {
+	if len(s.BootstrapsToCreate.Items) > 0 {
 		messages := []MonitorMessage{}
 		messages = append(messages, MonitorMessage{Body: "Bootstrapping", Level: "INFO"})
 		UserOutput(s.Channel(), messages)
 	}
-	res := buildBasicExecutionsCreate(s, s.Bootstraps.Items)
+	res := buildBasicExecutionsCreate(s, s.BootstrapsToCreate.Items)
 
 	return res
 }

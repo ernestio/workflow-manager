@@ -63,20 +63,20 @@
 			}, {
 				"from": "updating_nats",
 				"to": "nats_updated",
-				"event": "nats.update"
+				"event": "nats.update.done"
 			}, {
 				"from": "nats_updated",
 				"to": "bootstrapping",
-				"event": "nats.update.done"
-			}, {
-				"from": "bootstrapping",
-				"to": "bootstrap_ran",
-				"event": "executions.create.done"
-			}, {
-				"from": "bootstrap_ran",
-				"to": "running_executions",
-				"event": "executions.create"
-			}, {
+				"event": "bootstraps.create"
+      }, {
+        "from": "bootstrapping",
+        "to": "bootstrap_ran",
+        "event": "bootstraps.create.done"
+      }, {
+        "from": "bootstrap_ran",
+        "to": "running_executions",
+        "event": "executions.create"
+      }, {
 				"from": "running_executions",
 				"to": "executions_ran",
 				"event": "executions.create.done"
@@ -104,6 +104,22 @@
 				"from": "instances_updated",
 				"to": "creating_firewalls",
 				"event": "firewalls.create"
+			}, {
+				"from": "instances_created",
+				"to": "deleting_instances",
+				"event": "instances.delete"
+			}, {
+				"from": "deleting_instances",
+				"to": "instances_deleted",
+				"event": "instances.delete.done"
+			}, {
+				"from": "networks_created",
+				"to": "deleting_networks",
+				"event": "networks.delete"
+			}, {
+				"from": "deleting_networks",
+				"to": "networks_deleted",
+				"event": "networks.delete.done"
 			}, {
 				"from": "networks_created",
 				"to": "creating_instances",
@@ -187,12 +203,6 @@
       }]
     },
     "firewalls": {
-      "status": "",
-      "started": "",
-      "finished": "",
-      "items": []
-    },
-    "firewalls_to_create": {
       "status": "",
       "started": "",
       "finished": "",
@@ -319,6 +329,18 @@
           "stderr": ""
         }],
         "matched_instances": [ "" ]
+      }]
+    },
+    "bootstraps_to_create": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "type": "salt",
+        "name": "test_execution",
+        "payload": "bootstrap to create",
+        "target": "list:test",
+        "status": "completed"
       }]
     }
 }

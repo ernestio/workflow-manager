@@ -24,6 +24,16 @@ type NetworksCreate struct {
 	SequentialProcessing bool      `json:"sequential_processing"`
 }
 
+// GenericComponentCreate : Message to create instances
+type GenericComponentMsg struct {
+	Service              string        `json:"service"`
+	Components           []interface{} `json:"components"`
+	Status               string        `json:"status"`
+	ErrorCode            string        `json:"error_code"`
+	ErrorMessage         string        `json:"error_message"`
+	SequentialProcessing bool          `json:"sequential_processing"`
+}
+
 // InstancesCreate : Message to create instances
 type InstancesCreate struct {
 	Service              string     `json:"service"`

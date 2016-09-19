@@ -8,7 +8,10 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"strings"
 	"time"
+
+	"github.com/tidwall/gjson"
 )
 
 // When an event has happened and a a new message is about to be sent,
@@ -22,40 +25,113 @@ import (
 type publisher struct {
 }
 
-// This method is mapping messages to be sent to internal methods
-func (p *publisher) MethodName(subject string) (string, error) {
-	m := make(map[string]string)
-
-	m["test.message"] = "DummyTest"
-	m["routers.create"] = "CreateRouters"
-	m["routers.delete"] = "DeleteRouters"
-	m["service.create.error"] = "ServiceCreateError"
-	m["service.create.done"] = "ServiceCreateDone"
-	m["service.delete.error"] = "ServicesDeleteError"
-	m["service.delete.done"] = "ServiceDeleteDone"
-	m["networks.create"] = "NetworksCreate"
-	m["networks.delete"] = "NetworksDelete"
-	m["instances.create"] = "InstancesCreate"
-	m["instances.delete"] = "InstancesDelete"
-	m["instances.update"] = "InstancesUpdate"
-	m["nats.create"] = "NatsCreate"
-	m["nats.delete"] = "NatsDelete"
-	m["nats.update"] = "NatsUpdate"
-	m["firewalls.create"] = "FirewallsCreate"
-	m["firewalls.delete"] = "FirewallsDelete"
-	m["firewalls.update"] = "FirewallsUpdate"
-	m["executions.create"] = "ExecutionsCreate"
-
-	if val, ok := m[subject]; ok {
-		return val, nil
+func (p *publisher) Process(s *service, subject string) (result string, err error) {
+	if p.isSupportedMessage(s, subject) == false {
+		return result, errors.New("Message not supported")
+	}
+	switch subject {
+	case "service.create.error":
+		result = p.ServiceCreateError(s)
+	case "service.create.done":
+		result = p.ServiceCreateDone(s)
+	case "service.delete.error":
+		result = p.ServicesDeleteError(s)
+	case "service.delete.done":
+		result = p.ServiceDeleteDone(s)
+	case "routers.create":
+		result = p.CreateRouters(s)
+	case "routers.delete":
+		result = p.DeleteRouters(s)
+	case "networks.create":
+		result = p.NetworksCreate(s)
+	case "networks.delete":
+		result = p.NetworksDelete(s)
+	case "instances.create":
+		result = p.InstancesCreate(s)
+	case "instances.delete":
+		result = p.InstancesDelete(s)
+	case "instances.update":
+		result = p.InstancesUpdate(s)
+	case "nats.create":
+		result = p.NatsCreate(s)
+	case "nats.delete":
+		result = p.NatsDelete(s)
+	case "nats.update":
+		result = p.NatsUpdate(s)
+	case "firewalls.create":
+		result = p.FirewallsCreate(s)
+	case "firewalls.delete":
+		result = p.FirewallsDelete(s)
+	case "firewalls.update":
+		result = p.FirewallsUpdate(s)
+	case "executions.create":
+		result = p.ExecutionsCreate(s)
+	case "bootstraps.create":
+		result = p.BootstrapsCreate(s)
+	default:
+		return p.GenericHandler(s, subject)
 	}
 
-	return "", errors.New("Message not supported")
+	return result, nil
 }
 
-// This method is here just for testing / educational purposes
-func (p *publisher) DummyTest(s *service) string {
-	return "hello world from publisher!"
+func (p *publisher) GenericHandler(s *service, subject string) (string, error) {
+	output := GenericComponentMsg{
+		Service: s.ID,
+		Status:  "processing",
+	}
+
+	key := strings.Replace(subject, ".", "_to_", 1)
+
+	mapped := s.asMap()
+	m, ok := mapped[key]
+	if ok == false {
+		return "", errors.New("Component " + key + " not present")
+	}
+	list := m.(map[string]interface{})
+	items := list["items"].([]interface{})
+	items = p.Vitamine(items, s)
+	output.Components = items
+
+	marshalled, err := json.Marshal(output)
+	if err != nil {
+		log.Println(err)
+		return "", errors.New(err.Error())
+	}
+
+	return string(marshalled), nil
+}
+
+func (p *publisher) Vitamine(items []interface{}, s *service) []interface{} {
+	body, err := json.Marshal(s)
+	if err != nil {
+		log.Println("Can't marshal current service")
+		return items
+	}
+	json := string(body)
+
+	for _, v := range items {
+		item := v.(map[string]interface{})
+		for field, selector := range item {
+			value := selector.(string)
+			if value[0:2] == "$(" && value[len(value)-1:len(value)] == ")" {
+				item[field] = gjson.Get(json, value[2:len(value)-1]).String()
+			}
+		}
+	}
+
+	return items
+}
+
+func (p *publisher) isSupportedMessage(s *service, subject string) bool {
+	valid := s.Workflow.transitions()
+	for _, v := range valid {
+		if v == subject {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Prepares a message to create routers
@@ -230,11 +306,20 @@ func (p *publisher) FirewallsDelete(s *service) string {
 
 func (p *publisher) ExecutionsCreate(s *service) string {
 	m := ExecutionsCreate{}
-	if s.Bootstraps.Finished == "yes" || len(s.Bootstraps.Items) == 0 {
-		m = buildCreateExecutions(s)
-	} else {
-		m = buildCreateBootstraps(s)
+	m = buildCreateExecutions(s)
+
+	marshalled, err := json.Marshal(m)
+	if err != nil {
+		log.Println(err)
+		return ""
 	}
+
+	return string(marshalled)
+}
+
+func (p *publisher) BootstrapsCreate(s *service) string {
+	m := ExecutionsCreate{}
+	m = buildCreateBootstraps(s)
 
 	marshalled, err := json.Marshal(m)
 	if err != nil {
@@ -250,6 +335,14 @@ func (p *publisher) ServiceCreateDone(s *service) string {
 	marshalled, err := json.Marshal(s)
 	if err != nil {
 		log.Println(err)
+	}
+	if len(s.Routers.Items) > 0 {
+		if s.Endpoint == "" {
+			s.Endpoint = s.Routers.Items[0].IP
+		}
+		if s.ServiceIP == "" {
+			s.ServiceIP = s.Routers.Items[0].IP
+		}
 	}
 
 	natsClient.Request("service.set", []byte(`{"id":"`+s.ID+`","status":"done"}`), time.Second)

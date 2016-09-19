@@ -7,8 +7,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"log"
-	"reflect"
+	"strings"
 )
 
 // Message manager is a group of methods that does the magic to allow developers
@@ -20,45 +19,57 @@ type messageManager struct {
 // message to be published
 func (mm *messageManager) preparePublishMessage(subject string, s *service) (string, error) {
 	var p publisher
-	methodName, err := p.MethodName(subject)
-	if err != nil {
-		log.Printf("Message not supported: %s", subject)
-		return "", errors.New("Message not supported")
-	}
 
-	inputs := make([]reflect.Value, 1)
-	inputs[0] = reflect.ValueOf(s)
-	outputs := reflect.ValueOf(&p).MethodByName(methodName).Call(inputs)
-	return outputs[0].String(), nil
+	return p.Process(s, subject)
 }
 
 // It gets a message subject and the body received and calls the necessary
 // subscriber methods to read them into a service object
 func (mm *messageManager) getServiceFromMessage(subject string, body []byte) (*service, string, error) {
 	var sub subscriber
-	methodName, err := sub.MethodName(subject)
-	if err != nil {
-		e := errorManager{}
-		if e.isAnErrorMessage(subject) {
-			s, err := mm.getService(body)
-			if err == nil {
-				s = e.markAsFailed(s, subject, body)
-			}
-			return s, "to_error", nil
-		}
+
+	if err := mm.validateSubject(subject); err != nil {
 		return nil, "", errors.New("Message not supported")
 	}
+
 	s, err := mm.getService(body)
+	if err != nil {
+		return nil, "", errors.New("Message not supported")
+	}
 
-	inputs := make([]reflect.Value, 3)
-	inputs[0] = reflect.ValueOf(s)
-	inputs[1] = reflect.ValueOf(subject)
-	inputs[2] = reflect.ValueOf(body)
+	s, supported, status := sub.Process(s, subject, body)
 
-	outputs := reflect.ValueOf(&sub).MethodByName(methodName).Call(inputs)
-	s = outputs[0].Interface().(*service)
+	if status != "" {
+		em := errorManager{}
+		s = em.markAsFailed(s, subject, body)
+		return s, status, nil
+	}
+
+	if supported == false {
+		return nil, "", errors.New("Message not supported")
+	}
 
 	return s, subject, nil
+}
+
+func (mm *messageManager) validateSubject(subject string) error {
+	parts := strings.Split(subject, ".")
+	if len(parts) == 2 && parts[0] != "service" {
+		return errors.New("Message not supported")
+	}
+	if len(parts) < 2 {
+		return errors.New("Message not supported")
+	}
+	if parts[1] != "create" && parts[1] != "update" && parts[1] != "delete" && parts[1] != "patch" {
+		return errors.New("Message not supported")
+	}
+	if subject == "service.create.done" || subject == "service.create.error" {
+		return errors.New("Message not supported")
+	}
+
+	println("[THEORICALLY SUPPORTED] : " + subject)
+
+	return nil
 }
 
 // Creates or gets a persisted service based on the service field of the

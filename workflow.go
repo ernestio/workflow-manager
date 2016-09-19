@@ -89,3 +89,10 @@ func (w *workflow) loadWorkflow(source string) {
 		log.Panic("error:", err)
 	}
 }
+
+func (w *workflow) transitions() (transitions []string) {
+	for _, a := range w.Arcs {
+		transitions = append(transitions, a.Event)
+	}
+	return transitions
+}

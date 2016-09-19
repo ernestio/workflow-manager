@@ -11,26 +11,6 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestMappedMessage(t *testing.T) {
-	Convey("Given I have a valid service", t, func() {
-		setup()
-
-		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
-
-		Convey("When I try to get body for the mapped message", func() {
-			mm := messageManager{}
-			message, err := mm.preparePublishMessage("test.message", &s)
-
-			Convey("Then I'll receive the valid body", func() {
-				So(message, ShouldEqual, "hello world from publisher!")
-				So(err, ShouldEqual, nil)
-
-			})
-		})
-	})
-}
-
 func TestUnMappedMessage(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
 		setup()
@@ -88,7 +68,7 @@ func TestPublisherCreateError(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 
 		Convey("When I get the message for a services.create.error event", func() {
 			mm := messageManager{}
@@ -149,7 +129,7 @@ func TestDeleteNetworks(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 
 		Convey("When I get the message for a networks.delete event", func() {
 			mm := messageManager{}
@@ -376,14 +356,14 @@ func TestCreateBootstraps(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 		s.Status = "nats_created"
 		s.save()
 
 		Convey("When I get the message for a executions.create event and status nats_created", func() {
 			Convey("If a service_ip is not provided", func() {
 				mm := messageManager{}
-				body, err := mm.preparePublishMessage("executions.create", &s)
+				body, err := mm.preparePublishMessage("bootstraps.create", &s)
 				m := &ExecutionsCreate{}
 				json.Unmarshal([]byte(body), &m)
 
@@ -394,11 +374,11 @@ func TestCreateBootstraps(t *testing.T) {
 					So(len(m.Executions), ShouldEqual, 1)
 
 					e := m.Executions[0]
-					So(e.Name, ShouldEqual, s.Bootstraps.Items[0].Name)
+					So(e.Name, ShouldEqual, s.BootstrapsToCreate.Items[0].Name)
 					So(e.Type, ShouldEqual, "salt")
-					So(e.Payload, ShouldEqual, s.Bootstraps.Items[0].Payload)
-					So(e.Target, ShouldEqual, s.Bootstraps.Items[0].Target)
-					So(e.Status, ShouldEqual, s.Bootstraps.Items[0].Status)
+					So(e.Payload, ShouldEqual, s.BootstrapsToCreate.Items[0].Payload)
+					So(e.Target, ShouldEqual, s.BootstrapsToCreate.Items[0].Target)
+					So(e.Status, ShouldEqual, s.BootstrapsToCreate.Items[0].Status)
 					So(e.User, ShouldEqual, "")
 					So(e.Password, ShouldEqual, "")
 					So(e.EndPoint, ShouldEqual, s.Routers.Items[0].IP)
@@ -429,11 +409,11 @@ func TestCreateBootstraps(t *testing.T) {
 					So(len(m.Executions), ShouldEqual, 1)
 
 					e := m.Executions[0]
-					So(e.Name, ShouldEqual, s.Bootstraps.Items[0].Name)
+					So(e.Name, ShouldEqual, s.ExecutionsToCreate.Items[0].Name)
 					So(e.Type, ShouldEqual, "salt")
-					So(e.Payload, ShouldEqual, s.Bootstraps.Items[0].Payload)
-					So(e.Target, ShouldEqual, s.Bootstraps.Items[0].Target)
-					So(e.Status, ShouldEqual, s.Bootstraps.Items[0].Status)
+					So(e.Payload, ShouldEqual, s.ExecutionsToCreate.Items[0].Payload)
+					So(e.Target, ShouldEqual, s.ExecutionsToCreate.Items[0].Target)
+					So(e.Status, ShouldEqual, s.ExecutionsToCreate.Items[0].Status)
 					So(e.User, ShouldEqual, "")
 					So(e.Password, ShouldEqual, "")
 					So(e.EndPoint, ShouldEqual, "1.1.1.1")
@@ -459,7 +439,7 @@ func TestCreateExecutions(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 		s.Status = "bootstrap_ran"
 		s.Bootstraps.Finished = "yes"
 		s.save()
@@ -505,7 +485,7 @@ func TestServiceDone(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s := h.getService("./fixtures/service_real_workflow.json")
 		s.Status = "executions_ran"
 		s.save()
 

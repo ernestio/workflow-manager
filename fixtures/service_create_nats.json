@@ -12,12 +12,96 @@
     "started": "",
     "finished": "",
     "workflow": {
-      "arcs": [
-      { "from": "created", "to": "started", "event": "start" },
-      { "from": "started", "to": "in_progress", "event": "to_in_progress" },
-      { "from": "in_progress", "to": "uat", "event": "to_uat" },
-      { "from": "uat", "to": "done", "event": "to_done" }
-    ]},
+			"arcs": [{
+				"from": "created",
+				"to": "started",
+				"event": "service.create"
+			}, {
+				"from": "started",
+				"to": "creating_routers",
+				"event": "routers.create"
+			}, {
+				"from": "creating_routers",
+				"to": "routers_created",
+				"event": "routers.create.done"
+			}, {
+				"from": "routers_created",
+				"to": "creating_networks",
+				"event": "networks.create"
+			}, {
+				"from": "creating_networks",
+				"to": "networks_created",
+				"event": "networks.create.done"
+			}, {
+				"from": "creating_instances",
+				"to": "instances_created",
+				"event": "instances.create.done"
+			}, {
+				"from": "instances_created",
+				"to": "updating_instances",
+				"event": "instances.update"
+			}, {
+				"from": "updating_instances",
+				"to": "instances_updated",
+				"event": "instances.update.done"
+			}, {
+				"from": "creating_firewalls",
+				"to": "firewalls_created",
+				"event": "firewalls.create.done"
+			}, {
+				"from": "nats_created",
+				"to": "updating_nats",
+				"event": "nats.update"
+			}, {
+				"from": "updating_nats",
+				"to": "nats_updated",
+				"event": "nats.update"
+			}, {
+				"from": "nats_updated",
+				"to": "bootstrapping",
+				"event": "nats.update.done"
+			}, {
+				"from": "bootstrapping",
+				"to": "bootstrap_ran",
+				"event": "executions.create.done"
+			}, {
+				"from": "bootstrap_ran",
+				"to": "running_executions",
+				"event": "executions.create"
+			}, {
+				"from": "running_executions",
+				"to": "executions_ran",
+				"event": "executions.create.done"
+			}, {
+				"from": "creating_nats",
+				"to": "nats_created",
+				"event": "nats.create.done"
+			}, {
+				"from": "pre-failed",
+				"to": "failed",
+				"event": "to_error"
+			}, {
+				"from": "failed",
+				"to": "errored",
+				"event": "service.create.error"
+			}, {
+				"from": "executions_ran",
+				"to": "done",
+				"event": "service.create.done"
+			}, {
+				"from": "firewalls_created",
+				"to": "creating_nats",
+				"event": "nats.create"
+			}, {
+				"from": "instances_updated",
+				"to": "creating_firewalls",
+				"event": "firewalls.create"
+			}, {
+				"from": "networks_created",
+				"to": "creating_instances",
+				"event": "instances.create"
+			}]
+    },
     "datacenters": {
       "status": "",
       "started": "",
