@@ -114,8 +114,10 @@ func (p *publisher) Vitamine(items []interface{}, s *service) []interface{} {
 		item := v.(map[string]interface{})
 		for field, selector := range item {
 			value := selector.(string)
-			if value[0:2] == "$(" && value[len(value)-1:len(value)] == ")" {
-				item[field] = gjson.Get(json, value[2:len(value)-1]).String()
+			if value != "" {
+				if value[0:2] == "$(" && value[len(value)-1:len(value)] == ")" {
+					item[field] = gjson.Get(json, value[2:len(value)-1]).String()
+				}
 			}
 		}
 	}

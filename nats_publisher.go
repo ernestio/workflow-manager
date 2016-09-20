@@ -71,6 +71,9 @@ func buildNatsList(s *service, inputList []nat) NatsCreate {
 			NatGatewayAWSID:    n.NatGatewayAWSID,
 			VCloudURL:          d.VCloudURL,
 		}
+		if len(s.VPCs.Items) > 0 {
+			m.Nats[i].VpcID = s.VPCs.Items[0].VpcID
+		}
 		if r != nil {
 			m.Nats[i].RouterName = r.Name
 			m.Nats[i].RouterType = r.Type
