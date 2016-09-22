@@ -27,6 +27,7 @@ func (em *errorManager) isAnErrorMessage(subject string) bool {
 		"nats.create.error",
 		"nats.delete.error",
 		"nats.update.error",
+		"bootstraps.create.error",
 		"executions.create.error":
 		return true
 	}
@@ -63,6 +64,8 @@ func (em *errorManager) markAsFailed(s *service, subject string, body []byte) *s
 		s = em.markNatsDeleteAsErrored(s, body)
 	case "nats.update.error":
 		s = em.markNatsUpdateAsErrored(s, body)
+	case "bootstraps.create.error":
+		s = em.markExecutionsCreationAsErrored(s, body)
 	case "executions.create.error":
 		s = em.markExecutionsCreationAsErrored(s, body)
 	}
