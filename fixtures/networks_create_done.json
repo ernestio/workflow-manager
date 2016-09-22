@@ -4,14 +4,14 @@
    "components": [
       {
          "id": "network_id",
-         "name": "network_test",
+         "name": "network_test_2",
          "range": "10.64.4.0/24",
          "netmask": "netmask",
          "start_address": "start",
          "end_address": "end",
          "gateway": "gateway",
          "router": "test",
-         "status": "success"
+         "status": "completed"
       }
    ]
 }

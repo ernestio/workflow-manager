@@ -4,7 +4,7 @@
    "components": [
       {
          "id": "instance_id",
-         "name": "test_instance_1",
+         "name": "test_instance_2",
          "network": "43a6a12c-e402-4be7-9931-d7761b53a509",
          "created": true,
          "cpus": 1,

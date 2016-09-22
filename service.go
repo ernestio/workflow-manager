@@ -557,26 +557,20 @@ func (s *service) getComponentList(cType string) []interface{} {
 }
 
 func (s *service) transferCreated(cType string, input GenericComponentMsg) {
+	var erroredComponents []interface{}
+
 	tmp := s.asMap()
 	inputComponents := input.Components
-
 	currentComponents := tmp[cType].(map[string]interface{})
 	components := currentComponents["items"].([]interface{})
 
 	// Append new components
 	for _, c := range inputComponents {
-		exists := false
-		for i, v := range components {
-			inHash := c.(map[string]interface{})
-			exHash := v.(map[string]interface{})
-			iName := inHash["name"].(string)
-			name := exHash["name"].(string)
-			if iName == name {
-				components[i] = c
-				exists = true
-			}
-		}
-		if exists == false {
+		inHash := c.(map[string]interface{})
+		status := inHash["status"].(string)
+		if status == "errored" {
+			erroredComponents = append(erroredComponents, c)
+		} else {
 			components = append(components, c)
 		}
 	}
@@ -585,10 +579,10 @@ func (s *service) transferCreated(cType string, input GenericComponentMsg) {
 
 	// Remove to be created components
 	componentsToBeProcessed := tmp[cType+"_to_create"].(map[string]interface{})
-	componentsToBeProcessed["items"] = nil
-	componentsToBeProcessed["status"] = "completed"
-	componentsToBeProcessed["error_code"] = ""
-	componentsToBeProcessed["error_message"] = ""
+	componentsToBeProcessed["items"] = erroredComponents
+	componentsToBeProcessed["status"] = input.Status
+	componentsToBeProcessed["error_code"] = input.ErrorCode
+	componentsToBeProcessed["error_message"] = input.ErrorMessage
 
 	// Save result
 	s.loadFromMap(tmp)
@@ -596,6 +590,8 @@ func (s *service) transferCreated(cType string, input GenericComponentMsg) {
 
 func (s *service) transferUpdated(cType string, input GenericComponentMsg) {
 	var components []interface{}
+	var erroredComponents []interface{}
+
 	tmp := s.asMap()
 	inputComponents := input.Components
 
@@ -612,7 +608,12 @@ func (s *service) transferUpdated(cType string, input GenericComponentMsg) {
 			iName := inHash["name"].(string)
 			name := exHash["name"].(string)
 			if iName == name {
-				components[i] = c
+				status := inHash["status"].(string)
+				if status == "completed" {
+					components[i] = c
+				} else {
+					erroredComponents = append(erroredComponents, c)
+				}
 			}
 		}
 	}
@@ -621,22 +622,25 @@ func (s *service) transferUpdated(cType string, input GenericComponentMsg) {
 
 	// Remove to be created components
 	componentsToBeProcessed := tmp[cType+"_to_update"].(map[string]interface{})
-	componentsToBeProcessed["items"] = nil
-	componentsToBeProcessed["status"] = "completed"
-	componentsToBeProcessed["error_code"] = ""
-	componentsToBeProcessed["error_message"] = ""
+
+	componentsToBeProcessed["items"] = erroredComponents
+	componentsToBeProcessed["status"] = input.Status
+	componentsToBeProcessed["error_code"] = input.ErrorCode
+	componentsToBeProcessed["error_message"] = input.ErrorMessage
 
 	// Save result
 	s.loadFromMap(tmp)
 }
 
 func (s *service) transferDeleted(cType string, input GenericComponentMsg) {
+	var remanentComponents []interface{}
+	var erroredComponents []interface{}
+
 	tmp := s.asMap()
 	inputComponents := input.Components
 
 	currentComponents := tmp[cType].(map[string]interface{})
 	components := currentComponents["items"].([]interface{})
-	var remanentComponents []interface{}
 
 	for _, v := range components {
 		sw := false
@@ -646,7 +650,12 @@ func (s *service) transferDeleted(cType string, input GenericComponentMsg) {
 			inHash := c.(map[string]interface{})
 			iName := inHash["name"].(string)
 			if iName == name {
-				sw = true
+				status := inHash["status"].(string)
+				if status == "errored" {
+					erroredComponents = append(erroredComponents, c)
+				} else {
+					sw = true
+				}
 			}
 		}
 		if sw == false {
@@ -658,10 +667,15 @@ func (s *service) transferDeleted(cType string, input GenericComponentMsg) {
 
 	// Remove to be created components
 	componentsToBeProcessed := tmp[cType+"_to_delete"].(map[string]interface{})
-	componentsToBeProcessed["items"] = nil
-	componentsToBeProcessed["status"] = "completed"
-	componentsToBeProcessed["error_code"] = ""
-	componentsToBeProcessed["error_message"] = ""
+
+	componentsToBeProcessed["items"] = erroredComponents
+	if len(erroredComponents) > 0 {
+		componentsToBeProcessed["status"] = "errored"
+	} else {
+		componentsToBeProcessed["status"] = "completed"
+	}
+	componentsToBeProcessed["error_code"] = input.ErrorCode
+	componentsToBeProcessed["error_message"] = input.ErrorMessage
 
 	// Save result
 	s.loadFromMap(tmp)
