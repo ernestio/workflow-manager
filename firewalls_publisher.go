@@ -93,6 +93,10 @@ func buildFirewallsList(s *service, inputList []firewall) FirewallsCreate {
 			SecurityGroupAWSID: f.SecurityGroupAWSID,
 		}
 
+		if len(s.VPCs.Items) > 0 {
+			m.Firewalls[i].VpcID = s.VPCs.Items[0].VpcID
+		}
+
 		if r != nil {
 			m.Firewalls[i].RouterName = r.Name
 			m.Firewalls[i].RouterType = r.Type

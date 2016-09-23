@@ -4,11 +4,12 @@
    "components": [
       {
          "id": "69ce1c42-2640-4d69-ac44-b4fbcc682cee",
-         "name": "test",
+         "name": "test-2",
          "client": "",
          "datacenter": "30c1b369-ba69-405e-8e26-75e3fc9d3d42",
          "ip": "31.210.241.2",
-         "created": true
+         "created": true,
+         "status": "completed"
       }
    ]
 }

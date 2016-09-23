@@ -78,6 +78,10 @@ func buildInstancesList(s *service, list []instance, messages []MonitorMessage, 
 			InstanceAWSID:      ii.InstanceAWSID,
 		}
 
+		if len(s.VPCs.Items) > 0 {
+			m.Instances[i].VpcID = s.VPCs.Items[0].VpcID
+		}
+
 		if n != nil {
 			m.Instances[i].NetworkAWSID = n.NetworkAWSID
 			m.Instances[i].NetworkIsPublic = n.IsPublic

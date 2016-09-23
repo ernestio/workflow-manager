@@ -20,7 +20,7 @@
       "matched_instances": [
         "test"
       ],
-      "status": "success",
+      "status": "completed",
       "service": "test-generated-id",
       "datacenter": "test"
     }

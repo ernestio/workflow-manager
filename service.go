@@ -29,6 +29,17 @@ type datacenter struct {
 	status
 }
 
+type vpc struct {
+	DatacenterName   string `json:"datacenter_name"`
+	DatacenterRegion string `json:"datacenter_region"`
+	DatacenterToken  string `json:"datacenter_access_token"`
+	DatacenterSecret string `json:"datacenter_access_key"`
+	VpcID            string `json:"vpc_id"`
+	VpcSubnet        string `json:"vpc_subnet"`
+	Type             string `json:"_type"`
+	status
+}
+
 type executionReport struct {
 	Instance   string `json:"instance"`
 	ReturnCode int    `json:"return_code"`
@@ -87,6 +98,7 @@ type firewall struct {
 	ExternalNetwork    string          `json:"external_network"`
 	SecurityGroupAWSID string          `json:"security_group_aws_id"`
 	VCloudURL          string          `json:"vcloud_url"`
+	VpcID              string          `json:"vpc_id"`
 	status
 }
 
@@ -126,6 +138,7 @@ type instance struct {
 	SecurityGroups      []string       `json:"security_groups"`
 	SecurityGroupAWSIDs []string       `json:"security_group_aws_ids"`
 	VCloudURL           string         `json:"vcloud_url"`
+	VpcID               string         `json:"vpc_id"`
 	status
 }
 
@@ -178,6 +191,7 @@ type nat struct {
 	DatacenterSecret       string    `json:"datacenter_secret"`
 	ExternalNetwork        string    `json:"external_network"`
 	VCloudURL              string    `json:"vcloud_url"`
+	VpcID                  string    `json:"vpc_id"`
 	status
 }
 
@@ -206,6 +220,7 @@ type network struct {
 	NetworkType        string   `json:"network_type"`
 	NetworkSubnet      string   `json:"network_subnet"`
 	NetworkAWSID       string   `json:"network_aws_id"`
+	VpcID              string   `json:"vpc_id"`
 	DNS                []string `json:"DNS"`
 	VCloudURL          string   `json:"vcloud_url"`
 	status
@@ -257,6 +272,24 @@ type service struct {
 		Started  string       `json:"started"`
 		Status   string       `json:"status"`
 	} `json:"datacenters"`
+	VPCs struct {
+		Finished string `json:"finished"`
+		Items    []vpc  `json:"items"`
+		Started  string `json:"started"`
+		Status   string `json:"status"`
+	} `json:"vpcs"`
+	VPCsToCreate struct {
+		Finished string `json:"finished"`
+		Items    []vpc  `json:"items"`
+		Started  string `json:"started"`
+		Status   string `json:"status"`
+	} `json:"vpcs_to_create"`
+	VPCsToDelete struct {
+		Finished string `json:"finished"`
+		Items    []vpc  `json:"items"`
+		Started  string `json:"started"`
+		Status   string `json:"status"`
+	} `json:"vpcs_to_delete"`
 	Bootstraps struct {
 		Finished string      `json:"finished"`
 		Items    []execution `json:"items"`
@@ -524,26 +557,20 @@ func (s *service) getComponentList(cType string) []interface{} {
 }
 
 func (s *service) transferCreated(cType string, input GenericComponentMsg) {
+	var erroredComponents []interface{}
+
 	tmp := s.asMap()
 	inputComponents := input.Components
-
 	currentComponents := tmp[cType].(map[string]interface{})
 	components := currentComponents["items"].([]interface{})
 
 	// Append new components
 	for _, c := range inputComponents {
-		exists := false
-		for i, v := range components {
-			inHash := c.(map[string]interface{})
-			exHash := v.(map[string]interface{})
-			iName := inHash["name"].(string)
-			name := exHash["name"].(string)
-			if iName == name {
-				components[i] = c
-				exists = true
-			}
-		}
-		if exists == false {
+		inHash := c.(map[string]interface{})
+		status := inHash["status"].(string)
+		if status == "errored" {
+			erroredComponents = append(erroredComponents, c)
+		} else {
 			components = append(components, c)
 		}
 	}
@@ -552,10 +579,10 @@ func (s *service) transferCreated(cType string, input GenericComponentMsg) {
 
 	// Remove to be created components
 	componentsToBeProcessed := tmp[cType+"_to_create"].(map[string]interface{})
-	componentsToBeProcessed["items"] = nil
-	componentsToBeProcessed["status"] = "completed"
-	componentsToBeProcessed["error_code"] = ""
-	componentsToBeProcessed["error_message"] = ""
+	componentsToBeProcessed["items"] = erroredComponents
+	componentsToBeProcessed["status"] = input.Status
+	componentsToBeProcessed["error_code"] = input.ErrorCode
+	componentsToBeProcessed["error_message"] = input.ErrorMessage
 
 	// Save result
 	s.loadFromMap(tmp)
@@ -563,6 +590,8 @@ func (s *service) transferCreated(cType string, input GenericComponentMsg) {
 
 func (s *service) transferUpdated(cType string, input GenericComponentMsg) {
 	var components []interface{}
+	var erroredComponents []interface{}
+
 	tmp := s.asMap()
 	inputComponents := input.Components
 
@@ -579,7 +608,12 @@ func (s *service) transferUpdated(cType string, input GenericComponentMsg) {
 			iName := inHash["name"].(string)
 			name := exHash["name"].(string)
 			if iName == name {
-				components[i] = c
+				status := inHash["status"].(string)
+				if status == "completed" {
+					components[i] = c
+				} else {
+					erroredComponents = append(erroredComponents, c)
+				}
 			}
 		}
 	}
@@ -588,22 +622,25 @@ func (s *service) transferUpdated(cType string, input GenericComponentMsg) {
 
 	// Remove to be created components
 	componentsToBeProcessed := tmp[cType+"_to_update"].(map[string]interface{})
-	componentsToBeProcessed["items"] = nil
-	componentsToBeProcessed["status"] = "completed"
-	componentsToBeProcessed["error_code"] = ""
-	componentsToBeProcessed["error_message"] = ""
+
+	componentsToBeProcessed["items"] = erroredComponents
+	componentsToBeProcessed["status"] = input.Status
+	componentsToBeProcessed["error_code"] = input.ErrorCode
+	componentsToBeProcessed["error_message"] = input.ErrorMessage
 
 	// Save result
 	s.loadFromMap(tmp)
 }
 
 func (s *service) transferDeleted(cType string, input GenericComponentMsg) {
+	var remanentComponents []interface{}
+	var erroredComponents []interface{}
+
 	tmp := s.asMap()
 	inputComponents := input.Components
 
 	currentComponents := tmp[cType].(map[string]interface{})
 	components := currentComponents["items"].([]interface{})
-	var remanentComponents []interface{}
 
 	for _, v := range components {
 		sw := false
@@ -613,7 +650,12 @@ func (s *service) transferDeleted(cType string, input GenericComponentMsg) {
 			inHash := c.(map[string]interface{})
 			iName := inHash["name"].(string)
 			if iName == name {
-				sw = true
+				status := inHash["status"].(string)
+				if status == "errored" {
+					erroredComponents = append(erroredComponents, c)
+				} else {
+					sw = true
+				}
 			}
 		}
 		if sw == false {
@@ -625,10 +667,15 @@ func (s *service) transferDeleted(cType string, input GenericComponentMsg) {
 
 	// Remove to be created components
 	componentsToBeProcessed := tmp[cType+"_to_delete"].(map[string]interface{})
-	componentsToBeProcessed["items"] = nil
-	componentsToBeProcessed["status"] = "completed"
-	componentsToBeProcessed["error_code"] = ""
-	componentsToBeProcessed["error_message"] = ""
+
+	componentsToBeProcessed["items"] = erroredComponents
+	if len(erroredComponents) > 0 {
+		componentsToBeProcessed["status"] = "errored"
+	} else {
+		componentsToBeProcessed["status"] = "completed"
+	}
+	componentsToBeProcessed["error_code"] = input.ErrorCode
+	componentsToBeProcessed["error_message"] = input.ErrorMessage
 
 	// Save result
 	s.loadFromMap(tmp)

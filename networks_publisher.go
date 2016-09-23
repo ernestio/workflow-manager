@@ -63,6 +63,10 @@ func buildNetworksList(s *service, list []network, messages []MonitorMessage) (N
 		m.Networks[i].IsPublic = n.IsPublic
 		m.Networks[i].NetworkAWSID = n.NetworkAWSID
 		m.Networks[i].VCloudURL = d.VCloudURL
+
+		if len(s.VPCs.Items) > 0 {
+			m.Networks[i].VpcID = s.VPCs.Items[0].VpcID
+		}
 	}
 
 	return m, messages
