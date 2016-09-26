@@ -41,21 +41,21 @@ func TestCreateRouters(t *testing.T) {
 		Convey("When I get the message for a routers.create event", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("routers.create", &s)
-			m := &RoutersCreate{}
+			m := &GenericComponentMsg{}
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
-				r := m.Routers[0]
-				So(len(m.Routers), ShouldEqual, 1)
-				So(r.Name, ShouldEqual, s.RoutersToCreate.Items[0].Name)
-				So(r.Type, ShouldEqual, s.RoutersToCreate.Items[0].Type)
+				r := m.Components[0].(map[string]interface{})
+				So(len(m.Components), ShouldEqual, 1)
+				So(r["name"].(string), ShouldEqual, s.RoutersToCreate.Items[0].Name)
+				So(r["type"].(string), ShouldEqual, s.RoutersToCreate.Items[0].Type)
 
 				d := s.Datacenters.Items[0]
-				So(r.DatacenterName, ShouldEqual, d.Name)
-				So(r.DatacenterPassword, ShouldEqual, d.Password)
-				So(r.DatacenterRegion, ShouldEqual, d.Region)
-				So(r.DatacenterType, ShouldEqual, d.Type)
-				So(r.DatacenterUsername, ShouldEqual, d.Username)
+				So(r["datacenter_name"].(string), ShouldEqual, d.Name)
+				So(r["datacenter_password"].(string), ShouldEqual, d.Password)
+				So(r["datacenter_region"].(string), ShouldEqual, d.Region)
+				So(r["datacenter_type"].(string), ShouldEqual, d.Type)
+				So(r["datacenter_username"].(string), ShouldEqual, d.Username)
 				So(err, ShouldEqual, nil)
 
 			})

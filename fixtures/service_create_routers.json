@@ -153,7 +153,12 @@
         "datacenter": "1",
         "name": "test",
         "type": "",
-        "ip": ""
+        "ip": "",
+				"datacenter_name": "$(datacenters.items.0.name)",
+				"datacenter_password": "$(datacenters.items.0.password)",
+				"datacenter_region": "$(datacenters.items.0.region)",
+				"datacenter_type": "$(datacenters.items.0.type)",
+				"datacenter_username": "$(datacenters.items.0.username)"
       }]
     },
     "networks": {

@@ -38,10 +38,6 @@ func (p *publisher) Process(s *service, subject string) (result string, err erro
 		result = p.ServicesDeleteError(s)
 	case "service.delete.done":
 		result = p.ServiceDeleteDone(s)
-	case "routers.create":
-		result = p.CreateRouters(s)
-	case "routers.delete":
-		result = p.DeleteRouters(s)
 	case "networks.create":
 		result = p.NetworksCreate(s)
 	case "networks.delete":
@@ -113,8 +109,8 @@ func (p *publisher) Vitamine(items []interface{}, s *service) []interface{} {
 	for _, v := range items {
 		item := v.(map[string]interface{})
 		for field, selector := range item {
-			value := selector.(string)
-			if value != "" {
+			value, err := selector.(string)
+			if err == true && value != "" {
 				if value[0:2] == "$(" && value[len(value)-1:len(value)] == ")" {
 					item[field] = gjson.Get(json, value[2:len(value)-1]).String()
 				}
@@ -134,30 +130,6 @@ func (p *publisher) isSupportedMessage(s *service, subject string) bool {
 	}
 
 	return false
-}
-
-// Prepares a message to create routers
-func (p *publisher) CreateRouters(s *service) string {
-	m := buildCreateRouters(s)
-	marshalled, err := json.Marshal(m)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-
-	return string(marshalled)
-}
-
-// Prepares a message to delete routers
-func (p *publisher) DeleteRouters(s *service) string {
-	m := buildDeleteRouters(s)
-	marshalled, err := json.Marshal(m)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-
-	return string(marshalled)
 }
 
 func (p *publisher) ServiceCreateError(s *service) string {

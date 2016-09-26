@@ -4,16 +4,6 @@
 
 package main
 
-// RoutersCreate : Message to create routers
-type RoutersCreate struct {
-	Service              string   `json:"service"`
-	Routers              []router `json:"components"`
-	Status               string   `json:"status"`
-	ErrorCode            string   `json:"error_code"`
-	ErrorMessage         string   `json:"error_message"`
-	SequentialProcessing bool     `json:"sequential_processing"`
-}
-
 // NetworksCreate : Message to create networks
 type NetworksCreate struct {
 	Service              string    `json:"service"`
