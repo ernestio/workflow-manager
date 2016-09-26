@@ -96,26 +96,27 @@ func TestCreateNetworks(t *testing.T) {
 		Convey("When I get the message for a networks.create event", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("networks.create", &s)
-			m := &NetworksCreate{}
+			m := &GenericComponentMsg{}
+
 			d := s.Datacenters.Items[0]
 			r := s.Routers.Items[0]
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
 				So(m.Service, ShouldEqual, s.ID)
-				So(len(m.Networks), ShouldEqual, 1)
-				n := m.Networks[0]
-				So(n.Name, ShouldEqual, s.NetworksToCreate.Items[0].Name)
-				So(n.Range, ShouldEqual, s.NetworksToCreate.Items[0].Range)
-				So(n.RouterName, ShouldEqual, r.Name)
-				So(n.RouterType, ShouldEqual, r.Type)
-				So(n.RouterIP, ShouldEqual, r.IP)
-				So(n.ClientName, ShouldEqual, s.ClientName)
-				So(n.DatacenterName, ShouldEqual, d.Name)
-				So(n.DatacenterPassword, ShouldEqual, d.Password)
-				So(n.DatacenterRegion, ShouldEqual, d.Region)
-				So(n.DatacenterType, ShouldEqual, d.Type)
-				So(n.DatacenterUsername, ShouldEqual, d.Username)
+				So(len(m.Components), ShouldEqual, 1)
+				n := m.Components[0].(map[string]interface{})
+				So(n["name"].(string), ShouldEqual, s.NetworksToCreate.Items[0].Name)
+				So(n["range"].(string), ShouldEqual, s.NetworksToCreate.Items[0].Range)
+				So(n["router_name"].(string), ShouldEqual, r.Name)
+				So(n["router_type"].(string), ShouldEqual, r.Type)
+				So(n["router_ip"].(string), ShouldEqual, r.IP)
+				So(n["client_name"].(string), ShouldEqual, s.ClientName)
+				So(n["datacenter_name"].(string), ShouldEqual, d.Name)
+				So(n["datacenter_password"].(string), ShouldEqual, d.Password)
+				So(n["datacenter_region"].(string), ShouldEqual, d.Region)
+				So(n["datacenter_type"].(string), ShouldEqual, d.Type)
+				So(n["datacenter_username"].(string), ShouldEqual, d.Username)
 
 				So(err, ShouldEqual, nil)
 
@@ -134,26 +135,26 @@ func TestDeleteNetworks(t *testing.T) {
 		Convey("When I get the message for a networks.delete event", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("networks.delete", &s)
-			m := &NetworksCreate{}
+			m := &GenericComponentMsg{}
 			d := s.Datacenters.Items[0]
 			r := s.Routers.Items[0]
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
 				So(m.Service, ShouldEqual, s.ID)
-				So(len(m.Networks), ShouldEqual, 1)
-				n := m.Networks[0]
-				So(n.Name, ShouldEqual, s.Networks.Items[0].Name)
-				So(n.Range, ShouldEqual, s.Networks.Items[0].Range)
-				So(n.RouterName, ShouldEqual, r.Name)
-				So(n.RouterType, ShouldEqual, r.Type)
-				So(n.RouterIP, ShouldEqual, r.IP)
-				So(n.ClientName, ShouldEqual, s.ClientName)
-				So(n.DatacenterName, ShouldEqual, d.Name)
-				So(n.DatacenterPassword, ShouldEqual, d.Password)
-				So(n.DatacenterRegion, ShouldEqual, d.Region)
-				So(n.DatacenterType, ShouldEqual, d.Type)
-				So(n.DatacenterUsername, ShouldEqual, d.Username)
+				So(len(m.Components), ShouldEqual, 1)
+				n := m.Components[0].(map[string]interface{})
+				So(n["name"].(string), ShouldEqual, s.Networks.Items[0].Name)
+				So(n["range"].(string), ShouldEqual, s.Networks.Items[0].Range)
+				So(n["router_name"].(string), ShouldEqual, r.Name)
+				So(n["router_type"].(string), ShouldEqual, r.Type)
+				So(n["router_ip"].(string), ShouldEqual, r.IP)
+				So(n["client_name"].(string), ShouldEqual, s.ClientName)
+				So(n["datacenter_name"].(string), ShouldEqual, d.Name)
+				So(n["datacenter_password"].(string), ShouldEqual, d.Password)
+				So(n["datacenter_region"].(string), ShouldEqual, d.Region)
+				So(n["datacenter_type"].(string), ShouldEqual, d.Type)
+				So(n["datacenter_username"].(string), ShouldEqual, d.Username)
 
 				So(err, ShouldEqual, nil)
 

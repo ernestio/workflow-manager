@@ -38,10 +38,6 @@ func (p *publisher) Process(s *service, subject string) (result string, err erro
 		result = p.ServicesDeleteError(s)
 	case "service.delete.done":
 		result = p.ServiceDeleteDone(s)
-	case "networks.create":
-		result = p.NetworksCreate(s)
-	case "networks.delete":
-		result = p.NetworksDelete(s)
 	case "instances.create":
 		result = p.InstancesCreate(s)
 	case "instances.delete":
@@ -152,28 +148,6 @@ func (p *publisher) ServiceCreateError(s *service) string {
 
 func (p *publisher) ServicesDeleteError(s *service) string {
 	return p.ServiceCreateError(s)
-}
-
-func (p *publisher) NetworksCreate(s *service) string {
-	m := buildCreateNetworks(s)
-	marshalled, err := json.Marshal(m)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-
-	return string(marshalled)
-}
-
-func (p *publisher) NetworksDelete(s *service) string {
-	m := buildDeleteNetworks(s)
-	marshalled, err := json.Marshal(m)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-
-	return string(marshalled)
 }
 
 func (p *publisher) InstancesUpdate(s *service) string {
