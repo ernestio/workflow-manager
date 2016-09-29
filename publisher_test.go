@@ -179,7 +179,6 @@ func TestCreateNetworks(t *testing.T) {
 				So(n["datacenter_username"].(string), ShouldEqual, d.Username)
 
 				So(err, ShouldEqual, nil)
-
 			})
 		})
 	})
@@ -233,15 +232,26 @@ func TestCreateInstances(t *testing.T) {
 		Convey("When I get the message for a instances.create event", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("instances.create", &s)
-			m := &InstancesCreate{}
+			m := &GenericComponentMsg{}
+			d := s.Datacenters.Items[0]
+			n := s.Networks.Items[0]
+			sg := s.Firewalls.Items[0]
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
 				So(m.Service, ShouldEqual, s.ID)
-				So(len(m.Instances), ShouldEqual, 2)
-				i := m.Instances[0]
-				So(i.Name, ShouldEqual, s.InstancesToCreate.Items[0].Name)
-
+				So(len(m.Components), ShouldEqual, 2)
+				i := m.Components[0].(map[string]interface{})
+				So(i["name"], ShouldEqual, s.InstancesToCreate.Items[0].Name)
+				So(i["type"], ShouldEqual, s.InstancesToCreate.Items[0].Type)
+				So(i["ip"], ShouldEqual, s.InstancesToCreate.Items[0].IP)
+				So(i["datacenter_name"].(string), ShouldEqual, d.Name)
+				So(i["datacenter_password"].(string), ShouldEqual, d.Password)
+				So(i["datacenter_region"].(string), ShouldEqual, d.Region)
+				So(i["datacenter_type"].(string), ShouldEqual, d.Type)
+				So(i["datacenter_username"].(string), ShouldEqual, d.Username)
+				So(i["network_aws_id"].(string), ShouldEqual, n.NetworkAWSID)
+				So(i["security_group_aws_ids"].([]interface{})[0].(string), ShouldEqual, sg.SecurityGroupAWSID)
 				So(err, ShouldEqual, nil)
 
 			})

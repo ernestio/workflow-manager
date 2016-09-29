@@ -158,6 +158,7 @@
         "service": "test",
         "router_name": "test",
         "type": "vcloud",
+        "network_aws_id": "1",
         "name": "network_test",
         "range": "11.11.11.11/11",
         "netmask": "",
@@ -212,6 +213,7 @@
         "type": "vcloud",
         "name": "test_firewall",
         "status": "completed",
+        "security_group_aws_id": "1",
         "rules": [{
           "source_ip": "network_test",
           "source_port": "source_port",
@@ -249,10 +251,18 @@
       "items": [{
         "network_name": "network_test",
         "service": "test-generated-id",
-        "datacenter_name": "dtc_name",
+        "datacenter_name": "$(datacenters.items.0.name)",
+        "datacenter_password": "$(datacenters.items.0.password)",
+        "datacenter_region": "$(datacenters.items.0.region)",
+        "datacenter_type": "$(datacenters.items.0.type)",
+        "datacenter_username": "$(datacenters.items.0.username)",
         "type": "test_instance",
         "name": "test_instance_1",
         "ip": "1.1.1.1",
+        "network_aws_id": "$(networks.items.#[name=\"network_test\"].network_aws_id)",
+        "security_group_aws_ids": [
+            "$(firewalls.items.#[name=\"test_firewall\"].security_group_aws_id)"
+        ],
         "instance_resource": {
           "cpus": 2,
           "ram": 4096,
@@ -270,6 +280,15 @@
         "datacenter_name": "dtc_name",
         "type": "salt",
         "name": "salt",
+        "datacenter_name": "$(datacenters.items.0.name)",
+        "datacenter_password": "$(datacenters.items.0.password)",
+        "datacenter_region": "$(datacenters.items.0.region)",
+        "datacenter_type": "$(datacenters.items.0.type)",
+        "datacenter_username": "$(datacenters.items.0.username)",
+        "network_aws_id": "$(networks.items.#[name=\"network_test\"].network_aws_id)",
+        "security_group_aws_ids": [
+            "$(firewalls.items.#[name=\"test_firewall\"].security_group_aws_id)"
+        ],
         "instance_resource": {
           "cpus": 2,
           "ram": 4096,
