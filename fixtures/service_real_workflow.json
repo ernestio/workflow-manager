@@ -68,15 +68,15 @@
 				"from": "nats_updated",
 				"to": "bootstrapping",
 				"event": "bootstraps.create"
-      }, {
-        "from": "bootstrapping",
-        "to": "bootstrap_ran",
-        "event": "bootstraps.create.done"
-      }, {
-        "from": "bootstrap_ran",
-        "to": "running_executions",
-        "event": "executions.create"
-      }, {
+            }, {
+                "from": "bootstrapping",
+                "to": "bootstrap_ran",
+                "event": "bootstraps.create.done"
+            }, {
+                "from": "bootstrap_ran",
+                "to": "running_executions",
+                "event": "executions.create"
+            }, {
 				"from": "running_executions",
 				"to": "executions_ran",
 				"event": "executions.create.done"
@@ -146,8 +146,8 @@
         "service": "test-generated-id",
         "datacenter": "1",
         "name": "test",
-        "type": "",
-        "ip": ""
+        "type": "vcloud",
+        "ip": "5.5.5.5"
       }]
     },
     "networks": {
@@ -183,11 +183,11 @@
         "router_name": "$(routers.items.0.name)",
         "router_type": "$(routers.items.0.type)",
         "router_ip": "$(routers.items.0.ip)",
-				"datacenter_name": "$(datacenters.items.0.name)",
-				"datacenter_password": "$(datacenters.items.0.password)",
-				"datacenter_region": "$(datacenters.items.0.region)",
-				"datacenter_type": "$(datacenters.items.0.type)",
-				"datacenter_username": "$(datacenters.items.0.username)"
+		"datacenter_name": "$(datacenters.items.0.name)",
+		"datacenter_password": "$(datacenters.items.0.password)",
+		"datacenter_region": "$(datacenters.items.0.region)",
+		"datacenter_type": "$(datacenters.items.0.type)",
+		"datacenter_username": "$(datacenters.items.0.username)"
       }]
     },
     "nats": {

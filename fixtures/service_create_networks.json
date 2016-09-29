@@ -146,8 +146,8 @@
         "service": "test-generated-id",
         "datacenter": "1",
         "name": "test",
-        "type": "",
-        "ip": ""
+        "type": "vcloud",
+        "ip": "5.5.5.5"
       }]
     },
     "networks": {

@@ -6,6 +6,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
@@ -14,15 +15,20 @@ import (
 func TestVitamineTemplating(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
 		var p publisher
-		var i map[string]interface{}
+		var comp map[string]interface{}
+		var incomp map[string]interface{}
 
-		data := h.getFixture("./fixtures/publisher.json")
+		dataComplete := h.getFixture("./fixtures/publisher.json")
+		dataIncomplete := h.getFixture("./fixtures/publisher_incomplete_firewalls.json")
 		s := h.getService("./fixtures/publisher.json")
-		json.Unmarshal(data, &i)
-		x := i["instances"].(map[string]interface{})["items"].([]interface{})
+		si := h.getService("./fixtures/publisher_incomplete_firewalls.json")
 
-		Convey("When i try and template fields on an collection of instances", func() {
-			items := p.Vitamine(x, &s)
+		json.Unmarshal(dataComplete, &comp)
+		json.Unmarshal(dataIncomplete, &incomp)
+
+		Convey("When i try and template fields on an collection of instances where all fields are known", func() {
+			x := comp["instances"].(map[string]interface{})["items"].([]interface{})
+			items := p.UpdateTemplateVariables(x, &s)
 
 			Convey("It should have mapped all string fields", func() {
 				collection, ok := items[0].(map[string]interface{})
@@ -41,9 +47,28 @@ func TestVitamineTemplating(t *testing.T) {
 				So(ok, ShouldBeTrue)
 				So(item, ShouldEqual, "firewall-1-id")
 			})
+
+		})
+
+		Convey("When i try and template fields on an collection of instances where not all fields are known", func() {
+			x := incomp["instances"].(map[string]interface{})["items"].([]interface{})
+			items := p.UpdateTemplateVariables(x, &si)
+
+			Convey("It should not have mapped fields where there was no result", func() {
+				collection, ok := items[0].(map[string]interface{})
+				So(ok, ShouldBeTrue)
+				itemsl, ok := collection["security_group_aws_ids"].([]interface{})
+				So(ok, ShouldBeTrue)
+				item, ok := itemsl[0].(string)
+				So(ok, ShouldBeTrue)
+				So(item, ShouldNotEqual, "")
+				So(item, ShouldNotEqual, "null")
+				fmt.Println(item)
+			})
 		})
 
 	})
+
 }
 
 func TestUnMappedMessage(t *testing.T) {
