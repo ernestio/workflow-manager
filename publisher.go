@@ -94,22 +94,40 @@ func (p *publisher) GenericHandler(s *service, subject string) (string, error) {
 	return string(marshalled), nil
 }
 
+func MapString(data string, value string) string {
+	if len(value) > 3 && value[0:2] == "$(" && value[len(value)-1:len(value)] == ")" {
+		return gjson.Get(data, value[2:len(value)-1]).String()
+	}
+	return value
+}
+
+func MapSlice(data string, values []interface{}) []interface{} {
+	for i := 0; i < len(values); i++ {
+		switch v := values[i].(type) {
+		case string:
+			values[i] = MapString(data, v)
+		}
+	}
+	return values
+}
+
 func (p *publisher) Vitamine(items []interface{}, s *service) []interface{} {
 	body, err := json.Marshal(s)
 	if err != nil {
 		log.Println("Can't marshal current service")
 		return items
 	}
-	json := string(body)
+	data := string(body)
 
 	for _, v := range items {
 		item := v.(map[string]interface{})
+
 		for field, selector := range item {
-			value, err := selector.(string)
-			if err == true && value != "" {
-				if value[0:2] == "$(" && value[len(value)-1:len(value)] == ")" {
-					item[field] = gjson.Get(json, value[2:len(value)-1]).String()
-				}
+			switch value := selector.(type) {
+			case string:
+				item[field] = MapString(data, value)
+			case []interface{}:
+				item[field] = MapSlice(data, value)
 			}
 		}
 	}

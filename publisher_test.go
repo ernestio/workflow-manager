@@ -11,6 +11,41 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+func TestVitamineTemplating(t *testing.T) {
+	Convey("Given I have a valid service", t, func() {
+		var p publisher
+		var i map[string]interface{}
+
+		data := h.getFixture("./fixtures/publisher.json")
+		s := h.getService("./fixtures/publisher.json")
+		json.Unmarshal(data, &i)
+		x := i["instances"].(map[string]interface{})["items"].([]interface{})
+
+		Convey("When i try and template fields on an collection of instances", func() {
+			items := p.Vitamine(x, &s)
+
+			Convey("It should have mapped all string fields", func() {
+				collection, ok := items[0].(map[string]interface{})
+				So(ok, ShouldBeTrue)
+				item, ok := collection["network_aws_id"].(string)
+				So(ok, ShouldBeTrue)
+				So(item, ShouldEqual, "network-1-id")
+			})
+
+			Convey("It should have mapped all slice fields", func() {
+				collection, ok := items[0].(map[string]interface{})
+				So(ok, ShouldBeTrue)
+				itemsl, ok := collection["security_group_aws_ids"].([]interface{})
+				So(ok, ShouldBeTrue)
+				item, ok := itemsl[0].(string)
+				So(ok, ShouldBeTrue)
+				So(item, ShouldEqual, "firewall-1-id")
+			})
+		})
+
+	})
+}
+
 func TestUnMappedMessage(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
 		setup()
