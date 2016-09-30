@@ -269,35 +269,35 @@ func TestCreateNats(t *testing.T) {
 		Convey("When I get the message for a nats.create event", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("nats.create", &s)
-			m := &NatsCreate{}
+			m := &GenericComponentMsg{}
+			d := s.Datacenters.Items[0]
+			ro := s.Routers.Items[0]
 			json.Unmarshal([]byte(body), &m)
+			fmt.Println(body)
 
 			Convey("Then I'll receive a valid json string", func() {
-				d := s.Datacenters.Items[0]
-				ro := s.Routers.Items[0]
-
 				So(m.Service, ShouldEqual, s.ID)
-				So(len(m.Nats), ShouldEqual, 1)
-				n := m.Nats[0]
-				So(n.Name, ShouldEqual, s.NatsToCreate.Items[0].Name)
-				So(n.Status, ShouldEqual, s.NatsToCreate.Items[0].Status)
-				So(n.RouterName, ShouldEqual, ro.Name)
-				So(n.RouterType, ShouldEqual, ro.Type)
-				So(n.RouterIP, ShouldEqual, ro.IP)
-				So(n.ClientName, ShouldEqual, s.ClientName)
-				So(n.DatacenterName, ShouldEqual, d.Name)
-				So(n.DatacenterType, ShouldEqual, d.Type)
-				So(n.DatacenterRegion, ShouldEqual, d.Region)
-				So(n.DatacenterUsername, ShouldEqual, d.Username)
-				So(n.DatacenterPassword, ShouldEqual, d.Password)
-				r := n.Rules[0]
-				So(r.Protocol, ShouldEqual, "protocol")
-				So(r.Type, ShouldEqual, "type")
-				So(r.Network, ShouldEqual, "network")
-				So(r.OriginIP, ShouldEqual, "11.11.11.11/11")
-				So(r.OriginPort, ShouldEqual, "1")
-				So(r.TranslationIP, ShouldEqual, "10.10.10.10/10")
-				So(r.TranslationPort, ShouldEqual, "1")
+				So(len(m.Components), ShouldEqual, 1)
+				n := m.Components[0].(map[string]interface{})
+				So(n["name"], ShouldEqual, s.NatsToCreate.Items[0].Name)
+				So(n["status"], ShouldEqual, s.NatsToCreate.Items[0].Status)
+				So(n["router_name"], ShouldEqual, ro.Name)
+				So(n["router_type"], ShouldEqual, ro.Type)
+				So(n["router_ip"], ShouldEqual, ro.IP)
+				So(n["client_name"], ShouldEqual, s.ClientName)
+				So(n["datacenter_name"], ShouldEqual, d.Name)
+				So(n["datacenter_type"], ShouldEqual, d.Type)
+				So(n["datacenter_region"], ShouldEqual, d.Region)
+				So(n["datacenter_username"], ShouldEqual, d.Username)
+				So(n["datacenter_password"], ShouldEqual, d.Password)
+				r := n["rules"].([]interface{})[0].(map[string]interface{})
+				So(r["protocol"], ShouldEqual, "protocol")
+				So(r["type"], ShouldEqual, "type")
+				So(r["network"], ShouldEqual, "network")
+				So(r["origin_ip"], ShouldEqual, "11.11.11.11/11")
+				So(r["origin_port"], ShouldEqual, "1")
+				So(r["translation_ip"], ShouldEqual, "10.10.10.10/10")
+				So(r["translation_port"], ShouldEqual, "1")
 
 				So(err, ShouldEqual, nil)
 			})
@@ -315,34 +315,35 @@ func TestUpdateNats(t *testing.T) {
 		Convey("When I get the message for a nats.update event", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("nats.update", &s)
-			m := &NatsCreate{}
+			m := &GenericComponentMsg{}
+			d := s.Datacenters.Items[0]
+			ro := s.Routers.Items[0]
 			json.Unmarshal([]byte(body), &m)
+			fmt.Println(body)
 
 			Convey("Then I'll receive a valid json string", func() {
-				d := s.Datacenters.Items[0]
-				ro := s.Routers.Items[0]
-
 				So(m.Service, ShouldEqual, s.ID)
-				So(len(m.Nats), ShouldEqual, 1)
-				n := m.Nats[0]
-				So(n.Name, ShouldEqual, s.NatsToUpdate.Items[0].Name)
-				So(n.RouterName, ShouldEqual, ro.Name)
-				So(n.RouterType, ShouldEqual, ro.Type)
-				So(n.RouterIP, ShouldEqual, ro.IP)
-				So(n.ClientName, ShouldEqual, s.ClientName)
-				So(n.DatacenterName, ShouldEqual, d.Name)
-				So(n.DatacenterType, ShouldEqual, d.Type)
-				So(n.DatacenterRegion, ShouldEqual, d.Region)
-				So(n.DatacenterUsername, ShouldEqual, d.Username)
-				So(n.DatacenterPassword, ShouldEqual, d.Password)
-				r := n.Rules[0]
-				So(r.Protocol, ShouldEqual, "protocol")
-				So(r.Type, ShouldEqual, "type")
-				So(r.Network, ShouldEqual, "network")
-				So(r.OriginIP, ShouldEqual, "11.11.11.11/11")
-				So(r.OriginPort, ShouldEqual, "1")
-				So(r.TranslationIP, ShouldEqual, "10.10.10.10/10")
-				So(r.TranslationPort, ShouldEqual, "1")
+				So(len(m.Components), ShouldEqual, 1)
+				n := m.Components[0].(map[string]interface{})
+				So(n["name"], ShouldEqual, s.NatsToUpdate.Items[0].Name)
+				So(n["status"], ShouldEqual, s.NatsToUpdate.Items[0].Status)
+				So(n["router_name"], ShouldEqual, ro.Name)
+				So(n["router_type"], ShouldEqual, ro.Type)
+				So(n["router_ip"], ShouldEqual, ro.IP)
+				So(n["client_name"], ShouldEqual, s.ClientName)
+				So(n["datacenter_name"], ShouldEqual, d.Name)
+				So(n["datacenter_type"], ShouldEqual, d.Type)
+				So(n["datacenter_region"], ShouldEqual, d.Region)
+				So(n["datacenter_username"], ShouldEqual, d.Username)
+				So(n["datacenter_password"], ShouldEqual, d.Password)
+				r := n["rules"].([]interface{})[0].(map[string]interface{})
+				So(r["protocol"], ShouldEqual, "protocol")
+				So(r["type"], ShouldEqual, "type")
+				So(r["network"], ShouldEqual, "network")
+				So(r["origin_ip"], ShouldEqual, "11.11.11.11/11")
+				So(r["origin_port"], ShouldEqual, "1")
+				So(r["translation_ip"], ShouldEqual, "10.10.10.10/10")
+				So(r["translation_port"], ShouldEqual, "1")
 
 				So(err, ShouldEqual, nil)
 			})
@@ -360,25 +361,30 @@ func TestCreateFirewalls(t *testing.T) {
 		Convey("When I get the message for a firewalls.create event", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("firewalls.create", &s)
-			m := &FirewallsCreate{}
+			m := &GenericComponentMsg{}
+			d := s.Datacenters.Items[0]
+			ro := s.Routers.Items[0]
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
 				So(m.Service, ShouldEqual, s.ID)
-				So(len(m.Firewalls), ShouldEqual, 1)
-				So(len(m.Networks), ShouldEqual, 1)
-				f := m.Firewalls[0]
-				n := m.Networks[0]
-				So(f.Name, ShouldEqual, s.FirewallsToCreate.Items[0].Name)
-				So(f.Status, ShouldEqual, s.FirewallsToCreate.Items[0].Status)
-				So(n.Name, ShouldEqual, s.Networks.Items[0].Name)
-				So(n.Range, ShouldEqual, s.Networks.Items[0].Range)
-				r := f.Rules[0]
-				So(r.Source, ShouldEqual, "11.11.11.11/11")
-				So(r.SourcePort, ShouldEqual, "source_port")
-				So(r.Protocol, ShouldEqual, "protocol")
-				So(r.Destination, ShouldEqual, "any")
-				So(r.DestinationPort, ShouldEqual, "destination_port")
+				So(len(m.Components), ShouldEqual, 1)
+				f := m.Components[0].(map[string]interface{})
+				So(f["name"], ShouldEqual, s.FirewallsToCreate.Items[0].Name)
+				So(f["status"], ShouldEqual, s.FirewallsToCreate.Items[0].Status)
+				So(f["router_name"], ShouldEqual, ro.Name)
+				So(f["router_type"], ShouldEqual, ro.Type)
+				So(f["datacenter_name"], ShouldEqual, d.Name)
+				So(f["datacenter_type"], ShouldEqual, d.Type)
+				So(f["datacenter_region"], ShouldEqual, d.Region)
+				So(f["datacenter_username"], ShouldEqual, d.Username)
+				So(f["datacenter_password"], ShouldEqual, d.Password)
+				r := f["rules"].([]interface{})[0].(map[string]interface{})
+				So(r["source_ip"], ShouldEqual, "11.11.11.11/11")
+				So(r["source_port"], ShouldEqual, "source_port")
+				So(r["protocol"], ShouldEqual, "protocol")
+				So(r["destination_ip"], ShouldEqual, "any")
+				So(r["destination_port"], ShouldEqual, "destination_port")
 
 				So(err, ShouldEqual, nil)
 			})
@@ -396,25 +402,30 @@ func TestUpdateFirewalls(t *testing.T) {
 		Convey("When I get the message for a firewalls.update event", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("firewalls.update", &s)
-			m := &FirewallsCreate{}
+			m := &GenericComponentMsg{}
+			d := s.Datacenters.Items[0]
+			ro := s.Routers.Items[0]
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
 				So(m.Service, ShouldEqual, s.ID)
-				So(len(m.Firewalls), ShouldEqual, 1)
-				So(len(m.Networks), ShouldEqual, 1)
-				f := m.Firewalls[0]
-				n := m.Networks[0]
-				So(f.Name, ShouldEqual, s.Firewalls.Items[0].Name)
-				So(f.Status, ShouldEqual, s.Firewalls.Items[0].Status)
-				So(n.Name, ShouldEqual, s.Networks.Items[0].Name)
-				So(n.Range, ShouldEqual, s.Networks.Items[0].Range)
-				r := f.Rules[0]
-				So(r.Source, ShouldEqual, "11.11.11.11/11")
-				So(r.SourcePort, ShouldEqual, "source_port")
-				So(r.Protocol, ShouldEqual, "protocol")
-				So(r.Destination, ShouldEqual, "any")
-				So(r.DestinationPort, ShouldEqual, "destination_port")
+				So(len(m.Components), ShouldEqual, 1)
+				f := m.Components[0].(map[string]interface{})
+				So(f["name"], ShouldEqual, s.FirewallsToUpdate.Items[0].Name)
+				So(f["status"], ShouldEqual, s.FirewallsToUpdate.Items[0].Status)
+				So(f["router_name"], ShouldEqual, ro.Name)
+				So(f["router_type"], ShouldEqual, ro.Type)
+				So(f["datacenter_name"], ShouldEqual, d.Name)
+				So(f["datacenter_type"], ShouldEqual, d.Type)
+				So(f["datacenter_region"], ShouldEqual, d.Region)
+				So(f["datacenter_username"], ShouldEqual, d.Username)
+				So(f["datacenter_password"], ShouldEqual, d.Password)
+				r := f["rules"].([]interface{})[0].(map[string]interface{})
+				So(r["source_ip"], ShouldEqual, "11.11.11.11/11")
+				So(r["source_port"], ShouldEqual, "source_port")
+				So(r["protocol"], ShouldEqual, "protocol")
+				So(r["destination_ip"], ShouldEqual, "any")
+				So(r["destination_port"], ShouldEqual, "destination_port")
 
 				So(err, ShouldEqual, nil)
 			})

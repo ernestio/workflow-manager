@@ -197,6 +197,11 @@
         "service": "test",
         "router_name": "test",
         "status": "completed",
+        "datacenter_name": "$(datacenters.items.0.name)",
+        "datacenter_password": "$(datacenters.items.0.password)",
+        "datacenter_region": "$(datacenters.items.0.region)",
+        "datacenter_type": "$(datacenters.items.0.type)",
+        "datacenter_username": "$(datacenters.items.0.username)",
         "rules": [{
           "type": "type",
           "network": "network",

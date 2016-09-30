@@ -63,6 +63,9 @@ func (p *publisher) GenericHandler(s *service, subject string) (string, error) {
 		return "", errors.New("Component " + key + " not present")
 	}
 	list := m.(map[string]interface{})
+	if list["items"] == nil {
+		return "", errors.New("Could not handle components")
+	}
 	items := list["items"].([]interface{})
 	items = p.UpdateTemplateVariables(items, s)
 	output.Components = items
@@ -92,6 +95,13 @@ func MapSlice(data string, values []interface{}) []interface{} {
 		switch v := values[i].(type) {
 		case string:
 			values[i] = MapString(data, v)
+		case map[string]interface{}:
+			for field, selector := range v {
+				vv, ok := selector.(string)
+				if ok {
+					v[field] = MapString(data, vv)
+				}
+			}
 		}
 	}
 	return values
