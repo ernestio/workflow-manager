@@ -14,16 +14,6 @@ type GenericComponentMsg struct {
 	SequentialProcessing bool          `json:"sequential_processing"`
 }
 
-// InstancesCreate : Message to create instances
-type InstancesCreate struct {
-	Service              string     `json:"service"`
-	Instances            []instance `json:"components"`
-	Status               string     `json:"status"`
-	ErrorCode            string     `json:"error_code"`
-	ErrorMessage         string     `json:"error_message"`
-	SequentialProcessing bool       `json:"sequential_processing"`
-}
-
 // FirewallsCreate : Message to create firewalls
 type FirewallsCreate struct {
 	Service              string     `json:"service"`

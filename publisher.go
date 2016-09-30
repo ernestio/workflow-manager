@@ -38,12 +38,6 @@ func (p *publisher) Process(s *service, subject string) (result string, err erro
 		result = p.ServicesDeleteError(s)
 	case "service.delete.done":
 		result = p.ServiceDeleteDone(s)
-	case "instances.create":
-		result = p.InstancesCreate(s)
-	case "instances.delete":
-		result = p.InstancesDelete(s)
-	case "instances.update":
-		result = p.InstancesUpdate(s)
 	case "nats.create":
 		result = p.NatsCreate(s)
 	case "nats.delete":
@@ -82,7 +76,7 @@ func (p *publisher) GenericHandler(s *service, subject string) (string, error) {
 	}
 	list := m.(map[string]interface{})
 	items := list["items"].([]interface{})
-	items = p.Vitamine(items, s)
+	items = p.UpdateTemplateVariables(items, s)
 	output.Components = items
 
 	marshalled, err := json.Marshal(output)
@@ -94,22 +88,45 @@ func (p *publisher) GenericHandler(s *service, subject string) (string, error) {
 	return string(marshalled), nil
 }
 
-func (p *publisher) Vitamine(items []interface{}, s *service) []interface{} {
+func MapString(data string, value string) string {
+	if len(value) > 3 && value[0:2] == "$(" && value[len(value)-1:len(value)] == ")" {
+		q := gjson.Get(data, value[2:len(value)-1]).String()
+		if q != "" && q != "null" {
+			return q
+		}
+		return value
+	}
+	return value
+}
+
+func MapSlice(data string, values []interface{}) []interface{} {
+	for i := 0; i < len(values); i++ {
+		switch v := values[i].(type) {
+		case string:
+			values[i] = MapString(data, v)
+		}
+	}
+	return values
+}
+
+// UpdateTemplateVariables : replaces any qjson queries in fields with information from the current service build
+func (p *publisher) UpdateTemplateVariables(items []interface{}, s *service) []interface{} {
 	body, err := json.Marshal(s)
 	if err != nil {
 		log.Println("Can't marshal current service")
 		return items
 	}
-	json := string(body)
+	data := string(body)
 
 	for _, v := range items {
 		item := v.(map[string]interface{})
+
 		for field, selector := range item {
-			value, err := selector.(string)
-			if err == true && value != "" {
-				if value[0:2] == "$(" && value[len(value)-1:len(value)] == ")" {
-					item[field] = gjson.Get(json, value[2:len(value)-1]).String()
-				}
+			switch value := selector.(type) {
+			case string:
+				item[field] = MapString(data, value)
+			case []interface{}:
+				item[field] = MapSlice(data, value)
 			}
 		}
 	}
@@ -148,39 +165,6 @@ func (p *publisher) ServiceCreateError(s *service) string {
 
 func (p *publisher) ServicesDeleteError(s *service) string {
 	return p.ServiceCreateError(s)
-}
-
-func (p *publisher) InstancesUpdate(s *service) string {
-	m := buildUpdateInstances(s)
-	marshalled, err := json.Marshal(m)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-
-	return string(marshalled)
-}
-
-func (p *publisher) InstancesCreate(s *service) string {
-	m := buildCreateInstances(s)
-	marshalled, err := json.Marshal(m)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-
-	return string(marshalled)
-}
-
-func (p *publisher) InstancesDelete(s *service) string {
-	m := buildDeleteInstances(s)
-	marshalled, err := json.Marshal(m)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-
-	return string(marshalled)
 }
 
 func (p *publisher) NatsCreate(s *service) string {

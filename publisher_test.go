@@ -6,10 +6,70 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
+
+func TestVitamineTemplating(t *testing.T) {
+	Convey("Given I have a valid service", t, func() {
+		var p publisher
+		var comp map[string]interface{}
+		var incomp map[string]interface{}
+
+		dataComplete := h.getFixture("./fixtures/publisher.json")
+		dataIncomplete := h.getFixture("./fixtures/publisher_incomplete_firewalls.json")
+		s := h.getService("./fixtures/publisher.json")
+		si := h.getService("./fixtures/publisher_incomplete_firewalls.json")
+
+		json.Unmarshal(dataComplete, &comp)
+		json.Unmarshal(dataIncomplete, &incomp)
+
+		Convey("When i try and template fields on an collection of instances where all fields are known", func() {
+			x := comp["instances"].(map[string]interface{})["items"].([]interface{})
+			items := p.UpdateTemplateVariables(x, &s)
+
+			Convey("It should have mapped all string fields", func() {
+				collection, ok := items[0].(map[string]interface{})
+				So(ok, ShouldBeTrue)
+				item, ok := collection["network_aws_id"].(string)
+				So(ok, ShouldBeTrue)
+				So(item, ShouldEqual, "network-1-id")
+			})
+
+			Convey("It should have mapped all slice fields", func() {
+				collection, ok := items[0].(map[string]interface{})
+				So(ok, ShouldBeTrue)
+				itemsl, ok := collection["security_group_aws_ids"].([]interface{})
+				So(ok, ShouldBeTrue)
+				item, ok := itemsl[0].(string)
+				So(ok, ShouldBeTrue)
+				So(item, ShouldEqual, "firewall-1-id")
+			})
+
+		})
+
+		Convey("When i try and template fields on an collection of instances where not all fields are known", func() {
+			x := incomp["instances"].(map[string]interface{})["items"].([]interface{})
+			items := p.UpdateTemplateVariables(x, &si)
+
+			Convey("It should not have mapped fields where there was no result", func() {
+				collection, ok := items[0].(map[string]interface{})
+				So(ok, ShouldBeTrue)
+				itemsl, ok := collection["security_group_aws_ids"].([]interface{})
+				So(ok, ShouldBeTrue)
+				item, ok := itemsl[0].(string)
+				So(ok, ShouldBeTrue)
+				So(item, ShouldNotEqual, "")
+				So(item, ShouldNotEqual, "null")
+				fmt.Println(item)
+			})
+		})
+
+	})
+
+}
 
 func TestUnMappedMessage(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
@@ -119,7 +179,6 @@ func TestCreateNetworks(t *testing.T) {
 				So(n["datacenter_username"].(string), ShouldEqual, d.Username)
 
 				So(err, ShouldEqual, nil)
-
 			})
 		})
 	})
@@ -173,15 +232,26 @@ func TestCreateInstances(t *testing.T) {
 		Convey("When I get the message for a instances.create event", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("instances.create", &s)
-			m := &InstancesCreate{}
+			m := &GenericComponentMsg{}
+			d := s.Datacenters.Items[0]
+			n := s.Networks.Items[0]
+			sg := s.Firewalls.Items[0]
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
 				So(m.Service, ShouldEqual, s.ID)
-				So(len(m.Instances), ShouldEqual, 2)
-				i := m.Instances[0]
-				So(i.Name, ShouldEqual, s.InstancesToCreate.Items[0].Name)
-
+				So(len(m.Components), ShouldEqual, 2)
+				i := m.Components[0].(map[string]interface{})
+				So(i["name"], ShouldEqual, s.InstancesToCreate.Items[0].Name)
+				So(i["type"], ShouldEqual, s.InstancesToCreate.Items[0].Type)
+				So(i["ip"], ShouldEqual, s.InstancesToCreate.Items[0].IP)
+				So(i["datacenter_name"].(string), ShouldEqual, d.Name)
+				So(i["datacenter_password"].(string), ShouldEqual, d.Password)
+				So(i["datacenter_region"].(string), ShouldEqual, d.Region)
+				So(i["datacenter_type"].(string), ShouldEqual, d.Type)
+				So(i["datacenter_username"].(string), ShouldEqual, d.Username)
+				So(i["network_aws_id"].(string), ShouldEqual, n.NetworkAWSID)
+				So(i["security_group_aws_ids"].([]interface{})[0].(string), ShouldEqual, sg.SecurityGroupAWSID)
 				So(err, ShouldEqual, nil)
 
 			})
