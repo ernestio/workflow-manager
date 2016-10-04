@@ -38,18 +38,6 @@ func (p *publisher) Process(s *service, subject string) (result string, err erro
 		result = p.ServicesDeleteError(s)
 	case "service.delete.done":
 		result = p.ServiceDeleteDone(s)
-	case "nats.create":
-		result = p.NatsCreate(s)
-	case "nats.delete":
-		result = p.NatsDelete(s)
-	case "nats.update":
-		result = p.NatsUpdate(s)
-	case "firewalls.create":
-		result = p.FirewallsCreate(s)
-	case "firewalls.delete":
-		result = p.FirewallsDelete(s)
-	case "firewalls.update":
-		result = p.FirewallsUpdate(s)
 	case "executions.create":
 		result = p.ExecutionsCreate(s)
 	case "bootstraps.create":
@@ -75,6 +63,9 @@ func (p *publisher) GenericHandler(s *service, subject string) (string, error) {
 		return "", errors.New("Component " + key + " not present")
 	}
 	list := m.(map[string]interface{})
+	if list["items"] == nil {
+		return "", errors.New("Could not handle components")
+	}
 	items := list["items"].([]interface{})
 	items = p.UpdateTemplateVariables(items, s)
 	output.Components = items
@@ -104,6 +95,13 @@ func MapSlice(data string, values []interface{}) []interface{} {
 		switch v := values[i].(type) {
 		case string:
 			values[i] = MapString(data, v)
+		case map[string]interface{}:
+			for field, selector := range v {
+				vv, ok := selector.(string)
+				if ok {
+					v[field] = MapString(data, vv)
+				}
+			}
 		}
 	}
 	return values
@@ -165,75 +163,6 @@ func (p *publisher) ServiceCreateError(s *service) string {
 
 func (p *publisher) ServicesDeleteError(s *service) string {
 	return p.ServiceCreateError(s)
-}
-
-func (p *publisher) NatsCreate(s *service) string {
-	m := buildCreateNats(s)
-	marshalled, err := json.Marshal(m)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-
-	return string(marshalled)
-}
-
-func (p *publisher) NatsDelete(s *service) string {
-	m := buildDeleteNats(s)
-	marshalled, err := json.Marshal(m)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-
-	return string(marshalled)
-}
-
-func (p *publisher) NatsUpdate(s *service) string {
-	m := buildUpdateNats(s)
-	marshalled, err := json.Marshal(m)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-
-	return string(marshalled)
-}
-
-func (p *publisher) FirewallsCreate(s *service) string {
-	m := buildCreateFirewalls(s)
-
-	marshalled, err := json.Marshal(m)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-
-	return string(marshalled)
-}
-
-func (p *publisher) FirewallsUpdate(s *service) string {
-	m := buildUpdateFirewalls(s)
-
-	marshalled, err := json.Marshal(m)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-
-	return string(marshalled)
-}
-
-func (p *publisher) FirewallsDelete(s *service) string {
-	m := buildDeleteFirewalls(s)
-
-	marshalled, err := json.Marshal(m)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-
-	return string(marshalled)
 }
 
 func (p *publisher) ExecutionsCreate(s *service) string {

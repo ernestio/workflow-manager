@@ -14,27 +14,6 @@ type GenericComponentMsg struct {
 	SequentialProcessing bool          `json:"sequential_processing"`
 }
 
-// FirewallsCreate : Message to create firewalls
-type FirewallsCreate struct {
-	Service              string     `json:"service"`
-	Firewalls            []firewall `json:"components"`
-	Networks             []network  `json:"networks"`
-	Status               string     `json:"status"`
-	ErrorCode            string     `json:"error_code"`
-	ErrorMessage         string     `json:"error_message"`
-	SequentialProcessing bool       `json:"sequential_processing"`
-}
-
-// NatsCreate : Message to create nats
-type NatsCreate struct {
-	Service              string `json:"service"`
-	Nats                 []nat  `json:"components"`
-	Status               string `json:"status"`
-	ErrorCode            string `json:"error_code"`
-	ErrorMessage         string `json:"error_message"`
-	SequentialProcessing bool   `json:"sequential_processing"`
-}
-
 // ExecutionsCreate : Message to create Executions
 type ExecutionsCreate struct {
 	Service     string      `json:"service"`
