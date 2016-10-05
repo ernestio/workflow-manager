@@ -14,20 +14,6 @@ type GenericComponentMsg struct {
 	SequentialProcessing bool          `json:"sequential_processing"`
 }
 
-// ExecutionsCreate : Message to create Executions
-type ExecutionsCreate struct {
-	Service     string      `json:"service"`
-	ServiceName string      `json:"service_name"`
-	ServiceType string      `json:"service_type"`
-	Executions  []execution `json:"components"`
-}
-
-// ServiceOptions : Service options aka salt user password
-type ServiceOptions struct {
-	User     string `json:"user"`
-	Password string `json:"password"`
-}
-
 // Monitor : Messages to be sent to monitoring service
 type Monitor struct {
 	Service  string           `json:"service"`

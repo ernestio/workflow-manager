@@ -446,67 +446,22 @@ func TestCreateBootstraps(t *testing.T) {
 			Convey("If a service_ip is not provided", func() {
 				mm := messageManager{}
 				body, err := mm.preparePublishMessage("bootstraps.create", &s)
-				m := &ExecutionsCreate{}
+				m := &GenericComponentMsg{}
 				json.Unmarshal([]byte(body), &m)
 
 				Convey("Then I'll receive a valid json string", func() {
 					So(m.Service, ShouldEqual, s.ID)
-					So(m.ServiceName, ShouldEqual, s.Name)
-					So(m.ServiceType, ShouldEqual, s.Type)
-					So(len(m.Executions), ShouldEqual, 1)
+					So(len(m.Components), ShouldEqual, 1)
+					b := m.Components[0].(map[string]interface{})
 
-					e := m.Executions[0]
-					So(e.Name, ShouldEqual, s.BootstrapsToCreate.Items[0].Name)
-					So(e.Type, ShouldEqual, "salt")
-					So(e.Payload, ShouldEqual, s.BootstrapsToCreate.Items[0].Payload)
-					So(e.Target, ShouldEqual, s.BootstrapsToCreate.Items[0].Target)
-					So(e.Status, ShouldEqual, s.BootstrapsToCreate.Items[0].Status)
-					So(e.User, ShouldEqual, "")
-					So(e.Password, ShouldEqual, "")
-					So(e.EndPoint, ShouldEqual, s.Routers.Items[0].IP)
-					So(e.ClientName, ShouldEqual, s.ClientName)
-
-					d := s.Datacenters.Items[0]
-					So(e.DatacenterName, ShouldEqual, d.Name)
-					So(e.DatacenterPassword, ShouldEqual, d.Password)
-					So(e.DatacenterRegion, ShouldEqual, d.Region)
-					So(e.DatacenterType, ShouldEqual, d.Type)
-					So(e.DatacenterUsername, ShouldEqual, d.Username)
-
-					So(err, ShouldEqual, nil)
-				})
-			})
-
-			Convey("If a service_ip is provided", func() {
-				mm := messageManager{}
-				s.ServiceIP = "1.1.1.1"
-				body, err := mm.preparePublishMessage("executions.create", &s)
-				m := &ExecutionsCreate{}
-				json.Unmarshal([]byte(body), &m)
-
-				Convey("Then I'll receive a valid json string", func() {
-					So(m.Service, ShouldEqual, s.ID)
-					So(m.ServiceName, ShouldEqual, s.Name)
-					So(m.ServiceType, ShouldEqual, s.Type)
-					So(len(m.Executions), ShouldEqual, 1)
-
-					e := m.Executions[0]
-					So(e.Name, ShouldEqual, s.ExecutionsToCreate.Items[0].Name)
-					So(e.Type, ShouldEqual, "salt")
-					So(e.Payload, ShouldEqual, s.ExecutionsToCreate.Items[0].Payload)
-					So(e.Target, ShouldEqual, s.ExecutionsToCreate.Items[0].Target)
-					So(e.Status, ShouldEqual, s.ExecutionsToCreate.Items[0].Status)
-					So(e.User, ShouldEqual, "")
-					So(e.Password, ShouldEqual, "")
-					So(e.EndPoint, ShouldEqual, "1.1.1.1")
-					So(e.ClientName, ShouldEqual, s.ClientName)
-
-					d := s.Datacenters.Items[0]
-					So(e.DatacenterName, ShouldEqual, d.Name)
-					So(e.DatacenterPassword, ShouldEqual, d.Password)
-					So(e.DatacenterRegion, ShouldEqual, d.Region)
-					So(e.DatacenterType, ShouldEqual, d.Type)
-					So(e.DatacenterUsername, ShouldEqual, d.Username)
+					So(b["name"], ShouldEqual, s.BootstrapsToCreate.Items[0].Name)
+					So(b["type"], ShouldEqual, "salt")
+					So(b["payload"], ShouldEqual, s.BootstrapsToCreate.Items[0].Payload)
+					So(b["target"], ShouldEqual, s.BootstrapsToCreate.Items[0].Target)
+					So(b["status"], ShouldEqual, s.BootstrapsToCreate.Items[0].Status)
+					So(b["user"], ShouldEqual, "")
+					So(b["password"], ShouldEqual, "")
+					So(b["service_endpoint"], ShouldEqual, s.Routers.Items[0].IP)
 
 					So(err, ShouldEqual, nil)
 				})
@@ -529,34 +484,23 @@ func TestCreateExecutions(t *testing.T) {
 		Convey("When I get the message for a executions.create event and status nats_created", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("executions.create", &s)
-			m := &ExecutionsCreate{}
+			m := &GenericComponentMsg{}
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
 				So(err, ShouldEqual, nil)
 
 				So(m.Service, ShouldEqual, s.ID)
-				So(m.ServiceName, ShouldEqual, s.Name)
-				So(m.ServiceType, ShouldEqual, s.Type)
-				So(len(m.Executions), ShouldEqual, 1)
+				So(len(m.Components), ShouldEqual, 1)
+				e := m.Components[0].(map[string]interface{})
 
-				e := m.Executions[0]
-				So(e.Payload, ShouldEqual, s.ExecutionsToCreate.Items[0].Payload)
-				So(e.Name, ShouldEqual, s.ExecutionsToCreate.Items[0].Name)
-				So(e.Type, ShouldEqual, "salt")
-				So(e.User, ShouldEqual, "")
-				So(e.Password, ShouldEqual, "")
-				So(e.Target, ShouldEqual, s.ExecutionsToCreate.Items[0].Target)
-				So(e.ClientName, ShouldEqual, s.ClientName)
-				So(e.EndPoint, ShouldEqual, s.Routers.Items[0].IP)
-
-				d := s.Datacenters.Items[0]
-				So(e.DatacenterName, ShouldEqual, d.Name)
-				So(e.DatacenterPassword, ShouldEqual, d.Password)
-				So(e.DatacenterRegion, ShouldEqual, d.Region)
-				So(e.DatacenterType, ShouldEqual, d.Type)
-				So(e.DatacenterUsername, ShouldEqual, d.Username)
-
+				So(e["payload"], ShouldEqual, s.ExecutionsToCreate.Items[0].Payload)
+				So(e["name"], ShouldEqual, s.ExecutionsToCreate.Items[0].Name)
+				So(e["type"], ShouldEqual, "salt")
+				So(e["user"], ShouldEqual, "")
+				So(e["password"], ShouldEqual, "")
+				So(e["target"], ShouldEqual, s.ExecutionsToCreate.Items[0].Target)
+				So(e["service_endpoint"], ShouldEqual, s.Routers.Items[0].IP)
 			})
 		})
 	})

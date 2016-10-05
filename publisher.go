@@ -38,10 +38,6 @@ func (p *publisher) Process(s *service, subject string) (result string, err erro
 		result = p.ServicesDeleteError(s)
 	case "service.delete.done":
 		result = p.ServiceDeleteDone(s)
-	case "executions.create":
-		result = p.ExecutionsCreate(s)
-	case "bootstraps.create":
-		result = p.BootstrapsCreate(s)
 	default:
 		return p.GenericHandler(s, subject)
 	}
@@ -168,32 +164,6 @@ func (p *publisher) ServiceCreateError(s *service) string {
 
 func (p *publisher) ServicesDeleteError(s *service) string {
 	return p.ServiceCreateError(s)
-}
-
-func (p *publisher) ExecutionsCreate(s *service) string {
-	m := ExecutionsCreate{}
-	m = buildCreateExecutions(s)
-
-	marshalled, err := json.Marshal(m)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-
-	return string(marshalled)
-}
-
-func (p *publisher) BootstrapsCreate(s *service) string {
-	m := ExecutionsCreate{}
-	m = buildCreateBootstraps(s)
-
-	marshalled, err := json.Marshal(m)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-
-	return string(marshalled)
 }
 
 // ServiceCreateDone
