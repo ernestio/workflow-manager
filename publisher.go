@@ -70,6 +70,11 @@ func (p *publisher) GenericHandler(s *service, subject string) (string, error) {
 	items = p.UpdateTemplateVariables(items, s)
 	output.Components = items
 
+	processing, ok := list["sequential_processing"].(bool)
+	if ok {
+		output.SequentialProcessing = processing
+	}
+
 	marshalled, err := json.Marshal(output)
 	if err != nil {
 		log.Println(err)
