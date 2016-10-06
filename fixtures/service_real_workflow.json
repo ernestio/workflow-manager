@@ -315,6 +315,7 @@
         "type": "salt",
         "name": "test_execution",
         "payload": "test to create",
+        "service_endpoint": "$(routers.items.0.ip)",
         "target": "list:test"
       }]
     },
@@ -348,6 +349,7 @@
         "name": "test_execution",
         "payload": "bootstrap to create",
         "target": "list:test",
+        "service_endpoint": "$(routers.items.0.ip)",
         "status": "completed"
       }]
     }

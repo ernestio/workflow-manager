@@ -5,7 +5,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"os"
 	"runtime"
@@ -18,7 +17,6 @@ import (
 var natsClient *nats.Conn
 var em = eventManager{}
 var p = storage{}
-var c Config
 var cfg *ecc.Config
 
 // Receives a message, updates the related service on the FSM
@@ -50,11 +48,6 @@ func main() {
 	cfg = ecc.NewConfig(os.Getenv("NATS_URI"))
 	natsClient = cfg.Nats()
 	p.load(natsClient)
-
-	saltCfg, err := natsClient.Request("config.get.salt", []byte(""), 1*time.Second)
-	if err == nil {
-		json.Unmarshal(saltCfg.Data, &c.SaltAuthentication)
-	}
 
 	// Messages matching *.* are always actions
 	natsClient.Subscribe("*.*", func(m *nats.Msg) {
