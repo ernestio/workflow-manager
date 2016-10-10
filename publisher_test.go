@@ -164,6 +164,7 @@ func TestCreateNetworks(t *testing.T) {
 
 			Convey("Then I'll receive a valid json string", func() {
 				So(m.Service, ShouldEqual, s.ID)
+				So(m.SequentialProcessing, ShouldBeTrue)
 				So(len(m.Components), ShouldEqual, 1)
 				n := m.Components[0].(map[string]interface{})
 				So(n["name"].(string), ShouldEqual, s.NetworksToCreate.Items[0].Name)

@@ -267,166 +267,193 @@ type service struct {
 		User     string `json:"user"`
 	} `json:"options"`
 	Datacenters struct {
-		Finished string       `json:"finished"`
-		Items    []datacenter `json:"items"`
-		Started  string       `json:"started"`
-		Status   string       `json:"status"`
+		Finished             string       `json:"finished"`
+		Items                []datacenter `json:"items"`
+		Started              string       `json:"started"`
+		Status               string       `json:"status"`
+		SequentialProcessing bool         `json:"sequential_processing"`
 	} `json:"datacenters"`
 	VPCs struct {
-		Finished string `json:"finished"`
-		Items    []vpc  `json:"items"`
-		Started  string `json:"started"`
-		Status   string `json:"status"`
+		Finished             string `json:"finished"`
+		Items                []vpc  `json:"items"`
+		Started              string `json:"started"`
+		Status               string `json:"status"`
+		SequentialProcessing bool   `json:"sequential_processing"`
 	} `json:"vpcs"`
 	VPCsToCreate struct {
-		Finished string `json:"finished"`
-		Items    []vpc  `json:"items"`
-		Started  string `json:"started"`
-		Status   string `json:"status"`
+		Finished             string `json:"finished"`
+		Items                []vpc  `json:"items"`
+		Started              string `json:"started"`
+		Status               string `json:"status"`
+		SequentialProcessing bool   `json:"sequential_processing"`
 	} `json:"vpcs_to_create"`
 	VPCsToDelete struct {
-		Finished string `json:"finished"`
-		Items    []vpc  `json:"items"`
-		Started  string `json:"started"`
-		Status   string `json:"status"`
+		Finished             string `json:"finished"`
+		Items                []vpc  `json:"items"`
+		Started              string `json:"started"`
+		Status               string `json:"status"`
+		SequentialProcessing bool   `json:"sequential_processing"`
 	} `json:"vpcs_to_delete"`
 	Bootstraps struct {
-		Finished string      `json:"finished"`
-		Items    []execution `json:"items"`
-		Started  string      `json:"started"`
-		Status   string      `json:"status"`
+		Finished             string      `json:"finished"`
+		Items                []execution `json:"items"`
+		Started              string      `json:"started"`
+		Status               string      `json:"status"`
+		SequentialProcessing bool        `json:"sequential_processing"`
 	} `json:"bootstraps"`
 	BootstrapsToCreate struct {
-		Finished string      `json:"finished"`
-		Items    []execution `json:"items"`
-		Started  string      `json:"started"`
-		Status   string      `json:"status"`
+		Finished             string      `json:"finished"`
+		Items                []execution `json:"items"`
+		Started              string      `json:"started"`
+		Status               string      `json:"status"`
+		SequentialProcessing bool        `json:"sequential_processing"`
 	} `json:"bootstraps_to_create"`
 	Executions struct {
-		Finished string      `json:"finished"`
-		Items    []execution `json:"items"`
-		Started  string      `json:"started"`
-		Status   string      `json:"status"`
+		Finished             string      `json:"finished"`
+		Items                []execution `json:"items"`
+		Started              string      `json:"started"`
+		Status               string      `json:"status"`
+		SequentialProcessing bool        `json:"sequential_processing"`
 	} `json:"executions"`
 	ExecutionsToCreate struct {
-		Finished string      `json:"finished"`
-		Items    []execution `json:"items"`
-		Started  string      `json:"started"`
-		Status   string      `json:"status"`
+		Finished             string      `json:"finished"`
+		Items                []execution `json:"items"`
+		Started              string      `json:"started"`
+		Status               string      `json:"status"`
+		SequentialProcessing bool        `json:"sequential_processing"`
 	} `json:"executions_to_create"`
 	Firewalls struct {
 		Finished string     `json:"finished"`
 		Items    []firewall `json:"items"`
 		Started  string     `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"firewalls"`
 	FirewallsToCreate struct {
 		Finished string     `json:"finished"`
 		Items    []firewall `json:"items"`
 		Started  string     `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"firewalls_to_create"`
 	FirewallsToUpdate struct {
 		Finished string     `json:"finished"`
 		Items    []firewall `json:"items"`
 		Started  string     `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"firewalls_to_update"`
 	FirewallsToDelete struct {
 		Finished string     `json:"finished"`
 		Items    []firewall `json:"items"`
 		Started  string     `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"firewalls_to_delete"`
 	Instances struct {
 		Finished string     `json:"finished"`
 		Items    []instance `json:"items"`
 		Started  string     `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"instances"`
 	InstancesToCreate struct {
 		Finished string     `json:"finished"`
 		Items    []instance `json:"items"`
 		Started  string     `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"instances_to_create"`
 	InstancesToDelete struct {
 		Finished string     `json:"finished"`
 		Items    []instance `json:"items"`
 		Started  string     `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"instances_to_delete"`
 	InstancesToUpdate struct {
-		Finished string     `json:"finished"`
-		Items    []instance `json:"items"`
-		Started  string     `json:"started"`
-		Status   string     `json:"status"`
+		Finished             string     `json:"finished"`
+		Items                []instance `json:"items"`
+		Started              string     `json:"started"`
+		Status               string     `json:"status"`
+		SequentialProcessing bool       `json:"sequential_processing"`
 	} `json:"instances_to_update"`
 	Loadbalancer struct {
 		Finished string         `json:"finished"`
 		Items    []loadbalancer `json:"items"`
 		Started  string         `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"loadbalancer"`
 	Nats struct {
 		Finished string `json:"finished"`
 		Items    []nat  `json:"items"`
 		Started  string `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"nats"`
 	NatsToCreate struct {
 		Finished string `json:"finished"`
 		Items    []nat  `json:"items"`
 		Started  string `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"nats_to_create"`
 	NatsToUpdate struct {
 		Finished string `json:"finished"`
 		Items    []nat  `json:"items"`
 		Started  string `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"nats_to_update"`
 	NatsToDelete struct {
 		Finished string `json:"finished"`
 		Items    []nat  `json:"items"`
 		Started  string `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"nats_to_delete"`
 	Networks struct {
 		Finished string    `json:"finished"`
 		Items    []network `json:"items"`
 		Started  string    `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"networks"`
 	NetworksToCreate struct {
 		Finished string    `json:"finished"`
 		Items    []network `json:"items"`
 		Started  string    `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"networks_to_create"`
 	NetworksToDelete struct {
 		Finished string    `json:"finished"`
 		Items    []network `json:"items"`
 		Started  string    `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"networks_to_delete"`
 	Routers struct {
 		Finished string   `json:"finished"`
 		Items    []router `json:"items"`
 		Started  string   `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"routers"`
 	RoutersToCreate struct {
 		Finished string   `json:"finished"`
 		Items    []router `json:"items"`
 		Started  string   `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"routers_to_create"`
 	RoutersToDelete struct {
 		Finished string   `json:"finished"`
 		Items    []router `json:"items"`
 		Started  string   `json:"started"`
 		status
+		SequentialProcessing bool `json:"sequential_processing"`
 	} `json:"routers_to_delete"`
 }
 

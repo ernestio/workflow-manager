@@ -160,6 +160,7 @@
       "status": "",
       "started": "",
       "finished": "",
+      "sequential_processing": true,
       "items": [{
         "service": "test",
         "router_name": "test",
