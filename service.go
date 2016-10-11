@@ -254,7 +254,7 @@ type elbPort struct {
 
 // ELB : Mapping for a elb component
 type elb struct {
-	Type                string    `json:"elb_type"`
+	Type                string    `json:"_type"`
 	Name                string    `json:"elb_name"`
 	IsPrivate           bool      `json:"elb_is_private"`
 	DNSName             string    `json:"elb_dns_name"`
