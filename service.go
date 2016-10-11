@@ -722,6 +722,7 @@ func (s *service) transferUpdated(cType string, input GenericComponentMsg) {
 }
 
 func (s *service) transferDeleted(cType string, input GenericComponentMsg) {
+	var components []interface{}
 	var remanentComponents []interface{}
 	var erroredComponents []interface{}
 
@@ -729,7 +730,9 @@ func (s *service) transferDeleted(cType string, input GenericComponentMsg) {
 	inputComponents := input.Components
 
 	currentComponents := tmp[cType].(map[string]interface{})
-	components := currentComponents["items"].([]interface{})
+	if currentComponents["items"] != nil {
+		components = currentComponents["items"].([]interface{})
+	}
 
 	for _, v := range components {
 		sw := false
