@@ -584,12 +584,15 @@ func (s *service) getComponentList(cType string) []interface{} {
 }
 
 func (s *service) transferCreated(cType string, input GenericComponentMsg) {
+	var components []interface{}
 	var erroredComponents []interface{}
 
 	tmp := s.asMap()
 	inputComponents := input.Components
 	currentComponents := tmp[cType].(map[string]interface{})
-	components := currentComponents["items"].([]interface{})
+	if currentComponents["items"] != nil {
+		components = currentComponents["items"].([]interface{})
+	}
 
 	// Append new components
 	for _, c := range inputComponents {
