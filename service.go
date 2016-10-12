@@ -261,6 +261,7 @@ type elb struct {
 	Listeners           []elbListener `json:"listeners"`
 	NetworkAWSIDs       []string      `json:"network_aws_ids"`
 	Instances           []string      `json:"instances"`
+	InstanceNames       []string      `json:"instance_names"`
 	InstanceAWSIDs      []string      `json:"instance_aws_ids"`
 	SecurityGroups      []string      `json:"security_groups"`
 	SecurityGroupAWSIDs []string      `json:"security_group_aws_ids"`
