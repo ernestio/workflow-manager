@@ -195,6 +195,7 @@
       "items": [{
         "id": "nat_id",
         "service": "test",
+        "name": "test",
         "router_name": "test",
         "status": "completed",
         "datacenter_name": "$(datacenters.items.0.name)",

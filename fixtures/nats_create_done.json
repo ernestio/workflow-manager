@@ -9,6 +9,7 @@
          "rules": [
             {
                "type": "SNAT",
+               "name": "test",
                "origin_ip": "10.64.0.0/16",
                "origin_port": "ANY",
                "translation_ip": "31.210.241.10",

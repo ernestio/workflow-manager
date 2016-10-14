@@ -172,20 +172,11 @@ func (p *publisher) ServiceCreateDone(s *service) string {
 	if err != nil {
 		log.Println(err)
 	}
-	if len(s.Routers.Items) > 0 {
-		if s.Endpoint == "" {
-			s.Endpoint = s.Routers.Items[0].IP
-		}
-		if s.ServiceIP == "" {
-			s.ServiceIP = s.Routers.Items[0].IP
-		}
-	}
 
 	natsClient.Request("service.set", []byte(`{"id":"`+s.ID+`","status":"done"}`), time.Second)
 
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "SUCCESS: rules successfully applied", Level: "SUCCESS"})
-	messages = append(messages, MonitorMessage{Body: "Your environment endpoint is: " + s.Endpoint, Level: "SUCCESS"})
 	messages = append(messages, MonitorMessage{Body: "error", Level: "ERROR"})
 	UserOutput(s.Channel(), messages)
 

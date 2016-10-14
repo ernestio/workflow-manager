@@ -17,7 +17,7 @@ import (
 
 type testHelper struct{}
 
-func (t *testHelper) getService(source string) service {
+func (t *testHelper) getService(source string) (service, string) {
 	s := service{}
 	absPath, _ := filepath.Abs(source)
 	file, err := os.Open(absPath)
@@ -32,8 +32,9 @@ func (t *testHelper) getService(source string) service {
 		log.Println("Definition file is invalid")
 		log.Panic("error:", err)
 	}
+	content, _ := ioutil.ReadFile(source)
 
-	return s
+	return s, string(content)
 }
 
 func (t *testHelper) getServiceBody(source string) string {

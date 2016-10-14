@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/tidwall/gjson"
+
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -20,8 +22,8 @@ func TestVitamineTemplating(t *testing.T) {
 
 		dataComplete := h.getFixture("./fixtures/publisher.json")
 		dataIncomplete := h.getFixture("./fixtures/publisher_incomplete_firewalls.json")
-		s := h.getService("./fixtures/publisher.json")
-		si := h.getService("./fixtures/publisher_incomplete_firewalls.json")
+		s, _ := h.getService("./fixtures/publisher.json")
+		si, _ := h.getService("./fixtures/publisher_incomplete_firewalls.json")
 
 		json.Unmarshal(dataComplete, &comp)
 		json.Unmarshal(dataIncomplete, &incomp)
@@ -76,7 +78,7 @@ func TestUnMappedMessage(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service.json")
+		s, _ := h.getService("./fixtures/service.json")
 
 		Convey("When I try to get body for the unmapped message", func() {
 			mm := messageManager{}
@@ -96,7 +98,7 @@ func TestCreateRouters(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service_create_routers.json")
+		s, sBody := h.getService("./fixtures/service_create_routers.json")
 
 		Convey("When I get the message for a routers.create event", func() {
 			mm := messageManager{}
@@ -107,17 +109,15 @@ func TestCreateRouters(t *testing.T) {
 			Convey("Then I'll receive a valid json string", func() {
 				r := m.Components[0].(map[string]interface{})
 				So(len(m.Components), ShouldEqual, 1)
-				So(r["name"].(string), ShouldEqual, s.RoutersToCreate.Items[0].Name)
-				So(r["type"].(string), ShouldEqual, s.RoutersToCreate.Items[0].Type)
+				So(r["name"].(string), ShouldEqual, gjson.Get(sBody, "routers_to_create.items.0.name").String())
+				So(r["type"].(string), ShouldEqual, gjson.Get(sBody, "routers_to_create.items.0.type").String())
 
-				d := s.Datacenters.Items[0]
-				So(r["datacenter_name"].(string), ShouldEqual, d.Name)
-				So(r["datacenter_password"].(string), ShouldEqual, d.Password)
-				So(r["datacenter_region"].(string), ShouldEqual, d.Region)
-				So(r["datacenter_type"].(string), ShouldEqual, d.Type)
-				So(r["datacenter_username"].(string), ShouldEqual, d.Username)
+				So(r["datacenter_name"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.name").String())
+				So(r["datacenter_password"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.password").String())
+				So(r["datacenter_region"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.region").String())
+				So(r["datacenter_type"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.type").String())
+				So(r["datacenter_username"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.username").String())
 				So(err, ShouldEqual, nil)
-
 			})
 		})
 	})
@@ -128,7 +128,7 @@ func TestPublisherCreateError(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service_real_workflow.json")
+		s, _ := h.getService("./fixtures/service_real_workflow.json")
 
 		Convey("When I get the message for a services.create.error event", func() {
 			mm := messageManager{}
@@ -151,15 +151,13 @@ func TestCreateNetworks(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service_create_networks.json")
+		s, sBody := h.getService("./fixtures/service_create_networks.json")
 
 		Convey("When I get the message for a networks.create event", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("networks.create", &s)
 			m := &GenericComponentMsg{}
 
-			d := s.Datacenters.Items[0]
-			r := s.Routers.Items[0]
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
@@ -167,17 +165,17 @@ func TestCreateNetworks(t *testing.T) {
 				So(m.SequentialProcessing, ShouldBeTrue)
 				So(len(m.Components), ShouldEqual, 1)
 				n := m.Components[0].(map[string]interface{})
-				So(n["name"].(string), ShouldEqual, s.NetworksToCreate.Items[0].Name)
-				So(n["range"].(string), ShouldEqual, s.NetworksToCreate.Items[0].Range)
-				So(n["router_name"].(string), ShouldEqual, r.Name)
-				So(n["router_type"].(string), ShouldEqual, r.Type)
-				So(n["router_ip"].(string), ShouldEqual, r.IP)
-				So(n["client_name"].(string), ShouldEqual, s.ClientName)
-				So(n["datacenter_name"].(string), ShouldEqual, d.Name)
-				So(n["datacenter_password"].(string), ShouldEqual, d.Password)
-				So(n["datacenter_region"].(string), ShouldEqual, d.Region)
-				So(n["datacenter_type"].(string), ShouldEqual, d.Type)
-				So(n["datacenter_username"].(string), ShouldEqual, d.Username)
+				So(n["name"].(string), ShouldEqual, gjson.Get(sBody, "networks_to_create.items.0.name").String())
+				So(n["range"].(string), ShouldEqual, gjson.Get(sBody, "networks_to_create.items.0.range").String())
+				So(n["router_name"].(string), ShouldEqual, gjson.Get(sBody, "routers.items.0.name").String())
+				So(n["router_type"].(string), ShouldEqual, gjson.Get(sBody, "routers.items.0.type").String())
+				So(n["router_ip"].(string), ShouldEqual, gjson.Get(sBody, "routers.items.0.ip").String())
+				So(n["client_name"], ShouldBeNil)
+				So(n["datacenter_name"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.name").String())
+				So(n["datacenter_password"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.password").String())
+				So(n["datacenter_region"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.region").String())
+				So(n["datacenter_type"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.type").String())
+				So(n["datacenter_username"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.username").String())
 
 				So(err, ShouldEqual, nil)
 			})
@@ -190,31 +188,29 @@ func TestDeleteNetworks(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service_real_workflow.json")
+		s, sBody := h.getService("./fixtures/service_real_workflow.json")
 
 		Convey("When I get the message for a networks.delete event", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("networks.delete", &s)
 			m := &GenericComponentMsg{}
-			d := s.Datacenters.Items[0]
-			r := s.Routers.Items[0]
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
 				So(m.Service, ShouldEqual, s.ID)
 				So(len(m.Components), ShouldEqual, 1)
 				n := m.Components[0].(map[string]interface{})
-				So(n["name"].(string), ShouldEqual, s.Networks.Items[0].Name)
-				So(n["range"].(string), ShouldEqual, s.Networks.Items[0].Range)
-				So(n["router_name"].(string), ShouldEqual, r.Name)
-				So(n["router_type"].(string), ShouldEqual, r.Type)
-				So(n["router_ip"].(string), ShouldEqual, r.IP)
-				So(n["client_name"].(string), ShouldEqual, s.ClientName)
-				So(n["datacenter_name"].(string), ShouldEqual, d.Name)
-				So(n["datacenter_password"].(string), ShouldEqual, d.Password)
-				So(n["datacenter_region"].(string), ShouldEqual, d.Region)
-				So(n["datacenter_type"].(string), ShouldEqual, d.Type)
-				So(n["datacenter_username"].(string), ShouldEqual, d.Username)
+				So(n["name"].(string), ShouldEqual, gjson.Get(sBody, "networks.items.0.name").String())
+				So(n["range"].(string), ShouldEqual, gjson.Get(sBody, "networks.items.0.range").String())
+				So(n["router_name"].(string), ShouldEqual, gjson.Get(sBody, "routers.items.0.name").String())
+				So(n["router_type"].(string), ShouldEqual, gjson.Get(sBody, "routers.items.0.type").String())
+				So(n["router_ip"].(string), ShouldEqual, gjson.Get(sBody, "routers.items.0.ip").String())
+				So(n["client_name"], ShouldBeNil)
+				So(n["datacenter_name"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.name").String())
+				So(n["datacenter_password"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.password").String())
+				So(n["datacenter_region"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.region").String())
+				So(n["datacenter_type"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.type").String())
+				So(n["datacenter_username"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.username").String())
 
 				So(err, ShouldEqual, nil)
 
@@ -228,31 +224,27 @@ func TestCreateInstances(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service_create_instances.json")
+		s, sBody := h.getService("./fixtures/service_create_instances.json")
 
 		Convey("When I get the message for a instances.create event", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("instances.create", &s)
 			m := &GenericComponentMsg{}
-			d := s.Datacenters.Items[0]
-			n := s.Networks.Items[0]
-			sg := s.Firewalls.Items[0]
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
 				So(m.Service, ShouldEqual, s.ID)
 				So(len(m.Components), ShouldEqual, 2)
 				i := m.Components[0].(map[string]interface{})
-				So(i["name"], ShouldEqual, s.InstancesToCreate.Items[0].Name)
-				So(i["type"], ShouldEqual, s.InstancesToCreate.Items[0].Type)
-				So(i["ip"], ShouldEqual, s.InstancesToCreate.Items[0].IP)
-				So(i["datacenter_name"].(string), ShouldEqual, d.Name)
-				So(i["datacenter_password"].(string), ShouldEqual, d.Password)
-				So(i["datacenter_region"].(string), ShouldEqual, d.Region)
-				So(i["datacenter_type"].(string), ShouldEqual, d.Type)
-				So(i["datacenter_username"].(string), ShouldEqual, d.Username)
-				So(i["network_aws_id"].(string), ShouldEqual, n.NetworkAWSID)
-				So(i["security_group_aws_ids"].([]interface{})[0].(string), ShouldEqual, sg.SecurityGroupAWSID)
+				So(i["name"].(string), ShouldEqual, gjson.Get(sBody, "instances_to_create.items.0.name").String())
+				So(i["type"].(string), ShouldEqual, gjson.Get(sBody, "instances_to_create.items.0.type").String())
+				So(i["ip"].(string), ShouldEqual, gjson.Get(sBody, "instances_to_create.items.0.ip").String())
+				So(i["datacenter_name"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.name").String())
+				So(i["datacenter_password"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.password").String())
+				So(i["datacenter_region"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.region").String())
+				So(i["datacenter_type"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.type").String())
+				So(i["datacenter_username"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.username").String())
+				So(i["network_aws_id"].(string), ShouldEqual, gjson.Get(sBody, "networks.items.0.network_aws_id").String())
 				So(err, ShouldEqual, nil)
 
 			})
@@ -265,14 +257,12 @@ func TestCreateNats(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service_create_nats.json")
+		s, sBody := h.getService("./fixtures/service_create_nats.json")
 
 		Convey("When I get the message for a nats.create event", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("nats.create", &s)
 			m := &GenericComponentMsg{}
-			d := s.Datacenters.Items[0]
-			ro := s.Routers.Items[0]
 			json.Unmarshal([]byte(body), &m)
 			fmt.Println(body)
 
@@ -280,17 +270,17 @@ func TestCreateNats(t *testing.T) {
 				So(m.Service, ShouldEqual, s.ID)
 				So(len(m.Components), ShouldEqual, 1)
 				n := m.Components[0].(map[string]interface{})
-				So(n["name"], ShouldEqual, s.NatsToCreate.Items[0].Name)
-				So(n["status"], ShouldEqual, s.NatsToCreate.Items[0].Status)
-				So(n["router_name"], ShouldEqual, ro.Name)
-				So(n["router_type"], ShouldEqual, ro.Type)
-				So(n["router_ip"], ShouldEqual, ro.IP)
-				So(n["client_name"], ShouldEqual, s.ClientName)
-				So(n["datacenter_name"], ShouldEqual, d.Name)
-				So(n["datacenter_type"], ShouldEqual, d.Type)
-				So(n["datacenter_region"], ShouldEqual, d.Region)
-				So(n["datacenter_username"], ShouldEqual, d.Username)
-				So(n["datacenter_password"], ShouldEqual, d.Password)
+				So(n["name"].(string), ShouldEqual, gjson.Get(sBody, "nats_to_create.items.0.name").String())
+				So(n["status"].(string), ShouldEqual, gjson.Get(sBody, "nats_to_create.items.0.status").String())
+				So(n["router_name"].(string), ShouldEqual, gjson.Get(sBody, "routers.items.0.name").String())
+				So(n["router_type"], ShouldBeNil)
+				So(n["router_ip"], ShouldBeNil)
+				So(n["client_name"], ShouldBeNil)
+				So(n["datacenter_name"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.name").String())
+				So(n["datacenter_password"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.password").String())
+				So(n["datacenter_region"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.region").String())
+				So(n["datacenter_type"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.type").String())
+				So(n["datacenter_username"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.username").String())
 				r := n["rules"].([]interface{})[0].(map[string]interface{})
 				So(r["protocol"], ShouldEqual, "protocol")
 				So(r["type"], ShouldEqual, "type")
@@ -311,14 +301,12 @@ func TestUpdateNats(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service_update_nats.json")
+		s, sBody := h.getService("./fixtures/service_update_nats.json")
 
 		Convey("When I get the message for a nats.update event", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("nats.update", &s)
 			m := &GenericComponentMsg{}
-			d := s.Datacenters.Items[0]
-			ro := s.Routers.Items[0]
 			json.Unmarshal([]byte(body), &m)
 			fmt.Println(body)
 
@@ -326,17 +314,18 @@ func TestUpdateNats(t *testing.T) {
 				So(m.Service, ShouldEqual, s.ID)
 				So(len(m.Components), ShouldEqual, 1)
 				n := m.Components[0].(map[string]interface{})
-				So(n["name"], ShouldEqual, s.NatsToUpdate.Items[0].Name)
-				So(n["status"], ShouldEqual, s.NatsToUpdate.Items[0].Status)
-				So(n["router_name"], ShouldEqual, ro.Name)
-				So(n["router_type"], ShouldEqual, ro.Type)
-				So(n["router_ip"], ShouldEqual, ro.IP)
-				So(n["client_name"], ShouldEqual, s.ClientName)
-				So(n["datacenter_name"], ShouldEqual, d.Name)
-				So(n["datacenter_type"], ShouldEqual, d.Type)
-				So(n["datacenter_region"], ShouldEqual, d.Region)
-				So(n["datacenter_username"], ShouldEqual, d.Username)
-				So(n["datacenter_password"], ShouldEqual, d.Password)
+
+				So(n["name"].(string), ShouldEqual, gjson.Get(sBody, "nats_to_update.items.0.name").String())
+				So(n["status"].(string), ShouldEqual, gjson.Get(sBody, "nats_to_update.items.0.status").String())
+				So(n["router_name"].(string), ShouldEqual, gjson.Get(sBody, "routers.items.0.name").String())
+				So(n["router_type"], ShouldBeNil)
+				So(n["router_ip"], ShouldBeNil)
+				So(n["client_name"], ShouldBeNil)
+				So(n["datacenter_name"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.name").String())
+				So(n["datacenter_password"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.password").String())
+				So(n["datacenter_region"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.region").String())
+				So(n["datacenter_type"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.type").String())
+				So(n["datacenter_username"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.username").String())
 				r := n["rules"].([]interface{})[0].(map[string]interface{})
 				So(r["protocol"], ShouldEqual, "protocol")
 				So(r["type"], ShouldEqual, "type")
@@ -357,29 +346,27 @@ func TestCreateFirewalls(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service_create_firewalls.json")
+		s, sBody := h.getService("./fixtures/service_create_firewalls.json")
 
 		Convey("When I get the message for a firewalls.create event", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("firewalls.create", &s)
 			m := &GenericComponentMsg{}
-			d := s.Datacenters.Items[0]
-			ro := s.Routers.Items[0]
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
 				So(m.Service, ShouldEqual, s.ID)
 				So(len(m.Components), ShouldEqual, 1)
 				f := m.Components[0].(map[string]interface{})
-				So(f["name"], ShouldEqual, s.FirewallsToCreate.Items[0].Name)
-				So(f["status"], ShouldEqual, s.FirewallsToCreate.Items[0].Status)
-				So(f["router_name"], ShouldEqual, ro.Name)
-				So(f["router_type"], ShouldEqual, ro.Type)
-				So(f["datacenter_name"], ShouldEqual, d.Name)
-				So(f["datacenter_type"], ShouldEqual, d.Type)
-				So(f["datacenter_region"], ShouldEqual, d.Region)
-				So(f["datacenter_username"], ShouldEqual, d.Username)
-				So(f["datacenter_password"], ShouldEqual, d.Password)
+				So(f["name"].(string), ShouldEqual, gjson.Get(sBody, "firewalls_to_create.items.0.name").String())
+				So(f["status"].(string), ShouldEqual, gjson.Get(sBody, "firewalls_to_create.items.0.status").String())
+				So(f["router_name"].(string), ShouldEqual, gjson.Get(sBody, "routers.items.0.name").String())
+				So(f["router_type"], ShouldBeNil)
+				So(f["datacenter_name"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.name").String())
+				So(f["datacenter_password"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.password").String())
+				So(f["datacenter_region"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.region").String())
+				So(f["datacenter_type"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.type").String())
+				So(f["datacenter_username"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.username").String())
 				r := f["rules"].([]interface{})[0].(map[string]interface{})
 				So(r["source_ip"], ShouldEqual, "11.11.11.11/11")
 				So(r["source_port"], ShouldEqual, "source_port")
@@ -398,29 +385,27 @@ func TestUpdateFirewalls(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service_update_firewalls.json")
+		s, sBody := h.getService("./fixtures/service_update_firewalls.json")
 
 		Convey("When I get the message for a firewalls.update event", func() {
 			mm := messageManager{}
 			body, err := mm.preparePublishMessage("firewalls.update", &s)
 			m := &GenericComponentMsg{}
-			d := s.Datacenters.Items[0]
-			ro := s.Routers.Items[0]
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
 				So(m.Service, ShouldEqual, s.ID)
 				So(len(m.Components), ShouldEqual, 1)
 				f := m.Components[0].(map[string]interface{})
-				So(f["name"], ShouldEqual, s.FirewallsToUpdate.Items[0].Name)
-				So(f["status"], ShouldEqual, s.FirewallsToUpdate.Items[0].Status)
-				So(f["router_name"], ShouldEqual, ro.Name)
-				So(f["router_type"], ShouldEqual, ro.Type)
-				So(f["datacenter_name"], ShouldEqual, d.Name)
-				So(f["datacenter_type"], ShouldEqual, d.Type)
-				So(f["datacenter_region"], ShouldEqual, d.Region)
-				So(f["datacenter_username"], ShouldEqual, d.Username)
-				So(f["datacenter_password"], ShouldEqual, d.Password)
+				So(f["name"].(string), ShouldEqual, gjson.Get(sBody, "firewalls_to_update.items.0.name").String())
+				So(f["status"].(string), ShouldEqual, gjson.Get(sBody, "firewalls_to_update.items.0.status").String())
+				So(f["router_name"].(string), ShouldEqual, gjson.Get(sBody, "routers.items.0.name").String())
+				So(f["router_type"], ShouldBeNil)
+				So(f["datacenter_name"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.name").String())
+				So(f["datacenter_password"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.password").String())
+				So(f["datacenter_region"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.region").String())
+				So(f["datacenter_type"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.type").String())
+				So(f["datacenter_username"].(string), ShouldEqual, gjson.Get(sBody, "datacenters.items.0.username").String())
 				r := f["rules"].([]interface{})[0].(map[string]interface{})
 				So(r["source_ip"], ShouldEqual, "11.11.11.11/11")
 				So(r["source_port"], ShouldEqual, "source_port")
@@ -439,7 +424,7 @@ func TestCreateBootstraps(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service_real_workflow.json")
+		s, sBody := h.getService("./fixtures/service_real_workflow.json")
 		s.Status = "nats_created"
 		s.save()
 
@@ -455,14 +440,14 @@ func TestCreateBootstraps(t *testing.T) {
 					So(len(m.Components), ShouldEqual, 1)
 					b := m.Components[0].(map[string]interface{})
 
-					So(b["name"], ShouldEqual, s.BootstrapsToCreate.Items[0].Name)
+					So(b["name"].(string), ShouldEqual, gjson.Get(sBody, "bootstraps_to_create.items.0.name").String())
 					So(b["type"], ShouldEqual, "salt")
-					So(b["payload"], ShouldEqual, s.BootstrapsToCreate.Items[0].Payload)
-					So(b["target"], ShouldEqual, s.BootstrapsToCreate.Items[0].Target)
-					So(b["status"], ShouldEqual, s.BootstrapsToCreate.Items[0].Status)
-					So(b["user"], ShouldEqual, "")
-					So(b["password"], ShouldEqual, "")
-					So(b["service_endpoint"], ShouldEqual, s.Routers.Items[0].IP)
+					So(b["payload"].(string), ShouldEqual, gjson.Get(sBody, "bootstraps_to_create.items.0.payload").String())
+					So(b["target"].(string), ShouldEqual, gjson.Get(sBody, "bootstraps_to_create.items.0.target").String())
+					So(b["status"].(string), ShouldEqual, gjson.Get(sBody, "bootstraps_to_create.items.0.status").String())
+					So(b["user"], ShouldBeNil)
+					So(b["password"], ShouldBeNil)
+					So(b["service_endpoint"].(string), ShouldEqual, gjson.Get(sBody, "routers.items.0.ip").String())
 
 					So(err, ShouldEqual, nil)
 				})
@@ -477,7 +462,7 @@ func TestCreateExecutions(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service_real_workflow.json")
+		s, sBody := h.getService("./fixtures/service_real_workflow.json")
 		s.Status = "bootstrap_ran"
 		s.Bootstraps.Finished = "yes"
 		s.save()
@@ -495,13 +480,13 @@ func TestCreateExecutions(t *testing.T) {
 				So(len(m.Components), ShouldEqual, 1)
 				e := m.Components[0].(map[string]interface{})
 
-				So(e["payload"], ShouldEqual, s.ExecutionsToCreate.Items[0].Payload)
-				So(e["name"], ShouldEqual, s.ExecutionsToCreate.Items[0].Name)
+				So(e["name"].(string), ShouldEqual, gjson.Get(sBody, "executions_to_create.items.0.name").String())
 				So(e["type"], ShouldEqual, "salt")
-				So(e["user"], ShouldEqual, "")
-				So(e["password"], ShouldEqual, "")
-				So(e["target"], ShouldEqual, s.ExecutionsToCreate.Items[0].Target)
-				So(e["service_endpoint"], ShouldEqual, s.Routers.Items[0].IP)
+				So(e["payload"].(string), ShouldEqual, gjson.Get(sBody, "executions_to_create.items.0.payload").String())
+				So(e["target"].(string), ShouldEqual, gjson.Get(sBody, "executions_to_create.items.0.target").String())
+				So(e["user"], ShouldBeNil)
+				So(e["password"], ShouldBeNil)
+				So(e["service_endpoint"].(string), ShouldEqual, gjson.Get(sBody, "routers.items.0.ip").String())
 			})
 		})
 	})
@@ -512,7 +497,7 @@ func TestServiceDone(t *testing.T) {
 		setup()
 
 		p.load(natsClient)
-		s := h.getService("./fixtures/service_real_workflow.json")
+		s, _ := h.getService("./fixtures/service_real_workflow.json")
 		s.Status = "executions_ran"
 		s.save()
 
