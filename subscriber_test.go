@@ -13,25 +13,29 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestRoutersCreateDone(t *testing.T) {
+func TestComponentsCreateDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
 		setup()
 
 		p.load(natsClient)
-		body := h.getFixture("./fixtures/routers_create_done.json")
-		s, _ := h.getService("./fixtures/service_real_workflow.json")
+		body := h.getFixture("./fixtures/components_create_done.json")
+		s, _ := h.getService("./fixtures/service_components.json")
 		SaveService(s)
 
-		Convey("When I try to get body for the mapped message routers.create.done", func() {
+		Convey("When I try to get body for the mapped message components.create.done", func() {
 			mm := messageManager{}
-			s, subject, err := mm.getServiceFromMessage("routers.create.done", body)
+			s, subject, err := mm.getServiceFromMessage("components.create.done", body)
 			b, _ := json.Marshal(s)
 			sBody := string(b)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(gjson.Get(sBody, "routers.items").Array()), ShouldEqual, 2)
-				So(gjson.Get(sBody, "routers.items.1.ip").String(), ShouldEqual, "31.210.241.2")
-				So(subject, ShouldEqual, "routers.create.done")
+				So(len(gjson.Get(sBody, "components.items").Array()), ShouldEqual, 2)
+				So(len(gjson.Get(sBody, "components_to_create.items").Array()), ShouldEqual, 0)
+				So(gjson.Get(sBody, "components.items.0.name").String(), ShouldEqual, "existing")
+				So(gjson.Get(sBody, "components.items.0.field").String(), ShouldEqual, "existing")
+				So(gjson.Get(sBody, "components.items.1.name").String(), ShouldEqual, "created")
+				So(gjson.Get(sBody, "components.items.1.field").String(), ShouldEqual, "created")
+				So(subject, ShouldEqual, "components.create.done")
 				So(err, ShouldEqual, nil)
 
 			})
@@ -39,314 +43,60 @@ func TestRoutersCreateDone(t *testing.T) {
 	})
 }
 
-func TestCreateErrors(t *testing.T) {
+func TestComponentsUpdateDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
 		setup()
 
 		p.load(natsClient)
-		body := h.getFixture("./fixtures/routers_create_done.json")
-		s, _ := h.getService("./fixtures/service.json")
+		body := h.getFixture("./fixtures/components_update_done.json")
+		s, _ := h.getService("./fixtures/service_components.json")
+		(*s)["status"] = "updating_components"
+		(*s)["components"] = (*s)["components_to_create"]
 		SaveService(s)
 
-		Convey("When I try to get body for the non mapped message firewalls.create.error", func() {
+		Convey("When I try to get body for the mapped message components.create.done", func() {
 			mm := messageManager{}
-			s, subject, err := mm.getServiceFromMessage("firewalls.create.error", body)
-
-			Convey("Then I'll receive the valid body", func() {
-				name, _ := (*s)["name"].(string)
-				So(name, ShouldEqual, "test")
-				So(subject, ShouldEqual, "to_error")
-				So(err, ShouldEqual, nil)
-
-			})
-		})
-	})
-}
-
-func TestNetworksCreateDone(t *testing.T) {
-	Convey("Given I have a valid service", t, func() {
-		setup()
-
-		p.load(natsClient)
-		body := h.getFixture("./fixtures/networks_create_done.json")
-		s, _ := h.getService("./fixtures/service_real_workflow.json")
-		SaveService(s)
-
-		Convey("When I try to get body for the mapped message networks.create.done", func() {
-			mm := messageManager{}
-			s, subject, err := mm.getServiceFromMessage("networks.create.done", body)
+			s, subject, err := mm.getServiceFromMessage("components.update.done", body)
 			b, _ := json.Marshal(s)
 			sBody := string(b)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(gjson.Get(sBody, "networks.items").Array()), ShouldEqual, 2)
-				So(gjson.Get(sBody, "networks.items.1.name").String(), ShouldEqual, "network_test_2")
-				So(gjson.Get(sBody, "networks.items.1.range").String(), ShouldEqual, "10.64.4.0/24")
-				So(gjson.Get(sBody, "networks.items.1.netmask").String(), ShouldEqual, "netmask")
-				So(gjson.Get(sBody, "networks.items.1.start_address").String(), ShouldEqual, "start")
-				So(gjson.Get(sBody, "networks.items.1.end_address").String(), ShouldEqual, "end")
-				So(gjson.Get(sBody, "networks.items.1.gateway").String(), ShouldEqual, "gateway")
-				So(subject, ShouldEqual, "networks.create.done")
+				So(len(gjson.Get(sBody, "components.items").Array()), ShouldEqual, 2)
+				So(len(gjson.Get(sBody, "components_to_create.items").Array()), ShouldEqual, 2)
+				So(len(gjson.Get(sBody, "components_to_update.items").Array()), ShouldEqual, 0)
+				So(gjson.Get(sBody, "components.items.0.name").String(), ShouldEqual, "added")
+				So(gjson.Get(sBody, "components.items.0.field").String(), ShouldEqual, "created")
+				So(gjson.Get(sBody, "components.items.1.name").String(), ShouldEqual, "updated")
+				So(gjson.Get(sBody, "components.items.1.field").String(), ShouldEqual, "updated")
+				So(subject, ShouldEqual, "components.update.done")
 				So(err, ShouldEqual, nil)
-
 			})
 		})
 	})
 }
 
-func TestNetworksDeleteDone(t *testing.T) {
+func TestComponentsDeleteDone(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
 		setup()
 
 		p.load(natsClient)
-		body := h.getFixture("./fixtures/networks_delete_done.json")
-		s, _ := h.getService("./fixtures/service_real_workflow.json")
+		body := h.getFixture("./fixtures/components_delete_done.json")
+		s, _ := h.getService("./fixtures/service_components.json")
+		(*s)["status"] = "deleting_components"
 		SaveService(s)
 
-		Convey("When I try to get body for the mapped message networks.delete.done", func() {
+		Convey("When I try to get body for the mapped message components.create.done", func() {
 			mm := messageManager{}
-			s, subject, err := mm.getServiceFromMessage("networks.delete.done", body)
+			s, subject, err := mm.getServiceFromMessage("components.delete.done", body)
 			b, _ := json.Marshal(s)
 			sBody := string(b)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(gjson.Get(sBody, "networks_to_delete.items").Array()), ShouldEqual, 0)
-				So(subject, ShouldEqual, "networks.delete.done")
-				So(err, ShouldEqual, nil)
-
-			})
-		})
-	})
-}
-
-func TestInstancesCreateDone(t *testing.T) {
-	Convey("Given I have a valid service", t, func() {
-		setup()
-
-		p.load(natsClient)
-		body := h.getFixture("./fixtures/instances_create_done.json")
-		s, _ := h.getService("./fixtures/service_real_workflow.json")
-		SaveService(s)
-
-		Convey("When I try to get body for the mapped message instances.create.done", func() {
-			mm := messageManager{}
-			s, subject, err := mm.getServiceFromMessage("instances.create.done", body)
-			b, _ := json.Marshal(s)
-			sBody := string(b)
-
-			Convey("Then I'll receive the valid body", func() {
-				So(len(gjson.Get(sBody, "instances.items").Array()), ShouldEqual, 3)
-				So(subject, ShouldEqual, "instances.create.done")
-				So(err, ShouldEqual, nil)
-				So(gjson.Get(sBody, "instances.items.2.status").String(), ShouldEqual, "completed")
-				So(gjson.Get(sBody, "instances.items.2.name").String(), ShouldEqual, "test_instance_2")
-				So(gjson.Get(sBody, "instances.items.2.ram").String(), ShouldEqual, "1024")
-				So(gjson.Get(sBody, "instances.items.2.ip").String(), ShouldEqual, "10.64.4.101")
-			})
-		})
-	})
-}
-
-func TestInstancesUpdateDone(t *testing.T) {
-	Convey("Given I have a valid service", t, func() {
-		setup()
-
-		p.load(natsClient)
-		body := h.getFixture("./fixtures/instances_create_done.json")
-		s, _ := h.getService("./fixtures/service_real_workflow.json")
-		SaveService(s)
-
-		Convey("When I try to get body for the mapped message instances.create.done", func() {
-			mm := messageManager{}
-			s, subject, err := mm.getServiceFromMessage("instances.update.done", body)
-			b, _ := json.Marshal(s)
-			sBody := string(b)
-
-			Convey("Then I'll receive the valid body", func() {
-				So(len(gjson.Get(sBody, "instances.items").Array()), ShouldEqual, 2)
-				So(subject, ShouldEqual, "instances.update.done")
-				So(err, ShouldEqual, nil)
-				So(len(gjson.Get(sBody, "instances_to_update.items").Array()), ShouldEqual, 0)
-			})
-		})
-	})
-}
-
-func TestFirewallsCreateDone(t *testing.T) {
-	Convey("Given I have a valid service", t, func() {
-		setup()
-
-		p.load(natsClient)
-		body := h.getFixture("./fixtures/firewalls_create_done.json")
-		s, _ := h.getService("./fixtures/service_create_firewalls.json")
-		SaveService(s)
-
-		Convey("When I try to get body for the mapped message firewalls.create.done", func() {
-			mm := messageManager{}
-			s, subject, err := mm.getServiceFromMessage("firewalls.create.done", body)
-			b, _ := json.Marshal(s)
-			sBody := string(b)
-
-			Convey("Then I'll receive the valid body", func() {
-				So(len(gjson.Get(sBody, "firewalls.items").Array()), ShouldEqual, 1)
-				So(subject, ShouldEqual, "firewalls.create.done")
-				So(err, ShouldEqual, nil)
-				So(gjson.Get(sBody, "firewalls.items.0.status").String(), ShouldEqual, "completed")
-
-			})
-		})
-	})
-}
-
-func TestFirewallsUpdateDone(t *testing.T) {
-	Convey("Given I have a valid service", t, func() {
-		setup()
-
-		p.load(natsClient)
-		body := h.getFixture("./fixtures/firewalls_create_done.json")
-		s, _ := h.getService("./fixtures/service_real_workflow.json")
-		SaveService(s)
-
-		Convey("When I try to get body for the mapped message firewalls.update.done", func() {
-			mm := messageManager{}
-			s, subject, err := mm.getServiceFromMessage("firewalls.update.done", body)
-			b, _ := json.Marshal(s)
-			sBody := string(b)
-
-			Convey("Then I'll receive the valid body", func() {
-				So(len(gjson.Get(sBody, "firewalls.items").Array()), ShouldEqual, 1)
-				So(subject, ShouldEqual, "firewalls.update.done")
-				So(err, ShouldEqual, nil)
-
-			})
-		})
-	})
-}
-
-func TestNatsCreateDone(t *testing.T) {
-	Convey("Given I have a valid service", t, func() {
-		setup()
-
-		p.load(natsClient)
-		body := h.getFixture("./fixtures/nats_create_done.json")
-		s, _ := h.getService("./fixtures/service_create_nats.json")
-		SaveService(s)
-
-		Convey("When I try to get body for the mapped message nats.create.done", func() {
-			mm := messageManager{}
-			s, subject, err := mm.getServiceFromMessage("nats.create.done", body)
-			b, _ := json.Marshal(s)
-			sBody := string(b)
-
-			Convey("Then I'll receive the valid body", func() {
-				So(len(gjson.Get(sBody, "nats.items").Array()), ShouldEqual, 1)
-				So(subject, ShouldEqual, "nats.create.done")
-				So(err, ShouldEqual, nil)
-
-			})
-		})
-	})
-}
-
-func TestNatUpdateDone(t *testing.T) {
-	Convey("Given I have a valid service", t, func() {
-		setup()
-
-		p.load(natsClient)
-		body := h.getFixture("./fixtures/nats_create_done.json")
-		s, _ := h.getService("./fixtures/service_real_workflow.json")
-		SaveService(s)
-
-		Convey("When I try to get body for the mapped message nats.create.done", func() {
-			mm := messageManager{}
-			s, subject, err := mm.getServiceFromMessage("nats.update.done", body)
-			b, _ := json.Marshal(s)
-			sBody := string(b)
-
-			Convey("Then I'll receive the valid body", func() {
-				So(len(gjson.Get(sBody, "nats.items").Array()), ShouldEqual, 1)
-				So(subject, ShouldEqual, "nats.update.done")
-				So(err, ShouldEqual, nil)
-
-			})
-		})
-	})
-}
-
-func TestBootstrapsCreateDone(t *testing.T) {
-	Convey("Given I have a valid service", t, func() {
-		setup()
-
-		p.load(natsClient)
-		body := h.getFixture("./fixtures/executions_create_done.json")
-		s, sBody := h.getService("./fixtures/service_real_workflow.json")
-		(*s)["status"] = "bootstrapping"
-		SaveService(s)
-
-		Convey("When I try to get body for the mapped message executions.create.done", func() {
-			mm := messageManager{}
-			_, subject, err := mm.getServiceFromMessage("bootstraps.create.done", body)
-			Convey("Then I'll receive the valid body", func() {
-				So(len(gjson.Get(sBody, "bootstraps.items").Array()), ShouldEqual, 1)
-				So(gjson.Get(sBody, "bootstraps.items.0.reports.0.return_code").String(), ShouldEqual, "0")
-				So(gjson.Get(sBody, "bootstraps.items.0.reports.0.stdout").String(), ShouldEqual, "")
-				So(gjson.Get(sBody, "bootstraps.items.0.matched_instances.0").String(), ShouldEqual, "")
-				So(subject, ShouldEqual, "bootstraps.create.done")
-				So(err, ShouldEqual, nil)
-
-			})
-		})
-	})
-}
-
-func TestExecutionsCreateDone(t *testing.T) {
-	Convey("Given I have a valid service", t, func() {
-		setup()
-
-		p.load(natsClient)
-		body := h.getFixture("./fixtures/executions_create_done.json")
-		s, sBody := h.getService("./fixtures/service_real_workflow.json")
-		(*s)["status"] = "running_executions"
-		SaveService(s)
-
-		Convey("When I try to get body for the mapped message executions.create.done", func() {
-			mm := messageManager{}
-			_, subject, err := mm.getServiceFromMessage("executions.create.done", body)
-
-			Convey("Then I'll receive the valid body", func() {
-				So(len(gjson.Get(sBody, "executions.items").Array()), ShouldEqual, 1)
-				So(gjson.Get(sBody, "executions.items.0.reports.0.return_code").String(), ShouldEqual, "0")
-				So(gjson.Get(sBody, "executions.items.0.reports.0.stdout").String(), ShouldEqual, "")
-				So(gjson.Get(sBody, "executions.items.0.matched_instances.0").String(), ShouldEqual, "")
-				So(subject, ShouldEqual, "executions.create.done")
-				So(err, ShouldEqual, nil)
-
-			})
-		})
-	})
-}
-
-func TestExecutionsCreateError(t *testing.T) {
-	Convey("Given I have a valid service", t, func() {
-		setup()
-
-		p.load(natsClient)
-		body := h.getFixture("./fixtures/executions_create_done.json")
-		s, _ := h.getService("./fixtures/service.json")
-		(*s)["status"] = "running_executions"
-		SaveService(s)
-
-		Convey("When I try to get body for the mapped message executions.create.done", func() {
-			mm := messageManager{}
-			s, subject, err := mm.getServiceFromMessage("executions.create.error", body)
-			So(err, ShouldBeNil)
-
-			Convey("Then I'll receive the valid body", func() {
-				name, _ := (*s)["name"].(string)
-				So(name, ShouldEqual, "test")
-				status, _ := (*s)["status"].(string)
-				So(status, ShouldEqual, "pre-failed")
-				So(subject, ShouldEqual, "to_error")
+				So(len(gjson.Get(sBody, "components.items").Array()), ShouldEqual, 0)
+				So(len(gjson.Get(sBody, "components_to_create.items").Array()), ShouldEqual, 2)
+				So(len(gjson.Get(sBody, "components_to_update.items").Array()), ShouldEqual, 1)
+				So(len(gjson.Get(sBody, "components_to_delete.items").Array()), ShouldEqual, 0)
+				So(subject, ShouldEqual, "components.delete.done")
 				So(err, ShouldEqual, nil)
 			})
 		})

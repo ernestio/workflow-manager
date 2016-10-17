@@ -1,0 +1,105 @@
+{
+    "id": "test-generated-id",
+    "body": "",
+    "name": "test",
+    "type": "",
+    "endpoint": "",
+    "options": {
+      "user": "",
+      "password": ""
+    },
+    "status": "",
+    "started": "",
+    "finished": "",
+    "workflow": {
+			"arcs": [{
+				"from": "created",
+				"to": "started",
+				"event": "service.create"
+			}, {
+				"from": "started",
+				"to": "creating_components",
+				"event": "components.create"
+			}, {
+				"from": "creating_components",
+				"to": "components_created",
+				"event": "components.create.done"
+			}, {
+				"from": "components_created",
+				"to": "updating_components",
+				"event": "components.update"
+			}, {
+				"from": "updating_components",
+				"to": "components_updated",
+				"event": "components.update.done"
+			}, {
+				"from": "components_updated",
+				"to": "deleting_components",
+				"event": "components.delete"
+			}, {
+				"from": "deleting_components",
+				"to": "components_deleted",
+				"event": "components.delete.done"
+			}, {
+				"from": "pre-failed",
+				"to": "failed",
+				"event": "to_error"
+			}, {
+				"from": "failed",
+				"to": "errored",
+				"event": "service.create.error"
+			}, {
+				"from": "components_deleted",
+				"to": "done",
+				"event": "service.create.done"
+			}]
+    },
+    "components": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "service": "test",
+        "type": "vcloud",
+        "name": "existing",
+        "field": "existing" 
+      }]
+    },
+    "components_to_create": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "service": "test",
+        "type": "vcloud",
+        "name": "added",
+        "field": "created" 
+      },{
+        "service": "test",
+        "type": "vcloud",
+        "name": "updated",
+        "field": "created_to_be_updated" 
+      }]
+    },
+    "components_to_update": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "service": "test",
+        "type": "vcloud",
+        "name": "updated",
+        "field": "updated" 
+      }]
+    },
+    "components_to_delete": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "service": "test",
+        "type": "vcloud",
+        "name": "existing"
+      }]
+    }
+}
