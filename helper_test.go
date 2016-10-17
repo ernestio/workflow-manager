@@ -86,8 +86,6 @@ func runListenerMocks() {
 
 func setup() {
 	if listeners == false {
-		c := Config{}
-		c.Load()
 		natsClient = ecc.NewConfig(os.Getenv("NATS_URI")).Nats()
 		runListenerMocks()
 		listeners = true
