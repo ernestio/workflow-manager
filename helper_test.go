@@ -17,8 +17,9 @@ import (
 
 type testHelper struct{}
 
-func (t *testHelper) getService(source string) (service, string) {
-	s := service{}
+func (t *testHelper) getService(source string) (*map[string]interface{}, string) {
+	var s map[string]interface{}
+
 	absPath, _ := filepath.Abs(source)
 	file, err := os.Open(absPath)
 	log.Printf("Reading config from: %s", source)
@@ -34,7 +35,7 @@ func (t *testHelper) getService(source string) (service, string) {
 	}
 	content, _ := ioutil.ReadFile(source)
 
-	return s, string(content)
+	return &s, string(content)
 }
 
 func (t *testHelper) getServiceBody(source string) string {
@@ -44,9 +45,9 @@ func (t *testHelper) getServiceBody(source string) string {
 	return string(content)
 }
 
-func (t *testHelper) manage(subject string, s service) (string, *service, error) {
+func (t *testHelper) manage(subject string, s *map[string]interface{}) (string, *map[string]interface{}, error) {
 	em := eventManager{}
-	return em.manage(subject, &s)
+	return em.manage(subject, s)
 }
 
 func (t *testHelper) getFixture(source string) []byte {

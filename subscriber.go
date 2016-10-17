@@ -24,7 +24,7 @@ import (
 type subscriber struct {
 }
 
-func (sub *subscriber) Process(s *service, subject string, body []byte) (*service, bool, string) {
+func (sub *subscriber) Process(s *map[string]interface{}, subject string, body []byte) (*map[string]interface{}, bool, string) {
 	e := errorManager{}
 	if e.isAnErrorMessage(subject) {
 		return s, true, "to_error"
@@ -63,8 +63,9 @@ func (sub *subscriber) Process(s *service, subject string, body []byte) (*servic
 	return s, true, ""
 }
 
-func (sub *subscriber) isSupportedMessage(s *service, subject string) bool {
-	valid := s.Workflow.transitions()
+func (sub *subscriber) isSupportedMessage(s *map[string]interface{}, subject string) bool {
+	w, _ := ParseWorkflow(s)
+	valid := w.transitions()
 	for _, v := range valid {
 		if v == subject {
 			return true
@@ -91,81 +92,77 @@ func (sub *subscriber) getInputList(body []byte) GenericComponentMsg {
 }
 
 // GenericCreation : Will process generic messages
-func (sub *subscriber) GenericCreation(s *service, subject string, body []byte) *service {
+func (sub *subscriber) GenericCreation(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
 	parts := strings.Split(subject, ".")
 	input := sub.getInputList(body)
-	s.transferCreated(parts[0], input)
+	TransferCreated(s, parts[0], input)
 
 	return s
 }
 
 // GenericModification : Will process generic messages
-func (sub *subscriber) GenericModification(s *service, subject string, body []byte) *service {
+func (sub *subscriber) GenericModification(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
 	parts := strings.Split(subject, ".")
 	input := sub.getInputList(body)
-	s.transferUpdated(parts[0], input)
+	TransferUpdated(s, parts[0], input)
 
 	return s
 }
 
 // GenericDeletion : Will process generic messages
-func (sub *subscriber) GenericDeletion(s *service, subject string, body []byte) *service {
+func (sub *subscriber) GenericDeletion(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
 	parts := strings.Split(subject, ".")
 	input := sub.getInputList(body)
-	s.transferDeleted(parts[0], input)
+	TransferDeleted(s, parts[0], input)
 
 	return s
 }
 
 // Entry point to the flow environment creation, it will create the service and attach
 // a default workflow to it
-func (sub *subscriber) ServiceCreate(s *service, subject string, body []byte) *service {
+func (sub *subscriber) ServiceCreate(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
 
 	if err := json.Unmarshal(body, &s); err != nil {
 		log.Println(err)
 		return nil
 	}
 
-	w := &s.Workflow
-	if len(w.Arcs) == 0 {
-		w = &workflow{}
-		w.loadDefault()
-		s.Workflow = *w
-	}
-	natsClient.Request("service.set", []byte(`{"id":"`+s.ID+`","status":"in_progress"}`), time.Second)
+	id, _ := (*s)["id"].(string)
+	natsClient.Request("service.set", []byte(`{"id":"`+id+`","status":"in_progress"}`), time.Second)
 
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "Starting environment creation", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
+	UserOutput(id, messages)
 
 	return s
 }
 
 // Entry point to the flow environment deletion, it will trigger a cleanup of the
 // entire service
-func (sub *subscriber) ServiceDelete(s *service, subject string, body []byte) *service {
+func (sub *subscriber) ServiceDelete(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
 	if err := json.Unmarshal(body, &s); err != nil {
 		log.Println(err)
 		return nil
 	}
-	s.Status = "created"
-	natsClient.Request("service.set", []byte(`{"id":"`+s.ID+`","status":"in_progress"}`), time.Second)
+	id, _ := (*s)["id"].(string)
+	(*s)["status"] = "created"
+	natsClient.Request("service.set", []byte(`{"id":"`+id+`","status":"in_progress"}`), time.Second)
 
 	messages := []MonitorMessage{}
 	messages = append(messages, MonitorMessage{Body: "Starting environment deletion", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
+	UserOutput(id, messages)
 
 	return s
 }
 
 // ServicePatch Entry point to the flow environment patching, it will create the service and attach
 // a default workflow to it
-func (sub *subscriber) ServicePatch(s *service, subject string, body []byte) *service {
+func (sub *subscriber) ServicePatch(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
 	if err := json.Unmarshal(body, &s); err != nil {
 		log.Println(err)
 		return nil
 	}
-	s.Status = ""
+	(*s)["status"] = ""
 
 	return s
 }

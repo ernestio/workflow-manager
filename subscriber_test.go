@@ -20,7 +20,7 @@ func TestRoutersCreateDone(t *testing.T) {
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/routers_create_done.json")
 		s, _ := h.getService("./fixtures/service_real_workflow.json")
-		s.save()
+		SaveService(s)
 
 		Convey("When I try to get body for the mapped message routers.create.done", func() {
 			mm := messageManager{}
@@ -29,7 +29,7 @@ func TestRoutersCreateDone(t *testing.T) {
 			sBody := string(b)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(s.Routers.Items), ShouldEqual, 2)
+				So(len(gjson.Get(sBody, "routers.items").Array()), ShouldEqual, 2)
 				So(gjson.Get(sBody, "routers.items.1.ip").String(), ShouldEqual, "31.210.241.2")
 				So(subject, ShouldEqual, "routers.create.done")
 				So(err, ShouldEqual, nil)
@@ -46,14 +46,15 @@ func TestCreateErrors(t *testing.T) {
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/routers_create_done.json")
 		s, _ := h.getService("./fixtures/service.json")
-		s.save()
+		SaveService(s)
 
 		Convey("When I try to get body for the non mapped message firewalls.create.error", func() {
 			mm := messageManager{}
 			s, subject, err := mm.getServiceFromMessage("firewalls.create.error", body)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(s.Name, ShouldEqual, "test")
+				name, _ := (*s)["name"].(string)
+				So(name, ShouldEqual, "test")
 				So(subject, ShouldEqual, "to_error")
 				So(err, ShouldEqual, nil)
 
@@ -69,7 +70,7 @@ func TestNetworksCreateDone(t *testing.T) {
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/networks_create_done.json")
 		s, _ := h.getService("./fixtures/service_real_workflow.json")
-		s.save()
+		SaveService(s)
 
 		Convey("When I try to get body for the mapped message networks.create.done", func() {
 			mm := messageManager{}
@@ -78,7 +79,7 @@ func TestNetworksCreateDone(t *testing.T) {
 			sBody := string(b)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(s.Networks.Items), ShouldEqual, 2)
+				So(len(gjson.Get(sBody, "networks.items").Array()), ShouldEqual, 2)
 				So(gjson.Get(sBody, "networks.items.1.name").String(), ShouldEqual, "network_test_2")
 				So(gjson.Get(sBody, "networks.items.1.range").String(), ShouldEqual, "10.64.4.0/24")
 				So(gjson.Get(sBody, "networks.items.1.netmask").String(), ShouldEqual, "netmask")
@@ -100,14 +101,16 @@ func TestNetworksDeleteDone(t *testing.T) {
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/networks_delete_done.json")
 		s, _ := h.getService("./fixtures/service_real_workflow.json")
-		s.save()
+		SaveService(s)
 
 		Convey("When I try to get body for the mapped message networks.delete.done", func() {
 			mm := messageManager{}
 			s, subject, err := mm.getServiceFromMessage("networks.delete.done", body)
+			b, _ := json.Marshal(s)
+			sBody := string(b)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(s.NetworksToDelete.Items), ShouldEqual, 0)
+				So(len(gjson.Get(sBody, "networks_to_delete.items").Array()), ShouldEqual, 0)
 				So(subject, ShouldEqual, "networks.delete.done")
 				So(err, ShouldEqual, nil)
 
@@ -123,7 +126,7 @@ func TestInstancesCreateDone(t *testing.T) {
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/instances_create_done.json")
 		s, _ := h.getService("./fixtures/service_real_workflow.json")
-		s.save()
+		SaveService(s)
 
 		Convey("When I try to get body for the mapped message instances.create.done", func() {
 			mm := messageManager{}
@@ -132,7 +135,7 @@ func TestInstancesCreateDone(t *testing.T) {
 			sBody := string(b)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(s.Instances.Items), ShouldEqual, 3)
+				So(len(gjson.Get(sBody, "instances.items").Array()), ShouldEqual, 3)
 				So(subject, ShouldEqual, "instances.create.done")
 				So(err, ShouldEqual, nil)
 				So(gjson.Get(sBody, "instances.items.2.status").String(), ShouldEqual, "completed")
@@ -151,17 +154,19 @@ func TestInstancesUpdateDone(t *testing.T) {
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/instances_create_done.json")
 		s, _ := h.getService("./fixtures/service_real_workflow.json")
-		s.save()
+		SaveService(s)
 
 		Convey("When I try to get body for the mapped message instances.create.done", func() {
 			mm := messageManager{}
 			s, subject, err := mm.getServiceFromMessage("instances.update.done", body)
+			b, _ := json.Marshal(s)
+			sBody := string(b)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(s.Instances.Items), ShouldEqual, 2)
+				So(len(gjson.Get(sBody, "instances.items").Array()), ShouldEqual, 2)
 				So(subject, ShouldEqual, "instances.update.done")
 				So(err, ShouldEqual, nil)
-				So(len(s.InstancesToUpdate.Items), ShouldEqual, 0)
+				So(len(gjson.Get(sBody, "instances_to_update.items").Array()), ShouldEqual, 0)
 			})
 		})
 	})
@@ -174,7 +179,7 @@ func TestFirewallsCreateDone(t *testing.T) {
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/firewalls_create_done.json")
 		s, _ := h.getService("./fixtures/service_create_firewalls.json")
-		s.save()
+		SaveService(s)
 
 		Convey("When I try to get body for the mapped message firewalls.create.done", func() {
 			mm := messageManager{}
@@ -183,7 +188,7 @@ func TestFirewallsCreateDone(t *testing.T) {
 			sBody := string(b)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(s.Firewalls.Items), ShouldEqual, 1)
+				So(len(gjson.Get(sBody, "firewalls.items").Array()), ShouldEqual, 1)
 				So(subject, ShouldEqual, "firewalls.create.done")
 				So(err, ShouldEqual, nil)
 				So(gjson.Get(sBody, "firewalls.items.0.status").String(), ShouldEqual, "completed")
@@ -200,14 +205,16 @@ func TestFirewallsUpdateDone(t *testing.T) {
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/firewalls_create_done.json")
 		s, _ := h.getService("./fixtures/service_real_workflow.json")
-		s.save()
+		SaveService(s)
 
 		Convey("When I try to get body for the mapped message firewalls.update.done", func() {
 			mm := messageManager{}
 			s, subject, err := mm.getServiceFromMessage("firewalls.update.done", body)
+			b, _ := json.Marshal(s)
+			sBody := string(b)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(s.Firewalls.Items), ShouldEqual, 1)
+				So(len(gjson.Get(sBody, "firewalls.items").Array()), ShouldEqual, 1)
 				So(subject, ShouldEqual, "firewalls.update.done")
 				So(err, ShouldEqual, nil)
 
@@ -223,14 +230,16 @@ func TestNatsCreateDone(t *testing.T) {
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/nats_create_done.json")
 		s, _ := h.getService("./fixtures/service_create_nats.json")
-		s.save()
+		SaveService(s)
 
 		Convey("When I try to get body for the mapped message nats.create.done", func() {
 			mm := messageManager{}
 			s, subject, err := mm.getServiceFromMessage("nats.create.done", body)
+			b, _ := json.Marshal(s)
+			sBody := string(b)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(s.Nats.Items), ShouldEqual, 1)
+				So(len(gjson.Get(sBody, "nats.items").Array()), ShouldEqual, 1)
 				So(subject, ShouldEqual, "nats.create.done")
 				So(err, ShouldEqual, nil)
 
@@ -246,14 +255,16 @@ func TestNatUpdateDone(t *testing.T) {
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/nats_create_done.json")
 		s, _ := h.getService("./fixtures/service_real_workflow.json")
-		s.save()
+		SaveService(s)
 
 		Convey("When I try to get body for the mapped message nats.create.done", func() {
 			mm := messageManager{}
 			s, subject, err := mm.getServiceFromMessage("nats.update.done", body)
+			b, _ := json.Marshal(s)
+			sBody := string(b)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(s.Nats.Items), ShouldEqual, 1)
+				So(len(gjson.Get(sBody, "nats.items").Array()), ShouldEqual, 1)
 				So(subject, ShouldEqual, "nats.update.done")
 				So(err, ShouldEqual, nil)
 
@@ -269,14 +280,14 @@ func TestBootstrapsCreateDone(t *testing.T) {
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/executions_create_done.json")
 		s, sBody := h.getService("./fixtures/service_real_workflow.json")
-		s.Status = "bootstrapping"
-		s.save()
+		(*s)["status"] = "bootstrapping"
+		SaveService(s)
 
 		Convey("When I try to get body for the mapped message executions.create.done", func() {
 			mm := messageManager{}
-			s, subject, err := mm.getServiceFromMessage("bootstraps.create.done", body)
+			_, subject, err := mm.getServiceFromMessage("bootstraps.create.done", body)
 			Convey("Then I'll receive the valid body", func() {
-				So(len(s.Bootstraps.Items), ShouldEqual, 2)
+				So(len(gjson.Get(sBody, "bootstraps.items").Array()), ShouldEqual, 1)
 				So(gjson.Get(sBody, "bootstraps.items.0.reports.0.return_code").String(), ShouldEqual, "0")
 				So(gjson.Get(sBody, "bootstraps.items.0.reports.0.stdout").String(), ShouldEqual, "")
 				So(gjson.Get(sBody, "bootstraps.items.0.matched_instances.0").String(), ShouldEqual, "")
@@ -295,15 +306,15 @@ func TestExecutionsCreateDone(t *testing.T) {
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/executions_create_done.json")
 		s, sBody := h.getService("./fixtures/service_real_workflow.json")
-		s.Status = "running_executions"
-		s.save()
+		(*s)["status"] = "running_executions"
+		SaveService(s)
 
 		Convey("When I try to get body for the mapped message executions.create.done", func() {
 			mm := messageManager{}
-			s, subject, err := mm.getServiceFromMessage("executions.create.done", body)
+			_, subject, err := mm.getServiceFromMessage("executions.create.done", body)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(s.Executions.Items), ShouldEqual, 2)
+				So(len(gjson.Get(sBody, "executions.items").Array()), ShouldEqual, 1)
 				So(gjson.Get(sBody, "executions.items.0.reports.0.return_code").String(), ShouldEqual, "0")
 				So(gjson.Get(sBody, "executions.items.0.reports.0.stdout").String(), ShouldEqual, "")
 				So(gjson.Get(sBody, "executions.items.0.matched_instances.0").String(), ShouldEqual, "")
@@ -322,8 +333,8 @@ func TestExecutionsCreateError(t *testing.T) {
 		p.load(natsClient)
 		body := h.getFixture("./fixtures/executions_create_done.json")
 		s, _ := h.getService("./fixtures/service.json")
-		s.Status = "running_executions"
-		s.save()
+		(*s)["status"] = "running_executions"
+		SaveService(s)
 
 		Convey("When I try to get body for the mapped message executions.create.done", func() {
 			mm := messageManager{}
@@ -331,8 +342,10 @@ func TestExecutionsCreateError(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(s.Name, ShouldEqual, "test")
-				So(s.Status, ShouldEqual, "pre-failed")
+				name, _ := (*s)["name"].(string)
+				So(name, ShouldEqual, "test")
+				status, _ := (*s)["status"].(string)
+				So(status, ShouldEqual, "pre-failed")
 				So(subject, ShouldEqual, "to_error")
 				So(err, ShouldEqual, nil)
 			})

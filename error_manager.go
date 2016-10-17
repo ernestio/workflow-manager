@@ -22,7 +22,7 @@ func (em *errorManager) isAnErrorMessage(subject string) bool {
 	return false
 }
 
-func (em *errorManager) markAsFailed(s *service, subject string, body []byte) *service {
+func (em *errorManager) markAsFailed(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
 	switch subject[len(subject)-14:] {
 	case "s.create.error":
 		em.markComponentCreationAsFailed(s, subject, body)
@@ -31,7 +31,7 @@ func (em *errorManager) markAsFailed(s *service, subject string, body []byte) *s
 	case "s.update.error":
 		em.markComponentModificationAsFailed(s, subject, body)
 	}
-	s.markAsFailed()
+	(*s)["status"] = "pre-failed"
 
 	return s
 }
@@ -46,26 +46,26 @@ func (em *errorManager) getInputList(body []byte) GenericComponentMsg {
 	return input
 }
 
-func (em *errorManager) markComponentCreationAsFailed(s *service, subject string, body []byte) *service {
+func (em *errorManager) markComponentCreationAsFailed(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
 	parts := strings.Split(subject, ".")
 	input := em.getInputList(body)
-	s.transferCreated(parts[0], input)
+	TransferCreated(s, parts[0], input)
 
 	return s
 }
 
-func (em *errorManager) markComponentModificationAsFailed(s *service, subject string, body []byte) *service {
+func (em *errorManager) markComponentModificationAsFailed(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
 	parts := strings.Split(subject, ".")
 	input := em.getInputList(body)
-	s.transferUpdated(parts[0], input)
+	TransferUpdated(s, parts[0], input)
 
 	return s
 }
 
-func (em *errorManager) markComponentDeletionAsFailed(s *service, subject string, body []byte) *service {
+func (em *errorManager) markComponentDeletionAsFailed(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
 	parts := strings.Split(subject, ".")
 	input := em.getInputList(body)
-	s.transferDeleted(parts[0], input)
+	TransferDeleted(s, parts[0], input)
 
 	return s
 }

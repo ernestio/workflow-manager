@@ -9,14 +9,6 @@ import (
 	"log"
 )
 
-type components struct {
-	Finished             string        `json:"finished"`
-	Items                []interface{} `json:"items"`
-	Started              string        `json:"started"`
-	Status               string        `json:"status"`
-	SequentialProcessing bool          `json:"sequential_processing"`
-}
-
 // This is the object representation for a service inside the
 // FSM, it has appended the workflow the service needs to
 // follow to be built
@@ -38,105 +30,38 @@ type service struct {
 		Password string `json:"password"`
 		User     string `json:"user"`
 	} `json:"options"`
-	Datacenters        components `json:"datacenters"`
-	VPCs               components `json:"vpcs"`
-	VPCsToCreate       components `json:"vpcs_to_create"`
-	VPCsToDelete       components `json:"vpcs_to_delete"`
-	Bootstraps         components `json:"bootstraps"`
-	BootstrapsToCreate components `json:"bootstraps_to_create"`
-	Executions         components `json:"executions"`
-	ExecutionsToCreate components `json:"executions_to_create"`
-	Firewalls          components `json:"firewalls"`
-	FirewallsToCreate  components `json:"firewalls_to_create"`
-	FirewallsToUpdate  components `json:"firewalls_to_update"`
-	FirewallsToDelete  components `json:"firewalls_to_delete"`
-	Instances          components `json:"instances"`
-	InstancesToCreate  components `json:"instances_to_create"`
-	InstancesToUpdate  components `json:"instances_to_update"`
-	InstancesToDelete  components `json:"instances_to_delete"`
-	Nats               components `json:"nats"`
-	NatsToCreate       components `json:"nats_to_create"`
-	NatsToUpdate       components `json:"nats_to_update"`
-	NatsToDelete       components `json:"nats_to_delete"`
-	Networks           components `json:"networks"`
-	NetworksToCreate   components `json:"networks_to_create"`
-	NetworksToUpdate   components `json:"networks_to_update"`
-	NetworksToDelete   components `json:"networks_to_delete"`
-	Routers            components `json:"routers"`
-	RoutersToCreate    components `json:"routers_to_create"`
-	RoutersToDelete    components `json:"routers_to_delete"`
-	ELBs               components `json:"elbs"`
-	ELBsToCreate       components `json:"elbs_to_create"`
-	ELBsToUpdate       components `json:"elbs_to_update"`
-	ELBsToDelete       components `json:"elbs_to_delete"`
 }
 
-type message struct {
-	Service string `json:"service"`
-}
-
-func (s *service) markAsFailed() {
-	s.Status = "pre-failed"
-}
-
-// Persist current service
-func (s *service) save() error {
+// SaveService : persists the service
+func SaveService(s *map[string]interface{}) error {
 	json, err := json.Marshal(s)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	err = p.set(s.ID, string(json))
+	id, _ := (*s)["id"].(string)
+	err = p.set(id, string(json))
 	if err != nil {
 		log.Println(err)
 		return err
 	}
+
 	return nil
 }
 
-func (s *service) del() {
-	p.del(s.ID)
+// ServiceDel : removes the current service
+func ServiceDel(s *map[string]interface{}) {
+	id, _ := (*s)["id"].(string)
+	p.del(id)
 }
 
-func (s *service) Channel() string {
-	return s.ID
-}
-
-func (s *service) asMap() (mapped map[string]interface{}) {
-	body, err := json.Marshal(s)
-	if err != nil {
-		log.Panic(err.Error())
-	}
-	err = json.Unmarshal(body, &mapped)
-	if err != nil {
-		log.Panic(err.Error())
-	}
-	return mapped
-}
-
-func (s *service) loadFromMap(mapped map[string]interface{}) {
-	body, err := json.Marshal(mapped)
-	if err != nil {
-		log.Panic(err.Error())
-	}
-	err = json.Unmarshal(body, s)
-}
-
-func (s *service) getComponentList(cType string) []interface{} {
-	tmp := s.asMap()
-	cList := tmp[cType].(map[string]interface{})
-	list := cList["items"].([]interface{})
-
-	return list
-}
-
-func (s *service) transferCreated(cType string, input GenericComponentMsg) {
+// TransferCreated : transferst the components_to_created to components array
+func TransferCreated(s *map[string]interface{}, cType string, input GenericComponentMsg) {
 	var components []interface{}
 	var erroredComponents []interface{}
 
-	tmp := s.asMap()
 	inputComponents := input.Components
-	currentComponents := tmp[cType].(map[string]interface{})
+	currentComponents := (*s)[cType].(map[string]interface{})
 	if currentComponents["items"] != nil {
 		components = currentComponents["items"].([]interface{})
 	}
@@ -155,24 +80,22 @@ func (s *service) transferCreated(cType string, input GenericComponentMsg) {
 	currentComponents["items"] = components
 
 	// Remove to be created components
-	componentsToBeProcessed := tmp[cType+"_to_create"].(map[string]interface{})
-	componentsToBeProcessed["items"] = erroredComponents
-	componentsToBeProcessed["status"] = input.Status
-	componentsToBeProcessed["error_code"] = input.ErrorCode
-	componentsToBeProcessed["error_message"] = input.ErrorMessage
-
-	// Save result
-	s.loadFromMap(tmp)
+	if componentsToBeProcessed, ok := (*s)[cType+"_to_create"].(map[string]interface{}); ok {
+		componentsToBeProcessed["items"] = erroredComponents
+		componentsToBeProcessed["status"] = input.Status
+		componentsToBeProcessed["error_code"] = input.ErrorCode
+		componentsToBeProcessed["error_message"] = input.ErrorMessage
+	}
 }
 
-func (s *service) transferUpdated(cType string, input GenericComponentMsg) {
+// TransferUpdated : updates components with components_to_update data
+func TransferUpdated(s *map[string]interface{}, cType string, input GenericComponentMsg) {
 	var components []interface{}
 	var erroredComponents []interface{}
 
-	tmp := s.asMap()
 	inputComponents := input.Components
 
-	currentComponents := tmp[cType].(map[string]interface{})
+	currentComponents := (*s)[cType].(map[string]interface{})
 	if currentComponents["items"] != nil {
 		components = currentComponents["items"].([]interface{})
 	}
@@ -200,26 +123,23 @@ func (s *service) transferUpdated(cType string, input GenericComponentMsg) {
 	currentComponents["items"] = components
 
 	// Remove to be created components
-	componentsToBeProcessed := tmp[cType+"_to_update"].(map[string]interface{})
-
-	componentsToBeProcessed["items"] = erroredComponents
-	componentsToBeProcessed["status"] = input.Status
-	componentsToBeProcessed["error_code"] = input.ErrorCode
-	componentsToBeProcessed["error_message"] = input.ErrorMessage
-
-	// Save result
-	s.loadFromMap(tmp)
+	if componentsToBeProcessed, ok := (*s)[cType+"_to_update"].(map[string]interface{}); ok {
+		componentsToBeProcessed["items"] = erroredComponents
+		componentsToBeProcessed["status"] = input.Status
+		componentsToBeProcessed["error_code"] = input.ErrorCode
+		componentsToBeProcessed["error_message"] = input.ErrorMessage
+	}
 }
 
-func (s *service) transferDeleted(cType string, input GenericComponentMsg) {
+// TrasnferDeleted : removes from components received components_to_delete componets
+func TransferDeleted(s *map[string]interface{}, cType string, input GenericComponentMsg) {
 	var components []interface{}
 	var remanentComponents []interface{}
 	var erroredComponents []interface{}
 
-	tmp := s.asMap()
 	inputComponents := input.Components
 
-	currentComponents := tmp[cType].(map[string]interface{})
+	currentComponents := (*s)[cType].(map[string]interface{})
 	if currentComponents["items"] != nil {
 		components = currentComponents["items"].([]interface{})
 	}
@@ -248,17 +168,14 @@ func (s *service) transferDeleted(cType string, input GenericComponentMsg) {
 	currentComponents["items"] = remanentComponents
 
 	// Remove to be created components
-	componentsToBeProcessed := tmp[cType+"_to_delete"].(map[string]interface{})
-
-	componentsToBeProcessed["items"] = erroredComponents
-	if len(erroredComponents) > 0 {
-		componentsToBeProcessed["status"] = "errored"
-	} else {
-		componentsToBeProcessed["status"] = "completed"
+	if componentsToBeProcessed, ok := (*s)[cType+"_to_delete"].(map[string]interface{}); ok {
+		componentsToBeProcessed["items"] = erroredComponents
+		if len(erroredComponents) > 0 {
+			componentsToBeProcessed["status"] = "errored"
+		} else {
+			componentsToBeProcessed["status"] = "completed"
+		}
+		componentsToBeProcessed["error_code"] = input.ErrorCode
+		componentsToBeProcessed["error_message"] = input.ErrorMessage
 	}
-	componentsToBeProcessed["error_code"] = input.ErrorCode
-	componentsToBeProcessed["error_message"] = input.ErrorMessage
-
-	// Save result
-	s.loadFromMap(tmp)
 }

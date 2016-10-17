@@ -96,3 +96,12 @@ func (w *workflow) transitions() (transitions []string) {
 	}
 	return transitions
 }
+
+func ParseWorkflow(s *map[string]interface{}) (w workflow, err error) {
+	var ser service
+
+	raw, _ := json.Marshal(s)
+	json.Unmarshal(raw, &ser)
+
+	return ser.Workflow, err
+}

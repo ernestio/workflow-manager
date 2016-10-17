@@ -30,7 +30,7 @@ func TestVitamineTemplating(t *testing.T) {
 
 		Convey("When i try and template fields on an collection of instances where all fields are known", func() {
 			x := comp["instances"].(map[string]interface{})["items"].([]interface{})
-			items := p.UpdateTemplateVariables(x, &s)
+			items := p.UpdateTemplateVariables(x, s)
 
 			Convey("It should have mapped all string fields", func() {
 				collection, ok := items[0].(map[string]interface{})
@@ -54,7 +54,7 @@ func TestVitamineTemplating(t *testing.T) {
 
 		Convey("When i try and template fields on an collection of instances where not all fields are known", func() {
 			x := incomp["instances"].(map[string]interface{})["items"].([]interface{})
-			items := p.UpdateTemplateVariables(x, &si)
+			items := p.UpdateTemplateVariables(x, si)
 
 			Convey("It should not have mapped fields where there was no result", func() {
 				collection, ok := items[0].(map[string]interface{})
@@ -82,7 +82,7 @@ func TestUnMappedMessage(t *testing.T) {
 
 		Convey("When I try to get body for the unmapped message", func() {
 			mm := messageManager{}
-			message, err := mm.preparePublishMessage("test.message.invalid", &s)
+			message, err := mm.preparePublishMessage("test.message.invalid", s)
 
 			Convey("Then I'll receive an empty body and an error", func() {
 				So(message, ShouldEqual, "")
@@ -102,7 +102,7 @@ func TestCreateRouters(t *testing.T) {
 
 		Convey("When I get the message for a routers.create event", func() {
 			mm := messageManager{}
-			body, err := mm.preparePublishMessage("routers.create", &s)
+			body, err := mm.preparePublishMessage("routers.create", s)
 			m := &GenericComponentMsg{}
 			json.Unmarshal([]byte(body), &m)
 
@@ -132,12 +132,13 @@ func TestPublisherCreateError(t *testing.T) {
 
 		Convey("When I get the message for a services.create.error event", func() {
 			mm := messageManager{}
-			body, err := mm.preparePublishMessage("service.create.error", &s)
+			body, err := mm.preparePublishMessage("service.create.error", s)
 			m := &service{}
 			err = json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
-				So(m.ID, ShouldEqual, s.ID)
+				id, _ := (*s)["id"]
+				So(m.ID, ShouldEqual, id)
 				So(m.Status, ShouldEqual, "errored")
 				So(err, ShouldEqual, nil)
 
@@ -155,13 +156,14 @@ func TestCreateNetworks(t *testing.T) {
 
 		Convey("When I get the message for a networks.create event", func() {
 			mm := messageManager{}
-			body, err := mm.preparePublishMessage("networks.create", &s)
+			body, err := mm.preparePublishMessage("networks.create", s)
 			m := &GenericComponentMsg{}
 
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
-				So(m.Service, ShouldEqual, s.ID)
+				id, _ := (*s)["id"]
+				So(m.Service, ShouldEqual, id)
 				So(m.SequentialProcessing, ShouldBeTrue)
 				So(len(m.Components), ShouldEqual, 1)
 				n := m.Components[0].(map[string]interface{})
@@ -192,12 +194,13 @@ func TestDeleteNetworks(t *testing.T) {
 
 		Convey("When I get the message for a networks.delete event", func() {
 			mm := messageManager{}
-			body, err := mm.preparePublishMessage("networks.delete", &s)
+			body, err := mm.preparePublishMessage("networks.delete", s)
 			m := &GenericComponentMsg{}
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
-				So(m.Service, ShouldEqual, s.ID)
+				id, _ := (*s)["id"]
+				So(m.Service, ShouldEqual, id)
 				So(len(m.Components), ShouldEqual, 1)
 				n := m.Components[0].(map[string]interface{})
 				So(n["name"].(string), ShouldEqual, gjson.Get(sBody, "networks.items.0.name").String())
@@ -228,12 +231,13 @@ func TestCreateInstances(t *testing.T) {
 
 		Convey("When I get the message for a instances.create event", func() {
 			mm := messageManager{}
-			body, err := mm.preparePublishMessage("instances.create", &s)
+			body, err := mm.preparePublishMessage("instances.create", s)
 			m := &GenericComponentMsg{}
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
-				So(m.Service, ShouldEqual, s.ID)
+				id, _ := (*s)["id"]
+				So(m.Service, ShouldEqual, id)
 				So(len(m.Components), ShouldEqual, 2)
 				i := m.Components[0].(map[string]interface{})
 				So(i["name"].(string), ShouldEqual, gjson.Get(sBody, "instances_to_create.items.0.name").String())
@@ -261,13 +265,14 @@ func TestCreateNats(t *testing.T) {
 
 		Convey("When I get the message for a nats.create event", func() {
 			mm := messageManager{}
-			body, err := mm.preparePublishMessage("nats.create", &s)
+			body, err := mm.preparePublishMessage("nats.create", s)
 			m := &GenericComponentMsg{}
 			json.Unmarshal([]byte(body), &m)
 			fmt.Println(body)
 
 			Convey("Then I'll receive a valid json string", func() {
-				So(m.Service, ShouldEqual, s.ID)
+				id, _ := (*s)["id"]
+				So(m.Service, ShouldEqual, id)
 				So(len(m.Components), ShouldEqual, 1)
 				n := m.Components[0].(map[string]interface{})
 				So(n["name"].(string), ShouldEqual, gjson.Get(sBody, "nats_to_create.items.0.name").String())
@@ -305,13 +310,14 @@ func TestUpdateNats(t *testing.T) {
 
 		Convey("When I get the message for a nats.update event", func() {
 			mm := messageManager{}
-			body, err := mm.preparePublishMessage("nats.update", &s)
+			body, err := mm.preparePublishMessage("nats.update", s)
 			m := &GenericComponentMsg{}
 			json.Unmarshal([]byte(body), &m)
 			fmt.Println(body)
 
 			Convey("Then I'll receive a valid json string", func() {
-				So(m.Service, ShouldEqual, s.ID)
+				id, _ := (*s)["id"]
+				So(m.Service, ShouldEqual, id)
 				So(len(m.Components), ShouldEqual, 1)
 				n := m.Components[0].(map[string]interface{})
 
@@ -350,12 +356,13 @@ func TestCreateFirewalls(t *testing.T) {
 
 		Convey("When I get the message for a firewalls.create event", func() {
 			mm := messageManager{}
-			body, err := mm.preparePublishMessage("firewalls.create", &s)
+			body, err := mm.preparePublishMessage("firewalls.create", s)
 			m := &GenericComponentMsg{}
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
-				So(m.Service, ShouldEqual, s.ID)
+				id, _ := (*s)["id"]
+				So(m.Service, ShouldEqual, id)
 				So(len(m.Components), ShouldEqual, 1)
 				f := m.Components[0].(map[string]interface{})
 				So(f["name"].(string), ShouldEqual, gjson.Get(sBody, "firewalls_to_create.items.0.name").String())
@@ -389,12 +396,13 @@ func TestUpdateFirewalls(t *testing.T) {
 
 		Convey("When I get the message for a firewalls.update event", func() {
 			mm := messageManager{}
-			body, err := mm.preparePublishMessage("firewalls.update", &s)
+			body, err := mm.preparePublishMessage("firewalls.update", s)
 			m := &GenericComponentMsg{}
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
-				So(m.Service, ShouldEqual, s.ID)
+				id, _ := (*s)["id"]
+				So(m.Service, ShouldEqual, id)
 				So(len(m.Components), ShouldEqual, 1)
 				f := m.Components[0].(map[string]interface{})
 				So(f["name"].(string), ShouldEqual, gjson.Get(sBody, "firewalls_to_update.items.0.name").String())
@@ -425,18 +433,19 @@ func TestCreateBootstraps(t *testing.T) {
 
 		p.load(natsClient)
 		s, sBody := h.getService("./fixtures/service_real_workflow.json")
-		s.Status = "nats_created"
-		s.save()
+		(*s)["status"] = "nats_created"
+		SaveService(s)
 
 		Convey("When I get the message for a executions.create event and status nats_created", func() {
 			Convey("If a service_ip is not provided", func() {
 				mm := messageManager{}
-				body, err := mm.preparePublishMessage("bootstraps.create", &s)
+				body, err := mm.preparePublishMessage("bootstraps.create", s)
 				m := &GenericComponentMsg{}
 				json.Unmarshal([]byte(body), &m)
 
 				Convey("Then I'll receive a valid json string", func() {
-					So(m.Service, ShouldEqual, s.ID)
+					id, _ := (*s)["id"]
+					So(m.Service, ShouldEqual, id)
 					So(len(m.Components), ShouldEqual, 1)
 					b := m.Components[0].(map[string]interface{})
 
@@ -463,20 +472,20 @@ func TestCreateExecutions(t *testing.T) {
 
 		p.load(natsClient)
 		s, sBody := h.getService("./fixtures/service_real_workflow.json")
-		s.Status = "bootstrap_ran"
-		s.Bootstraps.Finished = "yes"
-		s.save()
+		(*s)["status"] = "bootstrap_ran"
+		SaveService(s)
 
 		Convey("When I get the message for a executions.create event and status nats_created", func() {
 			mm := messageManager{}
-			body, err := mm.preparePublishMessage("executions.create", &s)
+			body, err := mm.preparePublishMessage("executions.create", s)
 			m := &GenericComponentMsg{}
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
 				So(err, ShouldEqual, nil)
 
-				So(m.Service, ShouldEqual, s.ID)
+				id, _ := (*s)["id"]
+				So(m.Service, ShouldEqual, id)
 				So(len(m.Components), ShouldEqual, 1)
 				e := m.Components[0].(map[string]interface{})
 
@@ -498,21 +507,24 @@ func TestServiceDone(t *testing.T) {
 
 		p.load(natsClient)
 		s, _ := h.getService("./fixtures/service_real_workflow.json")
-		s.Status = "executions_ran"
-		s.save()
+		(*s)["status"] = "executions_ran"
+		SaveService(s)
 
 		Convey("When I get the message for a executions.create event and status nats_created", func() {
 			mm := messageManager{}
-			body, err := mm.preparePublishMessage("service.create.done", &s)
+			body, err := mm.preparePublishMessage("service.create.done", s)
 			m := service{}
 			json.Unmarshal([]byte(body), &m)
 
 			Convey("Then I'll receive a valid json string", func() {
 				So(err, ShouldEqual, nil)
 
-				So(m.ID, ShouldEqual, s.ID)
-				So(m.Name, ShouldEqual, s.Name)
-				So(m.Status, ShouldEqual, s.Status)
+				id, _ := (*s)["id"]
+				So(m.ID, ShouldEqual, id)
+				name, _ := (*s)["name"]
+				So(m.Name, ShouldEqual, name)
+				status, _ := (*s)["status"]
+				So(m.Status, ShouldEqual, status)
 			})
 		})
 	})

@@ -17,7 +17,7 @@ type messageManager struct {
 
 // Will call the publisher for a specified message and return the string with the
 // message to be published
-func (mm *messageManager) preparePublishMessage(subject string, s *service) (string, error) {
+func (mm *messageManager) preparePublishMessage(subject string, s *map[string]interface{}) (string, error) {
 	var p publisher
 
 	return p.Process(s, subject)
@@ -25,7 +25,7 @@ func (mm *messageManager) preparePublishMessage(subject string, s *service) (str
 
 // It gets a message subject and the body received and calls the necessary
 // subscriber methods to read them into a service object
-func (mm *messageManager) getServiceFromMessage(subject string, body []byte) (*service, string, error) {
+func (mm *messageManager) getServiceFromMessage(subject string, body []byte) (*map[string]interface{}, string, error) {
 	var sub subscriber
 
 	if err := mm.validateSubject(subject); err != nil {
@@ -74,7 +74,7 @@ func (mm *messageManager) validateSubject(subject string) error {
 
 // Creates or gets a persisted service based on the service field of the
 // message body
-func (mm *messageManager) getService(body []byte) (*service, error) {
+func (mm *messageManager) getService(body []byte) (*map[string]interface{}, error) {
 	type InputMessage struct {
 		ID      string `json:"id"`
 		Service string `json:"service"`

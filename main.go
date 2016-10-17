@@ -27,7 +27,7 @@ func manageInputMessage(m *nats.Msg) {
 	s, subject, err := mm.getServiceFromMessage(m.Subject, m.Data)
 	if err == nil {
 		subject, s, err := em.manage(subject, s)
-		s.save()
+		SaveService(s)
 		message, err := mm.preparePublishMessage(subject, s)
 
 		if err != nil {
@@ -35,7 +35,7 @@ func manageInputMessage(m *nats.Msg) {
 		} else {
 			em.move(s, subject)
 			log.Println("[PROCESSED]", m.Subject)
-			s.save()
+			SaveService(s)
 			time.Sleep(time.Second)
 			natsClient.Publish(subject, []byte(message))
 			log.Println("[EMITTED]", subject)
@@ -66,7 +66,7 @@ func main() {
 		if err != nil {
 			log.Println("Service not found")
 		} else {
-			s.del()
+			ServiceDel(s)
 		}
 	})
 
