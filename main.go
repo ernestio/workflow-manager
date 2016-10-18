@@ -22,7 +22,7 @@ var cfg *ecc.Config
 // and emits the relative message
 func manageInputMessage(m *nats.Msg) {
 	var service map[string]interface{}
-	mm := messageManager{}
+	mm := MessageManager{}
 
 	service, subject, err := mm.getServiceFromMessage(m.Subject, m.Data)
 	if err == nil {
@@ -65,7 +65,7 @@ func main() {
 
 	// Service delete
 	natsClient.Subscribe("service.delete.done", func(m *nats.Msg) {
-		mm := messageManager{}
+		mm := MessageManager{}
 		s, err := mm.getService(m.Data)
 		if err != nil {
 			log.Println("Service not found")

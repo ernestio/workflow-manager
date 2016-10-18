@@ -23,7 +23,7 @@ func TestComponentsCreateDone(t *testing.T) {
 		SaveService(s)
 
 		Convey("When I try to get body for the mapped message components.create.done", func() {
-			mm := messageManager{}
+			mm := MessageManager{}
 			s, subject, err := mm.getServiceFromMessage("components.create.done", body)
 			b, _ := json.Marshal(s)
 			sBody := string(b)
@@ -55,7 +55,7 @@ func TestComponentsUpdateDone(t *testing.T) {
 		SaveService(s)
 
 		Convey("When I try to get body for the mapped message components.create.done", func() {
-			mm := messageManager{}
+			mm := MessageManager{}
 			s, subject, err := mm.getServiceFromMessage("components.update.done", body)
 			b, _ := json.Marshal(s)
 			sBody := string(b)
@@ -86,7 +86,7 @@ func TestComponentsDeleteDone(t *testing.T) {
 		SaveService(s)
 
 		Convey("When I try to get body for the mapped message components.create.done", func() {
-			mm := messageManager{}
+			mm := MessageManager{}
 			s, subject, err := mm.getServiceFromMessage("components.delete.done", body)
 			b, _ := json.Marshal(s)
 			sBody := string(b)

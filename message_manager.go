@@ -10,23 +10,23 @@ import (
 	"strings"
 )
 
-// Message manager is a group of methods that does the magic to allow developers
+// MessageManager is a group of methods that does the magic to allow developers
 // worry only by getting updated its provider and subscriber files
-type messageManager struct {
+type MessageManager struct {
 }
 
 // Will call the publisher for a specified message and return the string with the
 // message to be published
-func (mm *messageManager) preparePublishMessage(subject string, s *map[string]interface{}) (string, error) {
-	var p publisher
+func (mm *MessageManager) preparePublishMessage(subject string, s *map[string]interface{}) (string, error) {
+	var p Publisher
 
 	return p.Process(s, subject)
 }
 
 // It gets a message subject and the body received and calls the necessary
 // subscriber methods to read them into a service object
-func (mm *messageManager) getServiceFromMessage(subject string, body []byte) (map[string]interface{}, string, error) {
-	var sub subscriber
+func (mm *MessageManager) getServiceFromMessage(subject string, body []byte) (map[string]interface{}, string, error) {
+	var sub Subscriber
 
 	if err := mm.validateSubject(subject); err != nil {
 		return nil, "", errors.New("Message not supported")
@@ -40,7 +40,7 @@ func (mm *messageManager) getServiceFromMessage(subject string, body []byte) (ma
 	supported, status := sub.Process(&s, subject, body)
 
 	if status != "" {
-		em := errorManager{}
+		em := ErrorManager{}
 		em.markAsFailed(&s, subject, body)
 		return s, status, nil
 	}
@@ -52,7 +52,7 @@ func (mm *messageManager) getServiceFromMessage(subject string, body []byte) (ma
 	return s, subject, nil
 }
 
-func (mm *messageManager) validateSubject(subject string) error {
+func (mm *MessageManager) validateSubject(subject string) error {
 	parts := strings.Split(subject, ".")
 	if len(parts) == 2 && parts[0] != "service" {
 		return errors.New("Message not supported")
@@ -72,7 +72,7 @@ func (mm *messageManager) validateSubject(subject string) error {
 
 // Creates or gets a persisted service based on the service field of the
 // message body
-func (mm *messageManager) getService(body []byte) (map[string]interface{}, error) {
+func (mm *MessageManager) getService(body []byte) (map[string]interface{}, error) {
 	type InputMessage struct {
 		ID      string `json:"id"`
 		Service string `json:"service"`

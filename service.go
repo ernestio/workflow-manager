@@ -16,7 +16,7 @@ type service struct {
 	ID            string   `json:"id"`
 	Name          string   `json:"name"`
 	Body          string   `json:"body"`
-	Workflow      workflow `json:"workflow"`
+	Workflow      Workflow `json:"workflow"`
 	Started       string   `json:"started"`
 	Finished      string   `json:"finished"`
 	Status        string   `json:"status"`
@@ -131,7 +131,7 @@ func TransferUpdated(s *map[string]interface{}, cType string, input GenericCompo
 	}
 }
 
-// TrasnferDeleted : removes from components received components_to_delete componets
+// TransferDeleted : removes from components received components_to_delete componets
 func TransferDeleted(s *map[string]interface{}, cType string, input GenericComponentMsg) {
 	var components []interface{}
 	var remanentComponents []interface{}

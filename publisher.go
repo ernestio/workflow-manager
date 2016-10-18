@@ -14,7 +14,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// When an event has happened and a a new message is about to be sent,
+// Publisher : When an event has happened and a a new message is about to be sent,
 // this is where the message is prepared to be sent.
 //
 // In order to create your own "translators" just add your mapping for the
@@ -22,22 +22,23 @@ import (
 //
 // Then create your own method so, getting a current service, it will
 // produce a specific message body to be sent to the dark side.
-type publisher struct {
+type Publisher struct {
 }
 
-func (p *publisher) Process(s *map[string]interface{}, subject string) (result string, err error) {
+// Process : starts message publication process
+func (p *Publisher) Process(s *map[string]interface{}, subject string) (result string, err error) {
 	if p.isSupportedMessage(s, subject) == false {
 		return result, errors.New("Message not supported")
 	}
 	switch subject {
 	case "service.create.error":
-		result = p.ServiceCreateError(s)
+		result = p.FinishProcessing(s, "errored")
 	case "service.create.done":
-		result = p.ServiceCreateDone(s)
+		result = p.FinishProcessing(s, "done")
 	case "service.delete.error":
-		result = p.ServicesDeleteError(s)
+		result = p.FinishProcessing(s, "errored")
 	case "service.delete.done":
-		result = p.ServiceDeleteDone(s)
+		result = p.FinishProcessing(s, "done")
 	default:
 		return p.GenericHandler(s, subject)
 	}
@@ -45,7 +46,8 @@ func (p *publisher) Process(s *map[string]interface{}, subject string) (result s
 	return result, nil
 }
 
-func (p *publisher) GenericHandler(s *map[string]interface{}, subject string) (string, error) {
+// GenericHandler : Generates a GenericComponentMsg depending on the event thrown
+func (p *Publisher) GenericHandler(s *map[string]interface{}, subject string) (string, error) {
 	id, _ := (*s)["id"].(string)
 	output := GenericComponentMsg{
 		Service: id,
@@ -80,6 +82,7 @@ func (p *publisher) GenericHandler(s *map[string]interface{}, subject string) (s
 	return string(marshalled), nil
 }
 
+// MapString : fills a templated string field on its mapped value
 func MapString(data string, value string) string {
 	if len(value) > 3 && value[0:2] == "$(" && value[len(value)-1:len(value)] == ")" {
 		q := gjson.Get(data, value[2:len(value)-1]).String()
@@ -91,6 +94,7 @@ func MapString(data string, value string) string {
 	return value
 }
 
+// MapSlice : finds and replace templated strings on a slice
 func MapSlice(data string, values []interface{}) []interface{} {
 	for i := 0; i < len(values); i++ {
 		switch v := values[i].(type) {
@@ -109,7 +113,7 @@ func MapSlice(data string, values []interface{}) []interface{} {
 }
 
 // UpdateTemplateVariables : replaces any qjson queries in fields with information from the current service build
-func (p *publisher) UpdateTemplateVariables(items []interface{}, s *map[string]interface{}) []interface{} {
+func (p *Publisher) UpdateTemplateVariables(items []interface{}, s *map[string]interface{}) []interface{} {
 	body, err := json.Marshal(s)
 	if err != nil {
 		log.Println("Can't marshal current service")
@@ -133,8 +137,9 @@ func (p *publisher) UpdateTemplateVariables(items []interface{}, s *map[string]i
 	return items
 }
 
-func (p *publisher) isSupportedMessage(s *map[string]interface{}, subject string) bool {
-	w, _ := ParseWorkflow(s)
+// isSupportedMessage : checks if a message is supported or not
+func (p *Publisher) isSupportedMessage(s *map[string]interface{}, subject string) bool {
+	w, _ := NewWorkflow(s)
 	valid := w.transitions()
 	for _, v := range valid {
 		if v == subject {
@@ -145,8 +150,9 @@ func (p *publisher) isSupportedMessage(s *map[string]interface{}, subject string
 	return false
 }
 
-func (p *publisher) ServiceCreateError(s *map[string]interface{}) string {
-	(*s)["status"] = "errored"
+// FinishProcessing : finishes a service processation setting the final status
+func (p *Publisher) FinishProcessing(s *map[string]interface{}, status string) string {
+	(*s)["status"] = status
 	marshalled, err := json.Marshal(s)
 	if err != nil {
 		log.Println(err)
@@ -154,37 +160,7 @@ func (p *publisher) ServiceCreateError(s *map[string]interface{}) string {
 	}
 
 	id, _ := (*s)["id"].(string)
-	natsClient.Request("service.set", []byte(`{"id":"`+id+`","status":"errored"}`), time.Second)
-
-	return string(marshalled)
-}
-
-func (p *publisher) ServicesDeleteError(s *map[string]interface{}) string {
-	return p.ServiceCreateError(s)
-}
-
-// ServiceCreateDone
-func (p *publisher) ServiceCreateDone(s *map[string]interface{}) string {
-	marshalled, err := json.Marshal(s)
-	if err != nil {
-		log.Println(err)
-	}
-
-	id, _ := (*s)["id"].(string)
-	natsClient.Request("service.set", []byte(`{"id":"`+id+`","status":"done"}`), time.Second)
-
-	return string(marshalled)
-}
-
-// ServiceDeleteDone ...
-func (p *publisher) ServiceDeleteDone(s *map[string]interface{}) string {
-	marshalled, err := json.Marshal(s)
-	if err != nil {
-		log.Println(err)
-	}
-
-	id, _ := (*s)["id"].(string)
-	natsClient.Request("service.set", []byte(`{"id":"`+id+`","status":"done"}`), time.Second)
+	natsClient.Request("service.set", []byte(`{"id":"`+id+`","status":"`+status+`"}`), time.Second)
 
 	return string(marshalled)
 }

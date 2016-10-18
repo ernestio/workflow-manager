@@ -5,65 +5,36 @@
 package main
 
 import (
-	"encoding/json"
-	"log"
 	"strings"
 )
 
-type errorManager struct{}
+// ErrorManager : manages error messages
+type ErrorManager struct{}
 
-func (em *errorManager) isAnErrorMessage(subject string) bool {
+// isAnErrorMessage : checks if the received message is an error or not
+func (em *ErrorManager) isAnErrorMessage(subject string) bool {
 	switch subject[len(subject)-14:] {
-	case "s.create.error",
-		"s.delete.error",
-		"s.update.error":
+	case "service.create.error",
+		"service.delete.error",
+		"service.update.error":
 		return true
 	}
 	return false
 }
 
-func (em *errorManager) markAsFailed(s *map[string]interface{}, subject string, body []byte) {
+// markAsFailed : marks as message as failed
+func (em *ErrorManager) markAsFailed(s *map[string]interface{}, subject string, body []byte) {
+	parts := strings.Split(subject, ".")
+	input := NewGenericComponentMsg(body)
+
 	switch subject[len(subject)-14:] {
 	case "s.create.error":
-		em.markComponentCreationAsFailed(s, subject, body)
+		TransferCreated(s, parts[0], input)
 	case "s.delete.error":
-		em.markComponentDeletionAsFailed(s, subject, body)
+		TransferUpdated(s, parts[0], input)
 	case "s.update.error":
-		em.markComponentModificationAsFailed(s, subject, body)
+		TransferDeleted(s, parts[0], input)
 	}
+
 	(*s)["status"] = "pre-failed"
-}
-
-func (em *errorManager) getInputList(body []byte) GenericComponentMsg {
-	input := GenericComponentMsg{}
-	err := json.Unmarshal(body, &input)
-	if err != nil {
-		log.Panic(err.Error())
-	}
-
-	return input
-}
-
-func (em *errorManager) markComponentCreationAsFailed(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
-	parts := strings.Split(subject, ".")
-	input := em.getInputList(body)
-	TransferCreated(s, parts[0], input)
-
-	return s
-}
-
-func (em *errorManager) markComponentModificationAsFailed(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
-	parts := strings.Split(subject, ".")
-	input := em.getInputList(body)
-	TransferUpdated(s, parts[0], input)
-
-	return s
-}
-
-func (em *errorManager) markComponentDeletionAsFailed(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
-	parts := strings.Split(subject, ".")
-	input := em.getInputList(body)
-	TransferDeleted(s, parts[0], input)
-
-	return s
 }

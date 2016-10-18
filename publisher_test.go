@@ -16,7 +16,7 @@ import (
 
 func TestVitamineTemplating(t *testing.T) {
 	Convey("Given I have a valid service", t, func() {
-		var p publisher
+		var p Publisher
 		var comp map[string]interface{}
 		var incomp map[string]interface{}
 
@@ -81,7 +81,7 @@ func TestPublisherCreateError(t *testing.T) {
 		s, _ := h.getService("./fixtures/service_components.json")
 
 		Convey("When I get the message for a services.create.error event", func() {
-			mm := messageManager{}
+			mm := MessageManager{}
 			body, err := mm.preparePublishMessage("service.create.error", s)
 			m := &service{}
 			err = json.Unmarshal([]byte(body), &m)
@@ -105,7 +105,7 @@ func TestUnMappedMessage(t *testing.T) {
 		s, _ := h.getService("./fixtures/service.json")
 
 		Convey("When I try to get body for the unmapped message", func() {
-			mm := messageManager{}
+			mm := MessageManager{}
 			message, err := mm.preparePublishMessage("test.message.invalid", s)
 
 			Convey("Then I'll receive an empty body and an error", func() {
@@ -125,7 +125,7 @@ func TestCreateComponents(t *testing.T) {
 		s, sBody := h.getService("./fixtures/service_components.json")
 
 		Convey("When I get the message for a components.create event", func() {
-			mm := messageManager{}
+			mm := MessageManager{}
 			body, err := mm.preparePublishMessage("components.create", s)
 			m := &GenericComponentMsg{}
 			json.Unmarshal([]byte(body), &m)
@@ -149,7 +149,7 @@ func TestUpdateComponents(t *testing.T) {
 		s, sBody := h.getService("./fixtures/service_components.json")
 
 		Convey("When I get the message for a components.create event", func() {
-			mm := messageManager{}
+			mm := MessageManager{}
 			body, err := mm.preparePublishMessage("components.update", s)
 			m := &GenericComponentMsg{}
 			json.Unmarshal([]byte(body), &m)
@@ -173,7 +173,7 @@ func TestDeleteComponents(t *testing.T) {
 		s, sBody := h.getService("./fixtures/service_components.json")
 
 		Convey("When I get the message for a components.create event", func() {
-			mm := messageManager{}
+			mm := MessageManager{}
 			body, err := mm.preparePublishMessage("components.delete", s)
 			m := &GenericComponentMsg{}
 			json.Unmarshal([]byte(body), &m)
