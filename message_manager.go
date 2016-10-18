@@ -25,7 +25,7 @@ func (mm *messageManager) preparePublishMessage(subject string, s *map[string]in
 
 // It gets a message subject and the body received and calls the necessary
 // subscriber methods to read them into a service object
-func (mm *messageManager) getServiceFromMessage(subject string, body []byte) (*map[string]interface{}, string, error) {
+func (mm *messageManager) getServiceFromMessage(subject string, body []byte) (map[string]interface{}, string, error) {
 	var sub subscriber
 
 	if err := mm.validateSubject(subject); err != nil {
@@ -37,11 +37,11 @@ func (mm *messageManager) getServiceFromMessage(subject string, body []byte) (*m
 		return nil, "", errors.New("Message not supported")
 	}
 
-	s, supported, status := sub.Process(s, subject, body)
+	supported, status := sub.Process(&s, subject, body)
 
 	if status != "" {
 		em := errorManager{}
-		s = em.markAsFailed(s, subject, body)
+		em.markAsFailed(&s, subject, body)
 		return s, status, nil
 	}
 
@@ -67,14 +67,12 @@ func (mm *messageManager) validateSubject(subject string) error {
 		return errors.New("Message not supported")
 	}
 
-	println("[THEORICALLY SUPPORTED] : " + subject)
-
 	return nil
 }
 
 // Creates or gets a persisted service based on the service field of the
 // message body
-func (mm *messageManager) getService(body []byte) (*map[string]interface{}, error) {
+func (mm *messageManager) getService(body []byte) (map[string]interface{}, error) {
 	type InputMessage struct {
 		ID      string `json:"id"`
 		Service string `json:"service"`

@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"time"
 
 	ecc "github.com/ernestio/ernest-config-client"
 	"github.com/nats-io/nats"
@@ -22,25 +21,30 @@ var cfg *ecc.Config
 // Receives a message, updates the related service on the FSM
 // and emits the relative message
 func manageInputMessage(m *nats.Msg) {
+	var service map[string]interface{}
 	mm := messageManager{}
 
-	s, subject, err := mm.getServiceFromMessage(m.Subject, m.Data)
+	service, subject, err := mm.getServiceFromMessage(m.Subject, m.Data)
 	if err == nil {
-		subject, s, err := em.manage(subject, s)
-		SaveService(s)
-		message, err := mm.preparePublishMessage(subject, s)
+		subject, err := em.manage(subject, &service)
+		if err := SaveService(&service); err != nil {
+			log.Println("[ERROR] : " + err.Error())
+		}
+		message, err := mm.preparePublishMessage(subject, &service)
 
 		if err != nil {
 			log.Println(err)
 		} else {
-			em.move(s, subject)
+			em.move(&service, subject)
 			log.Println("[PROCESSED]", m.Subject)
-			SaveService(s)
-			time.Sleep(time.Second)
+			if err := SaveService(&service); err != nil {
+				log.Println("[ERROR] : " + err.Error())
+			}
 			natsClient.Publish(subject, []byte(message))
 			log.Println("[EMITTED]", subject)
 		}
 	}
+	service = nil
 }
 
 // Setup the listeners for all messages on the platform
@@ -66,7 +70,7 @@ func main() {
 		if err != nil {
 			log.Println("Service not found")
 		} else {
-			ServiceDel(s)
+			ServiceDel(&s)
 		}
 	})
 

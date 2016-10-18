@@ -46,19 +46,19 @@ func (s *storage) get(key string) string {
 }
 
 // Gets a service object for a given key
-func (s *storage) getService(key string) *map[string]interface{} {
+func (s *storage) getService(key string) map[string]interface{} {
 	var srv map[string]interface{}
 
 	body := s.get(key)
 
 	if err := json.Unmarshal([]byte(body), &srv); err != nil {
-		return &srv
+		return srv
 	}
 	if srv == nil {
-		return &srv
+		return srv
 	}
 
-	return &srv
+	return srv
 }
 
 // Set a value for a given key

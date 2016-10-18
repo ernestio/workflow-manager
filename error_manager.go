@@ -22,7 +22,7 @@ func (em *errorManager) isAnErrorMessage(subject string) bool {
 	return false
 }
 
-func (em *errorManager) markAsFailed(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
+func (em *errorManager) markAsFailed(s *map[string]interface{}, subject string, body []byte) {
 	switch subject[len(subject)-14:] {
 	case "s.create.error":
 		em.markComponentCreationAsFailed(s, subject, body)
@@ -32,8 +32,6 @@ func (em *errorManager) markAsFailed(s *map[string]interface{}, subject string, 
 		em.markComponentModificationAsFailed(s, subject, body)
 	}
 	(*s)["status"] = "pre-failed"
-
-	return s
 }
 
 func (em *errorManager) getInputList(body []byte) GenericComponentMsg {

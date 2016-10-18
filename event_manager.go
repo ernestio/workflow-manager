@@ -13,15 +13,15 @@ type eventManager struct {
 }
 
 // Manage a trigger based on a given definition
-func (em *eventManager) manage(subject string, s *map[string]interface{}) (string, *map[string]interface{}, error) {
+func (em *eventManager) manage(subject string, s *map[string]interface{}) (string, error) {
 	err := em.move(s, subject)
 	if err != nil {
 		log.Println(err)
-		return "", nil, err
+		return "", err
 	}
 	event := em.next(s)
 
-	return event, s, err
+	return event, err
 }
 
 // Prepares a proper message and sends the next event

@@ -24,14 +24,14 @@ import (
 type subscriber struct {
 }
 
-func (sub *subscriber) Process(s *map[string]interface{}, subject string, body []byte) (*map[string]interface{}, bool, string) {
+func (sub *subscriber) Process(s *map[string]interface{}, subject string, body []byte) (bool, string) {
 	e := errorManager{}
 	if e.isAnErrorMessage(subject) {
-		return s, true, "to_error"
+		return true, "to_error"
 	}
 
 	if sub.isSupportedMessage(s, subject) == false {
-		return nil, false, ""
+		return false, ""
 	}
 
 	switch subject {
@@ -45,7 +45,7 @@ func (sub *subscriber) Process(s *map[string]interface{}, subject string, body [
 		parts := strings.Split(subject, ".")
 		if len(parts) != 3 || parts[0] == "service" {
 			log.Println("Message not supported : " + subject)
-			return s, false, ""
+			return false, ""
 		}
 		switch parts[1] {
 		case "create":
@@ -56,11 +56,11 @@ func (sub *subscriber) Process(s *map[string]interface{}, subject string, body [
 			sub.GenericDeletion(s, subject, body)
 		default:
 			log.Println("Message not supported")
-			return s, false, ""
+			return false, ""
 		}
 	}
 
-	return s, true, ""
+	return true, ""
 }
 
 func (sub *subscriber) isSupportedMessage(s *map[string]interface{}, subject string) bool {

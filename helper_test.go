@@ -45,7 +45,7 @@ func (t *testHelper) getServiceBody(source string) string {
 	return string(content)
 }
 
-func (t *testHelper) manage(subject string, s *map[string]interface{}) (string, *map[string]interface{}, error) {
+func (t *testHelper) manage(subject string, s *map[string]interface{}) (string, error) {
 	em := eventManager{}
 	return em.manage(subject, s)
 }

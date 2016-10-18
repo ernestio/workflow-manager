@@ -19,11 +19,10 @@ func TestWithInvalidTransition(t *testing.T) {
 		s, _ := h.getService("./fixtures/service.json")
 
 		Convey("When a message with an unexisting transition is received", func() {
-			subject, service, err := h.manage("hello", s)
+			subject, err := h.manage("hello", s)
 
 			Convey("Then should return an error", func() {
 				So(subject, ShouldEqual, "")
-				So(service, ShouldEqual, nil)
 				So(err, ShouldNotEqual, nil)
 			})
 		})
@@ -37,11 +36,10 @@ func TestWithValidTransitionButNotRelativeToCurrentStatus(t *testing.T) {
 		s, _ := h.getService("./fixtures/service.json")
 
 		Convey("When a message with an existing transition is received", func() {
-			subject, service, err := h.manage("to_done", s)
+			subject, err := h.manage("to_done", s)
 
 			Convey("Then should return an error", func() {
 				So(subject, ShouldEqual, "")
-				So(service, ShouldEqual, nil)
 				So(err, ShouldNotEqual, nil)
 			})
 		})
@@ -56,7 +54,7 @@ func TestWithValidTransitionAndStatus(t *testing.T) {
 		(*s)["status"] = "created"
 
 		Convey("When a message with an existing transition is received", func() {
-			subject, _, err := h.manage("start", s)
+			subject, err := h.manage("start", s)
 
 			Convey("Then should return an error", func() {
 				So(subject, ShouldEqual, "to_in_progress")
@@ -75,7 +73,7 @@ func TestOnStartingStatus(t *testing.T) {
 		s, _ := h.getService("./fixtures/service.json")
 
 		Convey("When a message with an existing transition is received and not set status", func() {
-			subject, _, err := h.manage("start", s)
+			subject, err := h.manage("start", s)
 
 			Convey("Then should return an error", func() {
 				So(subject, ShouldEqual, "to_in_progress")
@@ -94,7 +92,7 @@ func TestOnFinalStatus(t *testing.T) {
 		(*s)["status"] = "uat"
 
 		Convey("When a message with an existing transition is received and not set status", func() {
-			subject, _, err := h.manage("to_done", s)
+			subject, err := h.manage("to_done", s)
 
 			Convey("Then should return an error", func() {
 				So(subject, ShouldEqual, "")
@@ -113,7 +111,7 @@ func TestOnEntryPoint(t *testing.T) {
 		s, _ := h.getService("./fixtures/service.json")
 
 		Convey("When a message with an existing transition is received", func() {
-			subject, _, err := h.manage("start", s)
+			subject, err := h.manage("start", s)
 
 			Convey("Then should return an error", func() {
 				So(subject, ShouldEqual, "to_in_progress")
