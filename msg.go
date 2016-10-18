@@ -13,15 +13,3 @@ type GenericComponentMsg struct {
 	ErrorMessage         string        `json:"error_message"`
 	SequentialProcessing bool          `json:"sequential_processing"`
 }
-
-// Monitor : Messages to be sent to monitoring service
-type Monitor struct {
-	Service  string           `json:"service"`
-	Messages []MonitorMessage `json:"messages"`
-}
-
-// MonitorMessages : THe message to be sent
-type MonitorMessage struct {
-	Body  string `json:"body"`
-	Level string `json:"level"`
-}

@@ -130,10 +130,6 @@ func (sub *subscriber) ServiceCreate(s *map[string]interface{}, subject string, 
 	id, _ := (*s)["id"].(string)
 	natsClient.Request("service.set", []byte(`{"id":"`+id+`","status":"in_progress"}`), time.Second)
 
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "Starting environment creation", Level: "INFO"})
-	UserOutput(id, messages)
-
 	return s
 }
 
@@ -147,10 +143,6 @@ func (sub *subscriber) ServiceDelete(s *map[string]interface{}, subject string, 
 	id, _ := (*s)["id"].(string)
 	(*s)["status"] = "created"
 	natsClient.Request("service.set", []byte(`{"id":"`+id+`","status":"in_progress"}`), time.Second)
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "Starting environment deletion", Level: "INFO"})
-	UserOutput(id, messages)
 
 	return s
 }

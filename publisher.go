@@ -156,11 +156,6 @@ func (p *publisher) ServiceCreateError(s *map[string]interface{}) string {
 	id, _ := (*s)["id"].(string)
 	natsClient.Request("service.set", []byte(`{"id":"`+id+`","status":"errored"}`), time.Second)
 
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "\nOops! Something went wrong. Please manually fix any errors shown above and re-apply your definition.", Level: "INFO"})
-	messages = append(messages, MonitorMessage{Body: "error", Level: "ERROR"})
-	UserOutput(id, messages)
-
 	return string(marshalled)
 }
 
@@ -178,11 +173,6 @@ func (p *publisher) ServiceCreateDone(s *map[string]interface{}) string {
 	id, _ := (*s)["id"].(string)
 	natsClient.Request("service.set", []byte(`{"id":"`+id+`","status":"done"}`), time.Second)
 
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "SUCCESS: rules successfully applied", Level: "SUCCESS"})
-	messages = append(messages, MonitorMessage{Body: "error", Level: "ERROR"})
-	UserOutput(id, messages)
-
 	return string(marshalled)
 }
 
@@ -195,11 +185,6 @@ func (p *publisher) ServiceDeleteDone(s *map[string]interface{}) string {
 
 	id, _ := (*s)["id"].(string)
 	natsClient.Request("service.set", []byte(`{"id":"`+id+`","status":"done"}`), time.Second)
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "SUCCESS: your environment has been successfully deleted", Level: "SUCCESS"})
-	messages = append(messages, MonitorMessage{Body: "success", Level: "SUCCESS"})
-	UserOutput(id, messages)
 
 	return string(marshalled)
 }
