@@ -17,8 +17,9 @@ import (
 
 type testHelper struct{}
 
-func (t *testHelper) getService(source string) service {
-	s := service{}
+func (t *testHelper) getService(source string) (*map[string]interface{}, string) {
+	var s map[string]interface{}
+
 	absPath, _ := filepath.Abs(source)
 	file, err := os.Open(absPath)
 	log.Printf("Reading config from: %s", source)
@@ -32,8 +33,9 @@ func (t *testHelper) getService(source string) service {
 		log.Println("Definition file is invalid")
 		log.Panic("error:", err)
 	}
+	content, _ := ioutil.ReadFile(source)
 
-	return s
+	return &s, string(content)
 }
 
 func (t *testHelper) getServiceBody(source string) string {
@@ -43,9 +45,9 @@ func (t *testHelper) getServiceBody(source string) string {
 	return string(content)
 }
 
-func (t *testHelper) manage(subject string, s service) (string, *service, error) {
+func (t *testHelper) manage(subject string, s *map[string]interface{}) (string, error) {
 	em := eventManager{}
-	return em.manage(subject, &s)
+	return em.manage(subject, s)
 }
 
 func (t *testHelper) getFixture(source string) []byte {
@@ -84,8 +86,6 @@ func runListenerMocks() {
 
 func setup() {
 	if listeners == false {
-		c := Config{}
-		c.Load()
 		natsClient = ecc.NewConfig(os.Getenv("NATS_URI")).Nats()
 		runListenerMocks()
 		listeners = true

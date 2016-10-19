@@ -5,7 +5,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"log"
 	"time"
@@ -47,15 +46,16 @@ func (s *storage) get(key string) string {
 }
 
 // Gets a service object for a given key
-func (s *storage) getService(key string) *service {
+func (s *storage) getService(key string) map[string]interface{} {
+	var srv map[string]interface{}
+
 	body := s.get(key)
 
-	srv := &service{}
 	if err := json.Unmarshal([]byte(body), &srv); err != nil {
-		return &service{}
+		return srv
 	}
 	if srv == nil {
-		return &service{}
+		return srv
 	}
 
 	return srv
@@ -82,13 +82,4 @@ func (s *storage) del(key string) error {
 	}
 
 	return nil
-}
-
-// Prefixes a storage key with microservice type
-func (s *storage) cacheKey(key string) string {
-	var composedKey bytes.Buffer
-	composedKey.WriteString("FSM_")
-	composedKey.WriteString(key)
-
-	return composedKey.String()
 }

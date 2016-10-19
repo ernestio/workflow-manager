@@ -14,7 +14,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// When an event has happened and a a new message is about to be sent,
+// Publisher : When an event has happened and a a new message is about to be sent,
 // this is where the message is prepared to be sent.
 //
 // In order to create your own "translators" just add your mapping for the
@@ -22,22 +22,23 @@ import (
 //
 // Then create your own method so, getting a current service, it will
 // produce a specific message body to be sent to the dark side.
-type publisher struct {
+type Publisher struct {
 }
 
-func (p *publisher) Process(s *service, subject string) (result string, err error) {
+// Process : starts message publication process
+func (p *Publisher) Process(s *map[string]interface{}, subject string) (result string, err error) {
 	if p.isSupportedMessage(s, subject) == false {
 		return result, errors.New("Message not supported")
 	}
 	switch subject {
 	case "service.create.error":
-		result = p.ServiceCreateError(s)
+		result = p.FinishProcessing(s, "errored")
 	case "service.create.done":
-		result = p.ServiceCreateDone(s)
+		result = p.FinishProcessing(s, "done")
 	case "service.delete.error":
-		result = p.ServicesDeleteError(s)
+		result = p.FinishProcessing(s, "errored")
 	case "service.delete.done":
-		result = p.ServiceDeleteDone(s)
+		result = p.FinishProcessing(s, "done")
 	default:
 		return p.GenericHandler(s, subject)
 	}
@@ -45,16 +46,17 @@ func (p *publisher) Process(s *service, subject string) (result string, err erro
 	return result, nil
 }
 
-func (p *publisher) GenericHandler(s *service, subject string) (string, error) {
+// GenericHandler : Generates a GenericComponentMsg depending on the event thrown
+func (p *Publisher) GenericHandler(s *map[string]interface{}, subject string) (string, error) {
+	id, _ := (*s)["id"].(string)
 	output := GenericComponentMsg{
-		Service: s.ID,
+		Service: id,
 		Status:  "processing",
 	}
 
 	key := strings.Replace(subject, ".", "_to_", 1)
 
-	mapped := s.asMap()
-	m, ok := mapped[key]
+	m, ok := (*s)[key]
 	if ok == false {
 		return "", errors.New("Component " + key + " not present")
 	}
@@ -80,6 +82,7 @@ func (p *publisher) GenericHandler(s *service, subject string) (string, error) {
 	return string(marshalled), nil
 }
 
+// MapString : fills a templated string field on its mapped value
 func MapString(data string, value string) string {
 	if len(value) > 3 && value[0:2] == "$(" && value[len(value)-1:len(value)] == ")" {
 		q := gjson.Get(data, value[2:len(value)-1]).String()
@@ -91,6 +94,7 @@ func MapString(data string, value string) string {
 	return value
 }
 
+// MapSlice : finds and replace templated strings on a slice
 func MapSlice(data string, values []interface{}) []interface{} {
 	for i := 0; i < len(values); i++ {
 		switch v := values[i].(type) {
@@ -109,7 +113,7 @@ func MapSlice(data string, values []interface{}) []interface{} {
 }
 
 // UpdateTemplateVariables : replaces any qjson queries in fields with information from the current service build
-func (p *publisher) UpdateTemplateVariables(items []interface{}, s *service) []interface{} {
+func (p *Publisher) UpdateTemplateVariables(items []interface{}, s *map[string]interface{}) []interface{} {
 	body, err := json.Marshal(s)
 	if err != nil {
 		log.Println("Can't marshal current service")
@@ -133,8 +137,10 @@ func (p *publisher) UpdateTemplateVariables(items []interface{}, s *service) []i
 	return items
 }
 
-func (p *publisher) isSupportedMessage(s *service, subject string) bool {
-	valid := s.Workflow.transitions()
+// isSupportedMessage : checks if a message is supported or not
+func (p *Publisher) isSupportedMessage(s *map[string]interface{}, subject string) bool {
+	w, _ := NewWorkflow(s)
+	valid := w.transitions()
 	for _, v := range valid {
 		if v == subject {
 			return true
@@ -144,67 +150,17 @@ func (p *publisher) isSupportedMessage(s *service, subject string) bool {
 	return false
 }
 
-func (p *publisher) ServiceCreateError(s *service) string {
-	s.Status = "errored"
+// FinishProcessing : finishes a service processation setting the final status
+func (p *Publisher) FinishProcessing(s *map[string]interface{}, status string) string {
+	(*s)["status"] = status
 	marshalled, err := json.Marshal(s)
 	if err != nil {
 		log.Println(err)
 		return ""
 	}
 
-	natsClient.Request("service.set", []byte(`{"id":"`+s.ID+`","status":"errored"}`), time.Second)
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "\nOops! Something went wrong. Please manually fix any errors shown above and re-apply your definition.", Level: "INFO"})
-	messages = append(messages, MonitorMessage{Body: "error", Level: "ERROR"})
-	UserOutput(s.Channel(), messages)
-
-	return string(marshalled)
-}
-
-func (p *publisher) ServicesDeleteError(s *service) string {
-	return p.ServiceCreateError(s)
-}
-
-// ServiceCreateDone
-func (p *publisher) ServiceCreateDone(s *service) string {
-	marshalled, err := json.Marshal(s)
-	if err != nil {
-		log.Println(err)
-	}
-	if len(s.Routers.Items) > 0 {
-		if s.Endpoint == "" {
-			s.Endpoint = s.Routers.Items[0].IP
-		}
-		if s.ServiceIP == "" {
-			s.ServiceIP = s.Routers.Items[0].IP
-		}
-	}
-
-	natsClient.Request("service.set", []byte(`{"id":"`+s.ID+`","status":"done"}`), time.Second)
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "SUCCESS: rules successfully applied", Level: "SUCCESS"})
-	messages = append(messages, MonitorMessage{Body: "Your environment endpoint is: " + s.Endpoint, Level: "SUCCESS"})
-	messages = append(messages, MonitorMessage{Body: "error", Level: "ERROR"})
-	UserOutput(s.Channel(), messages)
-
-	return string(marshalled)
-}
-
-// ServiceDeleteDone ...
-func (p *publisher) ServiceDeleteDone(s *service) string {
-	marshalled, err := json.Marshal(s)
-	if err != nil {
-		log.Println(err)
-	}
-
-	natsClient.Request("service.set", []byte(`{"id":"`+s.ID+`","status":"done"}`), time.Second)
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "SUCCESS: your environment has been successfully deleted", Level: "SUCCESS"})
-	messages = append(messages, MonitorMessage{Body: "success", Level: "SUCCESS"})
-	UserOutput(s.Channel(), messages)
+	id, _ := (*s)["id"].(string)
+	natsClient.Request("service.set", []byte(`{"id":"`+id+`","status":"`+status+`"}`), time.Second)
 
 	return string(marshalled)
 }

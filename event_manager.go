@@ -9,24 +9,27 @@ import (
 	"log"
 )
 
+// eventManager : manages service moving through events
 type eventManager struct {
 }
 
-// Manage a trigger based on a given definition
-func (em *eventManager) manage(subject string, s *service) (string, *service, error) {
+// manage : Manage a trigger based on a given definition
+func (em *eventManager) manage(subject string, s *map[string]interface{}) (string, error) {
 	err := em.move(s, subject)
 	if err != nil {
 		log.Println(err)
-		return "", nil, err
+		return "", err
 	}
 	event := em.next(s)
 
-	return event, s, err
+	return event, err
 }
 
-// Prepares a proper message and sends the next event
-func (em *eventManager) next(s *service) string {
-	event, err := s.Workflow.nextEvent(s.Status)
+// next : Prepares a proper message and sends the next event
+func (em *eventManager) next(s *map[string]interface{}) string {
+	w, _ := NewWorkflow(s)
+	status, _ := (*s)["status"].(string)
+	event, err := w.nextEvent(status)
 	if err != nil {
 		log.Println(err)
 		return ""
@@ -35,21 +38,24 @@ func (em *eventManager) next(s *service) string {
 	return event
 }
 
-// Moves a service to its next status and return a
+// move : Moves a service to its next status and return a
 // string with it
-func (em *eventManager) move(s *service, event string) error {
+func (em *eventManager) move(s *map[string]interface{}, event string) error {
 	// Is a valid transition?
-	if s.Status == "" {
-		s.Status = "created"
+	status, _ := (*s)["status"].(string)
+	if status == "" {
+		status = "created"
 	}
+	(*s)["status"] = status
 
-	a, err := s.Workflow.nextArc(s.Status, event)
+	w, _ := NewWorkflow(s)
+	a, err := w.nextArc(status, event)
 	if err != nil {
-		return errors.New("Invalid status(" + s.Status + ") event (" + event + ") pair")
+		return errors.New("Invalid status(" + status + ") event (" + event + ") pair")
 	}
 
 	// Update status
-	s.Status = a.To
+	(*s)["status"] = a.To
 
 	// Return new status
 	return nil

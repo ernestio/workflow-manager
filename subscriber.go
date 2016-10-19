@@ -11,9 +11,9 @@ import (
 	"time"
 )
 
-// When a message is received from the interspace the FSM can't process it
-// directly this is where the subscriber comes and translates the received
-// message into an fsm understandable service
+// Subscriber : When a message is received from the interspace the FSM can't
+// process it directly this is where the subscriber comes and translates the
+// received message into an fsm understandable service
 //
 // In order to create your own "translators" just add your mapping for the
 // received message to the internal method on the MethodName function.
@@ -21,17 +21,17 @@ import (
 // Then create your own method in order to attach the received information
 // to the stored service and return this service, it will be persisted at
 // the other side
-type subscriber struct {
-}
+type Subscriber struct{}
 
-func (sub *subscriber) Process(s *service, subject string, body []byte) (*service, bool, string) {
-	e := errorManager{}
+// Process : starts message subscription processing
+func (sub *Subscriber) Process(s *map[string]interface{}, subject string, body []byte) (bool, string) {
+	e := ErrorManager{}
 	if e.isAnErrorMessage(subject) {
-		return s, true, "to_error"
+		return true, "to_error"
 	}
 
 	if sub.isSupportedMessage(s, subject) == false {
-		return nil, false, ""
+		return false, ""
 	}
 
 	switch subject {
@@ -45,26 +45,29 @@ func (sub *subscriber) Process(s *service, subject string, body []byte) (*servic
 		parts := strings.Split(subject, ".")
 		if len(parts) != 3 || parts[0] == "service" {
 			log.Println("Message not supported : " + subject)
-			return s, false, ""
+			return false, ""
 		}
+		input := NewGenericComponentMsg(body)
 		switch parts[1] {
 		case "create":
-			sub.GenericCreation(s, subject, body)
+			TransferCreated(s, parts[0], input)
 		case "update":
-			sub.GenericModification(s, subject, body)
+			TransferUpdated(s, parts[0], input)
 		case "delete":
-			sub.GenericDeletion(s, subject, body)
+			TransferDeleted(s, parts[0], input)
 		default:
 			log.Println("Message not supported")
-			return s, false, ""
+			return false, ""
 		}
 	}
 
-	return s, true, ""
+	return true, ""
 }
 
-func (sub *subscriber) isSupportedMessage(s *service, subject string) bool {
-	valid := s.Workflow.transitions()
+// isSupportedMessage : checks if a message is supported or not based on the service workflow
+func (sub *Subscriber) isSupportedMessage(s *map[string]interface{}, subject string) bool {
+	w, _ := NewWorkflow(s)
+	valid := w.transitions()
 	for _, v := range valid {
 		if v == subject {
 			return true
@@ -80,92 +83,43 @@ func (sub *subscriber) isSupportedMessage(s *service, subject string) bool {
 	return false
 }
 
-func (sub *subscriber) getInputList(body []byte) GenericComponentMsg {
-	input := GenericComponentMsg{}
-	err := json.Unmarshal(body, &input)
-	if err != nil {
-		log.Panic(err.Error())
-	}
-
-	return input
-}
-
-// GenericCreation : Will process generic messages
-func (sub *subscriber) GenericCreation(s *service, subject string, body []byte) *service {
-	parts := strings.Split(subject, ".")
-	input := sub.getInputList(body)
-	s.transferCreated(parts[0], input)
-
-	return s
-}
-
-// GenericModification : Will process generic messages
-func (sub *subscriber) GenericModification(s *service, subject string, body []byte) *service {
-	parts := strings.Split(subject, ".")
-	input := sub.getInputList(body)
-	s.transferUpdated(parts[0], input)
-
-	return s
-}
-
-// GenericDeletion : Will process generic messages
-func (sub *subscriber) GenericDeletion(s *service, subject string, body []byte) *service {
-	parts := strings.Split(subject, ".")
-	input := sub.getInputList(body)
-	s.transferDeleted(parts[0], input)
-
-	return s
-}
-
-// Entry point to the flow environment creation, it will create the service and attach
-// a default workflow to it
-func (sub *subscriber) ServiceCreate(s *service, subject string, body []byte) *service {
+// ServiceCreate : Entry point to the flow environment creation, it will create
+// the service and attach a default workflow to it
+func (sub *Subscriber) ServiceCreate(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
 
 	if err := json.Unmarshal(body, &s); err != nil {
 		log.Println(err)
 		return nil
 	}
 
-	w := &s.Workflow
-	if len(w.Arcs) == 0 {
-		w = &workflow{}
-		w.loadDefault()
-		s.Workflow = *w
-	}
-	natsClient.Request("service.set", []byte(`{"id":"`+s.ID+`","status":"in_progress"}`), time.Second)
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "Starting environment creation", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
+	id, _ := (*s)["id"].(string)
+	natsClient.Request("service.set", []byte(`{"id":"`+id+`","status":"in_progress"}`), time.Second)
 
 	return s
 }
 
-// Entry point to the flow environment deletion, it will trigger a cleanup of the
-// entire service
-func (sub *subscriber) ServiceDelete(s *service, subject string, body []byte) *service {
+// ServiceDelete : Entry point to the flow environment deletion, it will trigger
+// a cleanup of the entire service
+func (sub *Subscriber) ServiceDelete(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
 	if err := json.Unmarshal(body, &s); err != nil {
 		log.Println(err)
 		return nil
 	}
-	s.Status = "created"
-	natsClient.Request("service.set", []byte(`{"id":"`+s.ID+`","status":"in_progress"}`), time.Second)
-
-	messages := []MonitorMessage{}
-	messages = append(messages, MonitorMessage{Body: "Starting environment deletion", Level: "INFO"})
-	UserOutput(s.Channel(), messages)
+	id, _ := (*s)["id"].(string)
+	(*s)["status"] = "created"
+	natsClient.Request("service.set", []byte(`{"id":"`+id+`","status":"in_progress"}`), time.Second)
 
 	return s
 }
 
 // ServicePatch Entry point to the flow environment patching, it will create the service and attach
 // a default workflow to it
-func (sub *subscriber) ServicePatch(s *service, subject string, body []byte) *service {
+func (sub *Subscriber) ServicePatch(s *map[string]interface{}, subject string, body []byte) *map[string]interface{} {
 	if err := json.Unmarshal(body, &s); err != nil {
 		log.Println(err)
 		return nil
 	}
-	s.Status = ""
+	(*s)["status"] = ""
 
 	return s
 }

@@ -4,7 +4,12 @@
 
 package main
 
-// GenericComponentCreate : Message to create instances
+import (
+	"encoding/json"
+	"log"
+)
+
+// GenericComponentMsg : Message to create instances
 type GenericComponentMsg struct {
 	Service              string        `json:"service"`
 	Components           []interface{} `json:"components"`
@@ -14,14 +19,13 @@ type GenericComponentMsg struct {
 	SequentialProcessing bool          `json:"sequential_processing"`
 }
 
-// Monitor : Messages to be sent to monitoring service
-type Monitor struct {
-	Service  string           `json:"service"`
-	Messages []MonitorMessage `json:"messages"`
-}
+// NewGenericComponentMsg : GenericComponentMsg constructor
+func NewGenericComponentMsg(body []byte) GenericComponentMsg {
+	input := GenericComponentMsg{}
+	err := json.Unmarshal(body, &input)
+	if err != nil {
+		log.Panic(err.Error())
+	}
 
-// MonitorMessages : THe message to be sent
-type MonitorMessage struct {
-	Body  string `json:"body"`
-	Level string `json:"level"`
+	return input
 }
