@@ -13,10 +13,11 @@ type ErrorManager struct{}
 
 // isAnErrorMessage : checks if the received message is an error or not
 func (em *ErrorManager) isAnErrorMessage(subject string) bool {
+	// Checking the last part of the messages subject to determine if there has been an error
 	switch subject[len(subject)-14:] {
-	case "service.create.error",
-		"service.delete.error",
-		"service.update.error":
+	case "s.create.error",
+		"s.delete.error",
+		"s.update.error":
 		return true
 	}
 	return false
@@ -27,6 +28,7 @@ func (em *ErrorManager) markAsFailed(s *map[string]interface{}, subject string, 
 	parts := strings.Split(subject, ".")
 	input := NewGenericComponentMsg(body)
 
+	// Checking the last part of the messages subject to determine if there has been an error
 	switch subject[len(subject)-14:] {
 	case "s.create.error":
 		TransferCreated(s, parts[0], input)
