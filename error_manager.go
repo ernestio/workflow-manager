@@ -8,16 +8,15 @@ import (
 	"strings"
 )
 
+var ErrorSubjects = []string{"s.create.error", "s.delete.error", "s.update.error"}
+
 // ErrorManager : manages error messages
 type ErrorManager struct{}
 
 // isAnErrorMessage : checks if the received message is an error or not
 func (em *ErrorManager) isAnErrorMessage(subject string) bool {
 	// Checking the last part of the messages subject to determine if there has been an error
-	switch subject[len(subject)-14:] {
-	case "s.create.error",
-		"s.delete.error",
-		"s.update.error":
+	if getErrorType(subject) != "" {
 		return true
 	}
 	return false
@@ -29,7 +28,7 @@ func (em *ErrorManager) markAsFailed(s *map[string]interface{}, subject string, 
 	input := NewGenericComponentMsg(body)
 
 	// Checking the last part of the messages subject to determine if there has been an error
-	switch subject[len(subject)-14:] {
+	switch getErrorType(subject) {
 	case "s.create.error":
 		TransferCreated(s, parts[0], input)
 	case "s.delete.error":
@@ -39,4 +38,13 @@ func (em *ErrorManager) markAsFailed(s *map[string]interface{}, subject string, 
 	}
 
 	(*s)["status"] = "pre-failed"
+}
+
+func getErrorType(subject string) string {
+	for _, v := range ErrorSubjects {
+		if strings.Contains(subject, v) {
+			return v
+		}
+	}
+	return ""
 }
