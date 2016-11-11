@@ -69,8 +69,25 @@ func TestVitamineTemplating(t *testing.T) {
 			})
 		})
 
-	})
+		Convey("When i try and template fields nested inside of another structure multiple levels deep", func() {
+			x := comp["route53s"].(map[string]interface{})["items"].([]interface{})
+			items := p.UpdateTemplateVariables(x, si)
 
+			Convey("It should not have mapped fields where there was a result", func() {
+				collection, ok := items[0].(map[string]interface{})
+				So(ok, ShouldBeTrue)
+				records, ok := collection["records"].([]interface{})
+				So(ok, ShouldBeTrue)
+				record, ok := records[0].(map[string]interface{})
+				So(ok, ShouldBeTrue)
+				fmt.Println(record)
+				values, ok := record["values"].([]interface{})
+				So(ok, ShouldBeTrue)
+				So(len(values), ShouldEqual, 1)
+				So(values[0].(string), ShouldEqual, "8.8.8.8")
+			})
+		})
+	})
 }
 
 func TestPublisherCreateError(t *testing.T) {

@@ -17,6 +17,7 @@
                 "id": "instance-id",
                 "name": "instance",
                 "network": "network-1",
+                "public_ip": "8.8.8.8",
                 "network_aws_id": "$(networks.items.#[name=\"network-1\"].network_aws_id)",
                 "security_groups": ["firewall-1", "firewall-2"],
                 "security_group_aws_ids": ["$(firewalls.items.#[name=\"firewall-1\"].security_group_aws_id)", "$(firewalls.items.#[name=\"firewall-2\"].security_group_aws_id)"]
