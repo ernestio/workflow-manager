@@ -94,19 +94,31 @@ func MapString(data string, value string) string {
 	return value
 }
 
+// MapHash : finds and replaces templated values on a hash
+func MapHash(data string, value map[string]interface{}) map[string]interface{} {
+	for field, selector := range value {
+		switch v := selector.(type) {
+		case string:
+			value[field] = MapString(data, v)
+		case []interface{}:
+			value[field] = MapSlice(data, v)
+		case map[string]interface{}:
+			value[field] = MapHash(data, v)
+		}
+	}
+	return value
+}
+
 // MapSlice : finds and replace templated strings on a slice
 func MapSlice(data string, values []interface{}) []interface{} {
 	for i := 0; i < len(values); i++ {
 		switch v := values[i].(type) {
 		case string:
 			values[i] = MapString(data, v)
+		case []interface{}:
+			values[i] = MapSlice(data, v)
 		case map[string]interface{}:
-			for field, selector := range v {
-				vv, ok := selector.(string)
-				if ok {
-					v[field] = MapString(data, vv)
-				}
-			}
+			values[i] = MapHash(data, v)
 		}
 	}
 	return values
@@ -121,17 +133,9 @@ func (p *Publisher) UpdateTemplateVariables(items []interface{}, s *map[string]i
 	}
 	data := string(body)
 
-	for _, v := range items {
+	for i, v := range items {
 		item := v.(map[string]interface{})
-
-		for field, selector := range item {
-			switch value := selector.(type) {
-			case string:
-				item[field] = MapString(data, value)
-			case []interface{}:
-				item[field] = MapSlice(data, value)
-			}
-		}
+		items[i] = MapHash(data, item)
 	}
 
 	return items

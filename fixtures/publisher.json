@@ -17,6 +17,7 @@
                 "id": "instance-id",
                 "name": "instance",
                 "network": "network-1",
+                "public_ip": "8.8.8.8",
                 "network_aws_id": "$(networks.items.#[name=\"network-1\"].network_aws_id)",
                 "security_groups": ["firewall-1"],
                 "security_group_aws_ids": ["$(firewalls.items.#[name=\"firewall-1\"].security_group_aws_id)"]
@@ -32,6 +33,26 @@
             {
                 "security_group_aws_id": "firewall-2-id",
                 "name": "firewall-2"
+            }
+        ]
+    },
+    "route53s": {
+        "error_code": "",
+        "error_message": "",
+        "finished": "",
+        "items": [
+            {
+                "name": "example.com",
+                "records": [
+                    {
+                        "entry": "one.example.com",
+                        "ttl": 3600,
+                        "type": "A",
+                        "values": [
+                            "$(instances.items.#[name=\"instance\"].public_ip)"
+                        ]
+                    }
+                ]
             }
         ]
     }
