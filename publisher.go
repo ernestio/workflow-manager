@@ -86,7 +86,9 @@ func (p *Publisher) GenericHandler(s *map[string]interface{}, subject string) (s
 func MapString(data string, value string) string {
 	if len(value) > 3 && value[0:2] == "$(" && value[len(value)-1:len(value)] == ")" {
 		q := gjson.Get(data, value[2:len(value)-1]).String()
-		if q != "" && q != "null" {
+		if len(q) > 3 && q[0:2] == "$(" && q[len(q)-1:len(q)] == ")" {
+			return MapString(data, q)
+		} else if q != "" && q != "null" {
 			return q
 		}
 		return value

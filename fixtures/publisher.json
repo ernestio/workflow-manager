@@ -55,5 +55,16 @@
                 ]
             }
         ]
+    },
+    "examples": {
+        "error_code": "",
+        "error_message": "",
+        "finished": "",
+        "items": [
+            {
+                "name": "test",
+                "id": "$(instances.items.#[name=\"instance\"].network_aws_id)"
+            }
+        ]
     }
 }
