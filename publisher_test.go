@@ -80,11 +80,23 @@ func TestVitamineTemplating(t *testing.T) {
 				So(ok, ShouldBeTrue)
 				record, ok := records[0].(map[string]interface{})
 				So(ok, ShouldBeTrue)
-				fmt.Println(record)
 				values, ok := record["values"].([]interface{})
 				So(ok, ShouldBeTrue)
 				So(len(values), ShouldEqual, 1)
 				So(values[0].(string), ShouldEqual, "8.8.8.8")
+			})
+		})
+
+		Convey("When i try and template a field that references another templated field", func() {
+			x := comp["examples"].(map[string]interface{})["items"].([]interface{})
+			items := p.UpdateTemplateVariables(x, si)
+
+			Convey("It should not have mapped fields where there was a result", func() {
+				collection, ok := items[0].(map[string]interface{})
+				So(ok, ShouldBeTrue)
+				id, ok := collection["id"].(string)
+				So(ok, ShouldBeTrue)
+				So(id, ShouldEqual, "network-1-id")
 			})
 		})
 	})
