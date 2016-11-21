@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// ErrorSubjects : Subjects to be exported
 var ErrorSubjects = []string{"s.create.error", "s.delete.error", "s.update.error"}
 
 // ErrorManager : manages error messages
@@ -37,7 +38,19 @@ func (em *ErrorManager) markAsFailed(s *map[string]interface{}, subject string, 
 		TransferDeleted(s, parts[0], input)
 	}
 
+	(*s)["last_known_error"] = em.getErrorMessage(input)
 	(*s)["status"] = "pre-failed"
+}
+
+func (em *ErrorManager) getErrorMessage(input GenericComponentMsg) string {
+	for _, c := range input.Components {
+		inHash := c.(map[string]interface{})
+		status := inHash["status"].(string)
+		if status == "errored" {
+			return inHash["error_message"].(string)
+		}
+	}
+	return ""
 }
 
 func getErrorType(subject string) string {
