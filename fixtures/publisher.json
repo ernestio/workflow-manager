@@ -38,7 +38,7 @@
     },
     "route53s": {
         "error_code": "",
-        "error_message": "",
+        "error": "",
         "finished": "",
         "items": [
             {
@@ -58,7 +58,7 @@
     },
     "examples": {
         "error_code": "",
-        "error_message": "",
+        "error": "",
         "finished": "",
         "items": [
             {
