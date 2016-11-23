@@ -15,7 +15,7 @@ type GenericComponentMsg struct {
 	Components           []interface{} `json:"components"`
 	Status               string        `json:"status"`
 	ErrorCode            string        `json:"error_code"`
-	ErrorMessage         string        `json:"error_message"`
+	ErrorMessage         string        `json:"error"`
 	SequentialProcessing bool          `json:"sequential_processing"`
 }
 

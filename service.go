@@ -84,7 +84,7 @@ func TransferCreated(s *map[string]interface{}, cType string, input GenericCompo
 		componentsToBeProcessed["items"] = erroredComponents
 		componentsToBeProcessed["status"] = input.Status
 		componentsToBeProcessed["error_code"] = input.ErrorCode
-		componentsToBeProcessed["error_message"] = input.ErrorMessage
+		componentsToBeProcessed["error"] = input.ErrorMessage
 	}
 }
 
@@ -127,7 +127,7 @@ func TransferUpdated(s *map[string]interface{}, cType string, input GenericCompo
 		componentsToBeProcessed["items"] = erroredComponents
 		componentsToBeProcessed["status"] = input.Status
 		componentsToBeProcessed["error_code"] = input.ErrorCode
-		componentsToBeProcessed["error_message"] = input.ErrorMessage
+		componentsToBeProcessed["error"] = input.ErrorMessage
 	}
 }
 
@@ -176,6 +176,6 @@ func TransferDeleted(s *map[string]interface{}, cType string, input GenericCompo
 			componentsToBeProcessed["status"] = "completed"
 		}
 		componentsToBeProcessed["error_code"] = input.ErrorCode
-		componentsToBeProcessed["error_message"] = input.ErrorMessage
+		componentsToBeProcessed["error"] = input.ErrorMessage
 	}
 }
