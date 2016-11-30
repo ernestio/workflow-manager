@@ -51,7 +51,7 @@ func (em *ErrorManager) getErrorMessage(input GenericComponentMsg) string {
 			if ok {
 				return err
 			}
-			return ""
+			return "Internal error: 00001"
 		}
 	}
 	return ""
