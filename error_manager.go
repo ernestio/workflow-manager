@@ -47,7 +47,11 @@ func (em *ErrorManager) getErrorMessage(input GenericComponentMsg) string {
 		inHash := c.(map[string]interface{})
 		status := inHash["status"].(string)
 		if status == "errored" {
-			return inHash["error"].(string)
+			err, ok := inHash["error"].(string)
+			if ok {
+				return err
+			}
+			return "Internal error: 00001"
 		}
 	}
 	return ""
