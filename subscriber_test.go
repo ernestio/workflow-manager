@@ -30,7 +30,7 @@ func TestComponentsCreateDone(t *testing.T) {
 
 			Convey("Then I'll receive the valid body", func() {
 				So(len(gjson.Get(sBody, "components.items").Array()), ShouldEqual, 2)
-				So(len(gjson.Get(sBody, "components_to_create.items").Array()), ShouldEqual, 0)
+				So(gjson.Get(sBody, "components_to_create.items").String(), ShouldEqual, "null")
 				So(gjson.Get(sBody, "components.items.0.name").String(), ShouldEqual, "existing")
 				So(gjson.Get(sBody, "components.items.0.field").String(), ShouldEqual, "existing")
 				So(gjson.Get(sBody, "components.items.1.name").String(), ShouldEqual, "created")
@@ -63,7 +63,7 @@ func TestComponentsUpdateDone(t *testing.T) {
 			Convey("Then I'll receive the valid body", func() {
 				So(len(gjson.Get(sBody, "components.items").Array()), ShouldEqual, 2)
 				So(len(gjson.Get(sBody, "components_to_create.items").Array()), ShouldEqual, 2)
-				So(len(gjson.Get(sBody, "components_to_update.items").Array()), ShouldEqual, 0)
+				So(gjson.Get(sBody, "components_to_update.items").String(), ShouldEqual, "null")
 				So(gjson.Get(sBody, "components.items.0.name").String(), ShouldEqual, "added")
 				So(gjson.Get(sBody, "components.items.0.field").String(), ShouldEqual, "created")
 				So(gjson.Get(sBody, "components.items.1.name").String(), ShouldEqual, "updated")
@@ -92,11 +92,41 @@ func TestComponentsDeleteDone(t *testing.T) {
 			sBody := string(b)
 
 			Convey("Then I'll receive the valid body", func() {
-				So(len(gjson.Get(sBody, "components.items").Array()), ShouldEqual, 0)
+				So(gjson.Get(sBody, "components.items").String(), ShouldEqual, "null")
 				So(len(gjson.Get(sBody, "components_to_create.items").Array()), ShouldEqual, 2)
 				So(len(gjson.Get(sBody, "components_to_update.items").Array()), ShouldEqual, 1)
-				So(len(gjson.Get(sBody, "components_to_delete.items").Array()), ShouldEqual, 0)
+				So(gjson.Get(sBody, "components_to_delete.items").String(), ShouldEqual, "null")
 				So(subject, ShouldEqual, "components.delete.done")
+				So(err, ShouldEqual, nil)
+			})
+		})
+	})
+}
+
+func TestComponentsFindDone(t *testing.T) {
+	Convey("Given I have a valid service", t, func() {
+		setup()
+
+		p.load(natsClient)
+		body := h.getFixture("./fixtures/components_find_done.json")
+		s, _ := h.getService("./fixtures/service_components_found.json")
+		(*s)["status"] = "updating_components"
+		(*s)["components"] = (*s)["components_to_create"]
+		SaveService(s)
+
+		Convey("When I try to get body for the mapped message components.create.done", func() {
+			mm := MessageManager{}
+			s, subject, err := mm.getServiceFromMessage("components.find.done", body)
+			b, _ := json.Marshal(s)
+			sBody := string(b)
+
+			Convey("Then I'll receive the valid body", func() {
+				So(len(gjson.Get(sBody, "components.items").Array()), ShouldEqual, 1)
+				So(len(gjson.Get(sBody, "components_to_create.items").Array()), ShouldEqual, 0)
+				So(len(gjson.Get(sBody, "components_to_update.items").Array()), ShouldEqual, 0)
+				So(gjson.Get(sBody, "components.items.0.name").String(), ShouldEqual, "found")
+				So(gjson.Get(sBody, "components.items.0.field").String(), ShouldEqual, "found")
+				So(subject, ShouldEqual, "components.find.done")
 				So(err, ShouldEqual, nil)
 			})
 		})

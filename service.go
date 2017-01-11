@@ -179,3 +179,44 @@ func TransferDeleted(s *map[string]interface{}, cType string, input GenericCompo
 		componentsToBeProcessed["error"] = input.ErrorMessage
 	}
 }
+
+// TransferFound : updates components with input components data
+func TransferFound(s *map[string]interface{}, cType string, input GenericComponentMsg) {
+	var components []interface{}
+	var erroredComponents []interface{}
+
+	inputComponents := input.Components
+
+	currentComponents := (*s)[cType].(map[string]interface{})
+	if currentComponents["items"] != nil {
+		components = currentComponents["items"].([]interface{})
+	}
+
+	// Append new components
+	if len(components) == 0 {
+		for _, c := range inputComponents {
+			components = append(components, c)
+		}
+	} else {
+		for _, c := range inputComponents {
+			for i, v := range components {
+				inHash := c.(map[string]interface{})
+				exHash := v.(map[string]interface{})
+				if inHash["name"] != nil && exHash["name"] != nil {
+					iName := inHash["name"].(string)
+					name := exHash["name"].(string)
+					if iName == name {
+						status := inHash["status"].(string)
+						if status == "completed" {
+							components[i] = c
+						} else {
+							erroredComponents = append(erroredComponents, c)
+						}
+					}
+				}
+			}
+		}
+	}
+	currentComponents["status"] = "completed"
+	currentComponents["items"] = components
+}
