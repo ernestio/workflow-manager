@@ -27,7 +27,6 @@ func (mm *MessageManager) preparePublishMessage(subject string, s *map[string]in
 // subscriber methods to read them into a service object
 func (mm *MessageManager) getServiceFromMessage(subject string, body []byte) (map[string]interface{}, string, error) {
 	var sub Subscriber
-
 	if err := mm.validateSubject(subject); err != nil {
 		return nil, "", errors.New("Message not supported")
 	}
@@ -60,10 +59,10 @@ func (mm *MessageManager) validateSubject(subject string) error {
 	if len(parts) < 2 {
 		return errors.New("Message not supported")
 	}
-	if parts[1] != "create" && parts[1] != "update" && parts[1] != "delete" && parts[1] != "patch" {
+	if parts[1] != "create" && parts[1] != "update" && parts[1] != "delete" && parts[1] != "patch" && parts[1] != "find" && parts[1] != "import" {
 		return errors.New("Message not supported")
 	}
-	if subject == "service.create.done" || subject == "service.create.error" {
+	if subject == "service.create.done" || subject == "service.create.error" || subject == "service.import.done" || subject == "service.import.error" {
 		return errors.New("Message not supported")
 	}
 

@@ -35,7 +35,7 @@ func (sub *Subscriber) Process(s *map[string]interface{}, subject string, body [
 	}
 
 	switch subject {
-	case "service.create":
+	case "service.create", "service.import":
 		sub.ServiceCreate(s, subject, body)
 	case "service.delete":
 		sub.ServiceDelete(s, subject, body)
@@ -55,6 +55,8 @@ func (sub *Subscriber) Process(s *map[string]interface{}, subject string, body [
 			TransferUpdated(s, parts[0], input)
 		case "delete":
 			TransferDeleted(s, parts[0], input)
+		case "find":
+			TransferFound(s, parts[0], input)
 		default:
 			log.Println("Message not supported")
 			return false, ""

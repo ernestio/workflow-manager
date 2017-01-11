@@ -11,12 +11,17 @@ import (
 
 // GenericComponentMsg : Message to create instances
 type GenericComponentMsg struct {
-	Service              string        `json:"service"`
-	Components           []interface{} `json:"components"`
-	Status               string        `json:"status"`
-	ErrorCode            string        `json:"error_code"`
-	ErrorMessage         string        `json:"error"`
-	SequentialProcessing bool          `json:"sequential_processing"`
+	Service              string            `json:"service"`
+	Components           []interface{}     `json:"components"`
+	AWSAccessKeyID       string            `json:"aws_access_key_id"`
+	AWSSecretAccessKey   string            `json:"aws_secret_access_key"`
+	DatacenterRegion     string            `json:"datacenter_region"`
+	Tags                 map[string]string `json:"tags"`
+	Status               string            `json:"status"`
+	ErrorCode            string            `json:"error_code"`
+	ErrorMessage         string            `json:"error"`
+	SequentialProcessing bool              `json:"sequential_processing"`
+	Type                 string            `json:"_type"`
 }
 
 // NewGenericComponentMsg : GenericComponentMsg constructor
