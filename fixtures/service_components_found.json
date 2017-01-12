@@ -1,0 +1,70 @@
+{
+    "id": "test-generated-id",
+    "body": "",
+    "name": "test",
+    "type": "",
+    "endpoint": "",
+    "options": {
+      "user": "",
+      "password": ""
+    },
+    "status": "",
+    "started": "",
+    "finished": "",
+    "workflow": {
+			"arcs": [{
+				"from": "created",
+				"to": "started",
+				"event": "service.create"
+			}, {
+				"from": "started",
+				"to": "creating_components",
+				"event": "components.find"
+			}, {
+				"from": "finding_components",
+				"to": "components_found",
+				"event": "components.find.done"
+			}, {
+				"from": "pre-failed",
+				"to": "failed",
+				"event": "to_error"
+			}, {
+				"from": "failed",
+				"to": "errored",
+				"event": "service.create.error"
+			}, {
+				"from": "components_found",
+				"to": "done",
+				"event": "service.create.done"
+			}]
+    },
+    "components": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": [{
+        "service": "test",
+        "type": "vcloud",
+        "name": "existing",
+        "field": "existing" 
+      }]
+    },
+    "components_to_create": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": []
+    },
+    "components_to_update": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": []
+    },
+    "components_to_delete": {
+      "status": "",
+      "started": "",
+      "finished": "",
+      "items": []
+    }
+}
