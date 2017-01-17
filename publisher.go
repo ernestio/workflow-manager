@@ -31,9 +31,9 @@ func (p *Publisher) Process(s *map[string]interface{}, subject string) (result s
 		return result, errors.New("Message not supported")
 	}
 	switch subject {
-	case "service.create.error":
+	case "service.create.error", "service.import.error":
 		result = p.FinishProcessing(s, "errored")
-	case "service.create.done":
+	case "service.create.done", "service.import.done":
 		result = p.FinishProcessing(s, "done")
 	case "service.delete.error":
 		result = p.FinishProcessing(s, "errored")
@@ -52,6 +52,34 @@ func (p *Publisher) GenericHandler(s *map[string]interface{}, subject string) (s
 	output := GenericComponentMsg{
 		Service: id,
 		Status:  "processing",
+	}
+
+	parts := strings.Split(subject, ".")
+	if len(parts) == 2 {
+		if parts[1] == "find" {
+			body, err := json.Marshal(s)
+			if err != nil {
+				log.Println("Can't marshal current service")
+			}
+			data := string(body)
+			t, _ := (*s)["type"]
+			output.Type = t.(string)
+			output.AWSAccessKeyID = MapString(data, "$(datacenters.items.0.aws_access_key_id)")
+			output.AWSSecretAccessKey = MapString(data, "$(datacenters.items.0.aws_secret_access_key)")
+			output.DatacenterRegion = MapString(data, "$(datacenters.items.0.region)")
+
+			tags := make(map[string]string)
+			tags["ernest.service"], _ = (*s)["name"].(string)
+			output.Tags = tags
+
+			marshalled, err := json.Marshal(output)
+			if err != nil {
+				log.Println(err)
+				return "", errors.New(err.Error())
+			}
+
+			return string(marshalled), nil
+		}
 	}
 
 	key := strings.Replace(subject, ".", "_to_", 1)

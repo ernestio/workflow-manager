@@ -35,7 +35,7 @@ func (sub *Subscriber) Process(s *map[string]interface{}, subject string, body [
 	}
 
 	switch subject {
-	case "service.create":
+	case "service.create", "service.import":
 		sub.ServiceCreate(s, subject, body)
 	case "service.delete":
 		sub.ServiceDelete(s, subject, body)
