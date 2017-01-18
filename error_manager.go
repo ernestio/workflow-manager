@@ -36,6 +36,8 @@ func (em *ErrorManager) markAsFailed(s *map[string]interface{}, subject string, 
 		TransferUpdated(s, parts[0], input)
 	case "s.update.error":
 		TransferDeleted(s, parts[0], input)
+	case "s.find.error":
+		TransferFound(s, parts[0], input)
 	}
 
 	(*s)["last_known_error"] = em.getErrorMessage(input)
