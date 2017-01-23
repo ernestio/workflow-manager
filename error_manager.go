@@ -9,7 +9,7 @@ import (
 )
 
 // ErrorSubjects : Subjects to be exported
-var ErrorSubjects = []string{"s.create.error", "s.delete.error", "s.update.error"}
+var ErrorSubjects = []string{"s.create.error", "s.delete.error", "s.update.error", "s.find.error"}
 
 // ErrorManager : manages error messages
 type ErrorManager struct{}
