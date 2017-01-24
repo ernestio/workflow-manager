@@ -33,7 +33,7 @@ func (p *Publisher) Process(s *map[string]interface{}, subject string) (result s
 	switch subject {
 	case "service.create.error", "service.import.error":
 		result = p.FinishProcessing(s, "errored")
-	case "service.create.done", "service.import.done":
+	case "service.create.done", "service.import.done", "service.import.aws.done":
 		result = p.FinishProcessing(s, "done")
 	case "service.delete.error":
 		result = p.FinishProcessing(s, "errored")
